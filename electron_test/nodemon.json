@@ -1,0 +1,9 @@
+{
+    "ignore": [
+        "node_module",
+        "dist"
+    ],
+    "restartable": "r",
+    "watch":["*.*"],
+    "ext":"html,js,css"
+}

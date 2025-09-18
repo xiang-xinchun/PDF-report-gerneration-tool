@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>课程目标达成情况评价报告生成工具</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="report-container" id="reportContent">
+        <div class="step active" id="step1">
+            <header>
+                <img src="../图片1.png" alt="江西师范大学" class="school-logo">
+                <h1>《<div contenteditable="true" class="input-def" id="courseName" data-placeholder="请填写课程名称"></div>》课程目标达成情况评价报告</h1>
+            </header>
+
+            <h2>一、课程简介</h2>
+            <p><input type="text" class="input-field" id="courseSubject"></p>
+            <h2>二、课程目标</h2>
+            <p class="paragraph">通过本课程的教学，学生应该具备如下知识和能力：</p>
+            <div class="paragraph" data-placeholder="请填写目标1">目标1：<div contenteditable="true" class="input-def" id="target1"></div></div>
+            <div class="paragraph" data-placeholder="请填写目标2">目标2：<div contenteditable="true" class="input-def" id="target2"></div></div>
+            <div class="paragraph" data-placeholder="请填写目标3">目标3：<div contenteditable="true" class="input-def" id="target3"></div></div>
+            <div class="paragraph" data-placeholder="请填写目标4">目标4：<div contenteditable="true" class="input-def" id="target4"></div></div>
+
+            <h2>三、课程目标对毕业要求指标点的支撑关系</h2>
+            <p class="paragraph">表1是依据江西师范大学材料化学专业人才培养方案和《
+                <span id="courseNameShow1"></span>
+                》课程大纲得到的课程目标对毕业要求各指标点的对应支撑关系矩阵。
+            </p>
+            <div style="font-size: 12px;" class="table-name">表1.课程目标对毕业要求指标点的支撑矩阵</div>
+            <div class="table-container">
+                <table>
+                    <thead class="table-header">
+                        <tr>
+                            <th class="table-th" colspan="2"></th>
+                            <th class="table-th">课程目标1</th>
+                            <th class="table-th">课程目标2</th>
+                            <th class="table-th">课程目标3</th>
+                            <th class="table-th">课程目标4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="table-td category" rowspan="1">师德规范</td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-td category" rowspan="1">教育情怀</td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-td category" rowspan="2">学科素养</td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-td category" rowspan="1">教学能力</td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-td category" rowspan="1">班级指导</td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-td category" rowspan="1">综合育人</td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-td category" rowspan="1">学会反思</td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        </tr>
+                        <tr>
+                            <td class="table-td category" rowspan="1">沟通合作</td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                            <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="font-size: 12px;">注："H"表示高关联度，"M"表示中等关联度，"L"表示低关联度。</p>
+        </div>
+
+        <div class="step" id="step2">
+            <h2>四、课程目标与考核方式的对应权重关系</h2>
+            <div class="paragraph">本课程目标达成度评价采用直接评价方式进行。直接评价采用“考试成绩分析法”，数据源自抽取样本学生的课程考核成绩，对应的支撑材料为
+                <div contenteditable="true" class="input-def" id="supportMaterial" data-placeholder="请填写支撑材料"></div>
+                等成绩，其对应的各个课程目标考核方式与权重关系见下表2。
+            </div>            
+            <p style="font-size: 12px;" class="table-name">表2.课程考核方式对课程目标的权重关系矩阵</p>
+            <div class="table-container">
+                <table>
+                    <thead class="table-header">
+                        <tr>
+                            <th rowspan="2">考核方式</th>
+                            <th rowspan="2">满分</th>
+                            <th colspan="4">权重</th>
+                        </tr>
+                        <tr>
+                            <th>课程目标1</th>
+                            <th>课程目标2</th>
+                            <th>课程目标3</th>
+                            <th>课程目标4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>课堂表现</td>
+                            <td><div contenteditable="true" class="input-field" id="score1"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="weight1-1"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="weight1-2"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="weight1-3"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="weight1-4"></div></td>
+                        </tr>
+                        <tr>
+                            <td>课后作业</td>
+                            <td><div contenteditable="true" class="input-field" id="score2"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="weight2-1"></td>
+                            <td><div contenteditable="true" class="input-field" id="weight2-2"></td>
+                            <td><div contenteditable="true" class="input-field" id="weight2-3"></td>
+                            <td><div contenteditable="true" class="input-field" id="weight2-4"></td>
+                        </tr>
+                        <tr>
+                            <td>线上作业</td>
+                            <td><div contenteditable="true" class="input-field" id="score3"></td>
+                            <td><div contenteditable="true" class="input-field" id="weight3-1"></td>
+                            <td><div contenteditable="true" class="input-field" id="weight3-2"></td>
+                            <td><div contenteditable="true" class="input-field" id="weight3-3"></td>
+                            <td><div contenteditable="true" class="input-field" id="weight3-4"></td>
+                        </tr>
+                        <tr>
+                            <td>期末考试</td>
+                            <td><div contenteditable="true" class="input-field" id="score4"></td>
+                            <td><div contenteditable="true" class="input-field" id="weight4-1"></td>
+                            <td><div contenteditable="true" class="input-field" id="weight4-2"></td>
+                            <td><div contenteditable="true" class="input-field" id="weight4-3"></td>
+                            <td><div contenteditable="true" class="input-field" id="weight4-4"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h2>五、课程目标达成度评价</h2>
+            <h3>（一）课程分目标的权重值</h3>
+            <p class="paragraph">《<span id="courseNameShow2"></span>》
+                课程中有4个课程目标，设本课程有n个课程分目标，
+                第i个课程分目标对应8个毕业要求分解指标点的支撑强度值为Vi
+                （第i个课程分目标对8个毕业要求分解指标点的支撑强度分别有x个H、y个M、z个L，
+                按照赋值H=3、M=2、L=1计算，则第i个课程分目标的支撑强度值Vi=3x+2y+1z），
+                则第i个课程目标的权重值(wi)计算公式为：
+            </p>
+            <div class="formula">
+                <p class="formula-content">wi = Vi / ΣVi (i=1,2,3,...n)</p>
+                <p class="formula-name">公式（1）</p>
+            </div>
+            <div class="paragraph">通过累加可以计算出单个课程目标对应的权值，以及总权值为
+                <div contenteditable="true" class="input-def" id="totalWeight" data-placeholder="此处生成总权值"></div>。
+                《<span id="courseNameShow3"></span>》课程4个分目标对应的权重值计算如下：
+            </div>
+            
+            <p class="table-name">表3.课程目标的权重值</p>
+            <div class="table-container">
+                <table>
+                    <thead class="table-header">
+                        <tr>
+                            <th></th>
+                            <th>课程目标1</th>
+                            <th>课程目标2</th>
+                            <th>课程目标3</th>
+                            <th>课程目标4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>权重值</td>
+                            <td><div contenteditable="true" class="input-field" id="targetWeight1"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="targetWeight2"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="targetWeight3"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="targetWeight4"></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="step" id="step3">
+            <h3>（二）课程分目标的达成度</h3>
+            <p class="paragraph">根据表2中各个课程分目标与考核方式权重的对应关系，
+                设各种考核方式的权重、考核总分和考核平均分的数值分别为Kij、Zij、Qij
+                （i=1,2,3,...n；j为考核方式的项数），则本课程分目标i的评价达成度Pi为：
+            </p>
+            <div class="formula">
+                <p class="formula-content">Pi = Σ(Kij × Qij / Zij)</p>
+                <p class="formula-name">公式（2）</p>
+            </div>
+            <p class="table-name">表4.课程考核方式对应的考核成绩情况</p>
+            <div class="table-container">
+                <table>
+                    <thead class="table-header">
+                        <tr>
+                            <th></th>
+                            <th>课堂表现</th>
+                            <th>课后作业</th>
+                            <th>线上作业</th>
+                            <th>期末考试</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>总分</td>
+                            <td><div contenteditable="true" class="input-field" id="totalScore1"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="totalScore2"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="totalScore3"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="totalScore4"></div></td>
+                        </tr>
+                        <tr>
+                            <td>平均分</td>
+                            <td><div contenteditable="true" class="input-field" id="avgScore1"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="avgScore2"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="avgScore3"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="avgScore4"></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <p class="table-name">表5：课程分目标达成度</p>
+            <div class="table-container">
+                <table>
+                    <thead class="table-header">
+                        <tr>
+                            <th></th>
+                            <th>课程目标1</th>
+                            <th>课程目标2</th>
+                            <th>课程目标3</th>
+                            <th>课程目标4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>课程分目标的达成度</td>
+                            <td><div contenteditable="true" class="input-field" id="targetAchieve1"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="targetAchieve2"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="targetAchieve3"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="targetAchieve4"></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h3>（三）课程目标的总达成度</h3>
+            <p class="paragraph">课程的整体目标达成度由该课程所有的课程分目标达成度的加权平均值确定。
+               设本课程有n个课程目标，利用公式(1)计算得到的第i课程目标的权重值为wi，
+               利用公式(2)计算得到的第i个课程分目标的达成度为Pi，则该门课程的整体目标达成度P为：
+            </p>
+            <div class="formula">
+                <p class="formula-content">P = Σ(wi × Pi)</p>
+                <p class="formula-name">公式（3）</p>
+            </div>
+            <p class="paragraph">根据公式（3），计算可得《<span id="courseNameShow4"></span>》课程目标总达成度为：</p>
+            <div class="table-container">
+                <table>
+                    <thead class="table-header">
+                        <tr>
+                            <th></th>
+                            <th>权重值</th>
+                            <th>课程分目标达成度</th>
+                            <th>课程目标总达成度</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>课程目标1</td>
+                            <td><div contenteditable="true" class="input-field"></div></td>
+                            <td><div contenteditable="true" class="input-field"></div></td>
+                            <td rowspan="4"><div contenteditable="true" class="input-field"></div></td>
+                        </tr>
+                        <tr>
+                            <td>课程目标2</td>
+                            <td><div contenteditable="true" class="input-field"></div></td>
+                            <td><div contenteditable="true" class="input-field"></div></td>
+                        </tr>
+                        <tr>
+                            <td>课程目标3</td>
+                            <td><div contenteditable="true" class="input-field"></div></td>
+                            <td><div contenteditable="true" class="input-field"></div></td>
+                        </tr>
+                        <tr>
+                            <td>课程目标4</td>
+                            <td><div contenteditable="true" class="input-field"></div></td>
+                            <td><div contenteditable="true" class="input-field"></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h2>六、课程目标达成情况评价分析与持续改进</h2>
+            
+            <div class="table-container">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td><strong>课程名称</strong></td>
+                            <td><span id="courseNameShow5"></span></td>
+                            <td><strong>课程类别</strong></td>
+                            <td><div contenteditable="true" class="input-field"></div></td>
+                            <td><strong>学时</strong></td>
+                            <td><div contenteditable="true" class="input-field"></div></td>
+                            <td><strong>学分</strong></td>
+                            <td><div contenteditable="true" class="input-field"></div></td>
+                        </tr>
+                        <tr>
+                            <td><strong>任课教师</strong></td>
+                            <td><div contenteditable="true" class="input-field" id="teacherName"></div></td>
+                            <td><strong>教师职称</strong></td>
+                            <td><div contenteditable="true" class="input-field" id="teacherTitle"></div></td>
+                            <td colspan="2"><strong>授课时间</strong></td>
+                            <td colspan="2"><div contenteditable="true" class="input-field" id="teachTime"></div></td>
+                        </tr>
+                        <tr>
+                            <td><strong>授课班级</strong></td>
+                            <td><div contenteditable="true" class="input-field" id="className"></div></td>
+                            <td><strong>学生人数</strong></td>
+                            <td><div contenteditable="true" class="input-field" id="studentCount"></div></td>
+                            <td colspan="2"><strong>期末考核方式</strong></td>
+                            <td colspan="2"><div contenteditable="true" class="input-field" id="examMethod"></div></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" rowspan="4"><strong>成绩分析</strong></td>
+                            <td><strong>最高分</strong></td>
+                            <td><div contenteditable="true" class="input-field" id="maxScore"></div></td>
+                            <td><strong>最低分</strong></td>
+                            <td><div contenteditable="true" class="input-field" id="minScore"></div></td>
+                            <td><strong>平均分</strong></td>
+                            <td><div contenteditable="true" class="input-field" id="avgTotalScore"></div></td>
+                        </tr>
+                        <tr>
+                            <td><strong>分数</strong></td>
+                            <td>100-90</td>
+                            <td>89-80</td>
+                            <td>79-70</td>
+                            <td>69-60</td>
+                            <td>60分以下</td>
+                        </tr>
+                        <tr>
+                            <td><strong>人数</strong></td>
+                            <td><div contenteditable="true" class="input-field" id="count1"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="count2"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="count3"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="count4"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="count5"></div></td>
+                        </tr>
+                        <tr>
+                            <td><strong>百分比</strong></td>
+                            <td><div contenteditable="true" class="input-field" id="rate1"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="rate2"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="rate3"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="rate4"></div></td>
+                            <td><div contenteditable="true" class="input-field" id="rate5"></div></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><strong>课程目标达成情况分析</strong><br></td>
+                            <td colspan="6"><div contenteditable="true" class="input-field" id="rate6"></div></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><strong>持续改进措施</strong><br></td>
+                            <td colspan="6"><div contenteditable="true" class="input-field" id="rate7"></div></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><strong>教研室主任或系主任意见</strong></td>
+                            <td colspan="6" class="signature-cell">
+                                <div class="signature-group">
+                                    <div class="signature-item">
+                                        <span class="signature-label">教研室主任或系主任签名：</span>
+                                    </div>
+                                    <div class="signature-item">
+                                        <span class="signature-label">日期：</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><strong>学院审核意见</strong></td>
+                            <td colspan="6" class="signature-cell">
+                                <div class="signature-group">
+                                    <div class="signature-item">
+                                        <span class="signature-label">学院负责人签名：</span>
+                                    </div>
+                                    <div class="signature-item">
+                                        <span class="signature-label">日期：</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+        <div class="step-nav">
+            <button id="prevBtn" disabled>上一步</button>
+            <button id="nextBtn">下一步</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="render.js"></script>
+</body>
+
+</html>

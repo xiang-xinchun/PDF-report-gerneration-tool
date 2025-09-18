@@ -1,0 +1,220 @@
+/* 基础样式：模拟PDF纸张 */
+body {
+    font-family: "Times New Roman", serif;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    padding: 40px;
+    background-color: #f5f5f5;
+}
+
+.report-container {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+header {
+    text-align: center;
+}
+
+.school-logo {
+    width: 70%;
+    height: auto;
+}
+
+h1 {
+    text-align: center;
+    font-size: 18px;
+    font-family: "Source Han Sans SC Black","Arial Black",sans-serif;
+    font-weight: black;
+}
+
+h1 .input-def {
+    font-weight: inherit;
+}
+
+.input-def{
+    display: inline-block;
+    min-width: 20px;
+    outline: none;
+}
+.input-def[data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    /* 灰色提示文本 */
+    color: #f83838;
+    /* 斜体区分提示文本 */
+    font-style: italic;
+    pointer-events: none;
+}
+.input-def[data-placeholder]:empty:focus::before {
+    content: "";
+}
+.paragraph{
+    /* 自然段行距 */
+    margin: 1em 0;
+}
+.paragraph::before {
+    content: "";
+    display: inline-block;
+    width: 2em;
+    /* 等效于2em缩进 */
+}
+
+h2 {
+    font-family: "Source Han Sans SC Black", "Arial Black", sans-serif;
+    font-weight: bolder;
+    font-size: 16px;
+}
+
+h3{
+    font-family: "Source Han Sans SC Black", "Arial Black", sans-serif;
+    font-weight: bold;
+    font-size: 14px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+.table-name{
+    font-size: 12px;
+    text-align: center;
+    margin: 5px 0 0 0;
+}
+table th,
+table td {
+    border: 1px solid #000;
+    padding: 6px 8px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 12px;
+    /* 缩小表格内文字字号 */
+}
+
+table th {
+    font-weight: bold;
+    /* 加粗表格标题行文本 */
+}
+
+/* 跨页表格表头固定：关键样式 */
+.table-container {
+    page-break-inside: avoid;
+}
+
+.table-header {
+    display: table-header-group;
+    /* 表头始终显示在页面顶部 */
+}
+.formula{
+    display: flex;
+    align-items: center;
+    margin: 1em 0;
+    padding: 0 20px;
+}
+.formula-content{
+    margin: 0;
+    flex: 1;
+    text-align: center;
+}
+.formula-name{
+    margin: 0;
+    white-space: nowrap;
+}
+
+/* 签名区域优化样式 */
+.signature-cell {
+    vertical-align: bottom;
+    padding: 20px;
+    position: relative;
+    /* 增加高度以便更靠下显示 */
+    min-height: 150px;
+    /* 整体右对齐 */
+    text-align: right;
+    padding-bottom: 0;
+}
+
+.signature-group {
+    display: inline-block;
+    margin-top: 80px;
+    /* 增加顶部距离，使签名区域更靠下 */
+    padding-right: 150px;
+}
+
+.signature-item {
+    margin: 0;
+    padding: 0;
+    /* 签名与日期之间的间距 */
+    margin-bottom: 10px;
+}
+
+.signature-label {
+    /* 使用固定宽度确保冒号对齐 */
+    white-space: nowrap;
+    display: inline-block;
+    /* 调整此值可控制冒号位置 */
+    width: 180px;
+    /* 文本右对齐，使冒号统一靠右 */
+    text-align: right;
+}
+
+/* 步骤导航样式 */
+.step-nav {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #f0f0f0;
+    align-items: center;
+}
+
+.step-nav button {
+    padding: 6px 12px;
+    /* 调整按钮内边距 */
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.step-nav button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.input-field {
+    padding: 4px;
+    margin: 3px 0;
+    width: calc(100% - 10px);
+}
+
+.step {
+    display: none;
+}
+
+.step.active {
+    display: block;
+}
+
+/* PDF导出按钮样式 */
+.export-btn {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    /* 调整按钮内边距 */
+    background-color: #2196F3;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.export-btn:hover {
+    background-color: #0b7dda;
+}
