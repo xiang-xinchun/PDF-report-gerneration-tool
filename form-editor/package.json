@@ -1,0 +1,33 @@
+{
+  "name": "course-report-generator",
+  "version": "1.0.0",
+  "description": "课程目标达成情况评价报告生成工具",
+  "main": "course-report-main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^38.1.1",
+    "electron-builder": "^24.6.4"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "electron-pdf": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.electron.course-report-generator",
+    "productName": "课程目标达成情况评价报告生成工具",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+}

@@ -1,0 +1,113 @@
+/**
+ * 特殊样式，用于修复PDF导出时内容显示的问题
+ * 这个样式表会被动态加载到页面中，确保PDF导出时正确显示内容
+ */
+
+/* 简化的全局样式 */
+body.is-exporting-pdf {
+    background-color: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 仅为导出相关元素设置可见性，避免影响编辑功能 */
+body.is-exporting-pdf .export-content-visible {
+    visibility: visible !important;
+}
+
+/* 简化的可编辑元素样式 */
+body.is-exporting-pdf [contenteditable="true"], 
+body.is-exporting-pdf .input-field, 
+body.is-exporting-pdf input {
+    display: inline-block !important;
+    border: none !important;
+    background: transparent !important;
+    color: black !important;
+}
+
+/* 确保表格单元格内的内容可见 */
+body.is-exporting-pdf td [contenteditable="true"], 
+body.is-exporting-pdf td .input-field,
+body.is-exporting-pdf td input {
+    width: auto !important;
+    min-width: 20px !important;
+    display: block !important;
+    color: black !important;
+}
+
+/* 简化的表格样式 */
+body.is-exporting-pdf table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+}
+
+body.is-exporting-pdf td,
+body.is-exporting-pdf th {
+    border: 1px solid black !important;
+    color: black !important;
+}
+
+/* 修复表格显示 */
+body.is-exporting-pdf table {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+}
+
+body.is-exporting-pdf tbody {
+    display: table-row-group !important;
+}
+
+body.is-exporting-pdf tr {
+    display: table-row !important;
+    page-break-inside: avoid !important;
+}
+
+body.is-exporting-pdf td, 
+body.is-exporting-pdf th {
+    display: table-cell !important;
+    color: black !important;
+    border: 1px solid #000 !important;
+    padding: 4px 8px !important;
+}
+
+/* 确保所有步骤可见 */
+body.is-exporting-pdf .step {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    page-break-inside: avoid !important;
+}
+
+/* 确保图片正确显示 */
+body.is-exporting-pdf img {
+    display: block !important;
+    max-width: 100% !important;
+    height: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* 确保段落和标题可见 */
+body.is-exporting-pdf p,
+body.is-exporting-pdf h1,
+body.is-exporting-pdf h2,
+body.is-exporting-pdf h3,
+body.is-exporting-pdf h4,
+body.is-exporting-pdf h5,
+body.is-exporting-pdf h6 {
+    color: black !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+}
+
+/* 简化的隐藏样式 */
+body.is-exporting-pdf .no-print, 
+body.is-exporting-pdf .step-nav, 
+body.is-exporting-pdf .action-buttons, 
+body.is-exporting-pdf #debug-info, 
+body.is-exporting-pdf button {
+    display: none !important;
+}

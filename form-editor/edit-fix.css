@@ -1,0 +1,57 @@
+/* 
+ * 修复编辑功能的样式文件
+ * 此文件添加了确保所有可编辑元素在正常模式下可以编辑的样式
+ */
+
+/* 确保可编辑元素在正常模式下可以编辑 */
+[contenteditable="true"] {
+    cursor: text !important;
+    pointer-events: auto !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    background-color: rgba(255, 255, 255, 0.7) !important;
+    border: 1px dashed #ccc !important;
+}
+
+[contenteditable="true"]:focus {
+    outline: none !important;
+    border-color: #2196F3 !important;
+    background-color: #fff !important;
+    box-shadow: 0 0 3px rgba(33, 150, 243, 0.3) !important;
+}
+
+/* 确保输入框在正常模式下可以编辑 */
+input.input-field, 
+textarea.input-field, 
+select.input-field {
+    cursor: text !important;
+    pointer-events: auto !important;
+    background-color: white !important;
+    border: 1px solid #ddd !important;
+}
+
+input.input-field:focus, 
+textarea.input-field:focus, 
+select.input-field:focus {
+    outline: none !important;
+    border-color: #2196F3 !important;
+    box-shadow: 0 0 3px rgba(33, 150, 243, 0.3) !important;
+}
+
+/* 确保表格中的可编辑内容可以正常编辑 */
+td [contenteditable="true"], 
+td .input-field {
+    cursor: text !important;
+    pointer-events: auto !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+}
+
+/* 仅在导出模式下应用特殊样式 */
+body.is-exporting-pdf [contenteditable="true"],
+body.is-exporting-pdf input.input-field,
+body.is-exporting-pdf textarea.input-field,
+body.is-exporting-pdf select.input-field {
+    border: none !important;
+    box-shadow: none !important;
+}
