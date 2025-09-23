@@ -55,3 +55,92 @@ body.is-exporting-pdf select.input-field {
     border: none !important;
     box-shadow: none !important;
 }
+
+/* 编辑项容器样式 */
+.editable-item-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 5px;
+}
+
+/* 删除按钮样式 */
+.delete-button, .row-delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background-color: #f44336;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 5px;
+    border: none;
+    outline: none;
+    transition: background-color 0.3s;
+}
+
+.row-delete-button {
+    margin: 0 auto;
+}
+
+.delete-button:hover {
+    background-color: #d32f2f;
+}
+
+/* 打印时隐藏删除按钮 */
+@media print {
+    .delete-button {
+        display: none !important;
+    }
+}
+
+/* 导出PDF时隐藏删除按钮 */
+body.is-exporting-pdf .delete-button,
+body.is-exporting .delete-button {
+    display: none !important;
+}
+
+/* 表格行删除按钮样式 */
+.row-delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background-color: #f44336;
+    color: white;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: background-color 0.3s;
+    margin: 0 auto;
+}
+
+.row-delete-button:hover {
+    background-color: #d32f2f;
+}
+
+/* 打印时隐藏表格行删除按钮 */
+@media print {
+    .row-delete-button {
+        display: none !important;
+    }
+}
+
+/* 导出PDF时隐藏表格行删除按钮 */
+body.is-exporting-pdf .row-delete-button,
+body.is-exporting .row-delete-button {
+    display: none !important;
+}
+
+/* 表格行删除按钮单元格样式 */
+.delete-cell {
+    width: 30px;
+    text-align: center;
+    vertical-align: middle;
+}

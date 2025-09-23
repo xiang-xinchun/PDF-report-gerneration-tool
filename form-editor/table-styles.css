@@ -1,0 +1,42 @@
+/* 表格行删除按钮和操作列样式 */
+.delete-cell {
+    width: 60px;
+    text-align: center;
+}
+
+/* 表格行删除按钮样式 */
+.row-delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background-color: #f44336;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: background-color 0.3s;
+    margin: 0 auto;
+}
+
+.row-delete-button:hover {
+    background-color: #d32f2f;
+}
+
+/* 打印时隐藏删除按钮和操作列 */
+@media print {
+    .delete-cell, .row-delete-button {
+        display: none !important;
+    }
+}
+
+/* 导出PDF时隐藏删除按钮和操作列 */
+body.is-exporting-pdf .delete-cell,
+body.is-exporting-pdf .row-delete-button,
+body.is-exporting .delete-cell,
+body.is-exporting .row-delete-button {
+    display: none !important;
+}

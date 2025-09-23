@@ -9,280 +9,7 @@
     --button-hover: #0b7dda;
 }
 
-/* 打印样式优化 */
-@media print {
-    @page {
-        size: A4;
-        margin: 1.5cm;
-    }
-    
-    body {
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        background-color: white;
-        font-size: 12pt;
-    }
-    
-    .report-container {
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-    }
-    
-    /* 隐藏编辑界面的按钮和导航元素 */
-    .action-buttons, .step-nav, #debug-info, button,
-    .editor-toolbar, .control-panel, .step-navigation,
-    .editor-buttons, .edit-controls, .toolbar {
-        display: none !important;
-    }
-    
-    /* 显示内容元素，但删除编辑边框和背景 */
-    .input-def, [contenteditable="true"], input, .input-field {
-        border: none !important;
-        background: transparent !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        box-shadow: none !important;
-        display: inline !important;
-        color: black !important;
-        min-height: 1em !important;
-        font-size: inherit !important;
-        line-height: inherit !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    /* 启用所有步骤的显示，确保所有内容打印 */
-    .step {
-        display: block !important;
-        page-break-before: always;
-        width: 100% !important;
-        border: none !important;
-    }
-    
-    /* 表格在打印时不会被截断 */
-    .table-container {
-        overflow: visible !important;
-        width: 100% !important;
-        page-break-inside: auto;
-    }
-    
-    table {
-        page-break-inside: auto;
-        width: 100% !important;
-        border-collapse: collapse !important;
-        display: table !important;
-    }
-    
-    thead {
-        display: table-header-group !important;
-    }
-    
-    tbody {
-        display: table-row-group !important;
-    }
-    
-    tr {
-        page-break-inside: avoid;
-        page-break-after: auto;
-        display: table-row !important;
-    }
-    
-    th, td {
-        display: table-cell !important;
-        color: black !important;
-        border: 1px solid #000 !important;
-    }
-    
-    /* 确保第一页不是空白页 */
-    #step1 {
-        page-break-before: avoid !important;
-    }
-    
-    /* 确保页眉在每页显示 */
-    h1, h2, h3 {
-        page-break-after: avoid;
-        color: black !important;
-    }
-    
-    /* 隐藏调试信息 */
-    #debug-info {
-        display: none !important;
-    }
-    
-    /* 确保表格在打印时显示完整 */
-    table, tr, td, th {
-        break-inside: avoid;
-    }
-    
-    /* 修改公式打印样式 */
-    .formula {
-        display: block;
-        page-break-inside: avoid;
-    }
-    
-    /* 让表格在打印时正常显示 */
-    .table-container {
-        width: 100% !important;
-        overflow: visible !important;
-    }
-    
-    /* 确保占位符内容可见 */
-    [data-placeholder]:empty:before {
-        content: attr(data-placeholder);
-        color: black !important;
-        font-style: normal;
-    }
-    
-    /* 确保所有文本元素可见 */
-    p, span, div {
-        color: black !important;
-        visibility: visible !important;
-    }
-    
-    /* 确保图片可见 */
-    img {
-        display: block !important;
-        max-width: 100% !important;
-        height: auto !important;
-        visibility: visible !important;
-    }
-}
-
-/* 特殊类，用于PDF导出时的额外样式控制 */
-body.is-exporting-pdf {
-    padding: 0;
-    margin: 0;
-    background-color: white;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-}
-
-body.is-exporting-pdf * {
-    visibility: visible !important;
-}
-
-body.is-exporting-pdf .report-container {
-    margin: 0;
-    padding: 0;
-    box-shadow: none;
-    background-color: white;
-    width: 100%;
-}
-
-body.is-exporting-pdf .step-nav,
-body.is-exporting-pdf .action-buttons,
-body.is-exporting-pdf #debug-info,
-body.is-exporting-pdf button,
-body.is-exporting-pdf .editor-toolbar,
-body.is-exporting-pdf .control-panel,
-body.is-exporting-pdf .step-navigation,
-body.is-exporting-pdf .editor-buttons,
-body.is-exporting-pdf .edit-controls,
-body.is-exporting-pdf .toolbar {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0 !important;
-    width: 0 !important;
-    overflow: hidden !important;
-    position: absolute !important;
-    left: -9999px !important;
-}
-
-body.is-exporting-pdf .step {
-    display: block !important;
-    page-break-before: always;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-body.is-exporting-pdf #step1 {
-    page-break-before: avoid;
-}
-
-body.is-exporting-pdf [contenteditable="true"],
-body.is-exporting-pdf .input-field,
-body.is-exporting-pdf input,
-body.is-exporting-pdf textarea,
-body.is-exporting-pdf select {
-    border: none !important;
-    background: transparent !important;
-    display: inline-block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    color: black !important;
-    min-height: 1em !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    font-size: inherit !important;
-    line-height: inherit !important;
-}
-
-body.is-exporting-pdf table {
-    display: table !important;
-    width: 100% !important;
-    border-collapse: collapse !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-body.is-exporting-pdf thead {
-    display: table-header-group !important;
-}
-
-body.is-exporting-pdf tbody {
-    display: table-row-group !important;
-}
-
-body.is-exporting-pdf tr {
-    display: table-row !important;
-    page-break-inside: avoid !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-body.is-exporting-pdf th, 
-body.is-exporting-pdf td {
-    display: table-cell !important;
-    color: black !important;
-    border: 1px solid #000 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    padding: 4px 8px !important;
-}
-
-body.is-exporting-pdf p, 
-body.is-exporting-pdf h1, 
-body.is-exporting-pdf h2, 
-body.is-exporting-pdf h3,
-body.is-exporting-pdf span, 
-body.is-exporting-pdf div,
-body.is-exporting-pdf label {
-    color: black !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-body.is-exporting-pdf img {
-    display: block !important;
-    max-width: 100% !important;
-    height: auto !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-/* 确保占位符内容可见 */
-body.is-exporting-pdf [data-placeholder]:empty:before {
-    content: attr(data-placeholder);
-    color: black !important;
-    font-style: normal;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
+/* 基本样式 */
 body {
     font-family: "SimSun", "宋体", serif;
     line-height: 1.6;
@@ -306,9 +33,12 @@ header {
 }
 
 .school-logo {
-    width: 120px;
+    width: 240px;
     height: auto;
     margin-bottom: 15px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 h1 {
@@ -316,6 +46,13 @@ h1 {
     font-weight: bold;
     text-align: center;
     margin-bottom: 20px;
+    letter-spacing: 0; /* 减少字间距 */
+}
+
+h1 .title-wrapper {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
 }
 
 h2 {
@@ -481,13 +218,6 @@ table {
     margin-top: 30px;
 }
 
-/* 不打印类 */
-@media print {
-    .no-print {
-        display: none !important;
-    }
-}
-
 .step-nav button {
     padding: 8px 15px;
     background-color: var(--button-color);
@@ -521,4 +251,321 @@ table {
 
 .signature-label {
     margin-right: 80px;
+}
+
+/* 打印样式优化 */
+@media print {
+    @page {
+        size: A4;
+        margin: 1.5cm;
+    }
+    
+    body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: white;
+        font-size: 12pt;
+    }
+    
+    .report-container {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    /* 隐藏编辑界面的按钮和导航元素 */
+    .action-buttons, .step-nav, #debug-info, button,
+    .editor-toolbar, .control-panel, .step-navigation,
+    .editor-buttons, .edit-controls, .toolbar {
+        display: none !important;
+    }
+    
+    /* 显示内容元素，但删除编辑边框和背景 */
+    .input-def, [contenteditable="true"], input, .input-field {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        display: inline !important;
+        color: black !important;
+        min-height: 1em !important;
+        font-size: inherit !important;
+        line-height: inherit !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* 启用所有步骤的显示，确保所有内容打印 */
+    .step {
+        display: block !important;
+        page-break-before: always;
+        width: 100% !important;
+        border: none !important;
+    }
+    
+    /* 表格在打印时不会被截断 */
+    .table-container {
+        overflow: visible !important;
+        width: 100% !important;
+        page-break-inside: auto;
+    }
+    
+    table {
+        page-break-inside: auto;
+        width: 100% !important;
+        border-collapse: collapse !important;
+        display: table !important;
+    }
+    
+    thead {
+        display: table-header-group !important;
+    }
+    
+    tbody {
+        display: table-row-group !important;
+    }
+    
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+        display: table-row !important;
+    }
+    
+    th, td {
+        display: table-cell !important;
+        color: black !important;
+        border: 1px solid #000 !important;
+    }
+    
+    /* 确保第一页不是空白页 */
+    #step1 {
+        page-break-before: avoid !important;
+    }
+    
+    /* 确保页眉在每页显示 */
+    h1, h2, h3 {
+        page-break-after: avoid;
+        color: black !important;
+    }
+    
+    /* 隐藏调试信息 */
+    #debug-info {
+        display: none !important;
+    }
+    
+    /* 确保表格在打印时显示完整 */
+    table, tr, td, th {
+        break-inside: avoid;
+    }
+    
+    /* 修改公式打印样式 */
+    .formula {
+        display: block;
+        page-break-inside: avoid;
+    }
+    
+    /* 让表格在打印时正常显示 */
+    .table-container {
+        width: 100% !important;
+        overflow: visible !important;
+    }
+    
+    /* 确保占位符内容可见 */
+    [data-placeholder]:empty:before {
+        content: attr(data-placeholder);
+        color: black !important;
+        font-style: normal;
+    }
+    
+    /* 确保所有文本元素可见 */
+    p, span, div {
+        color: black !important;
+        visibility: visible !important;
+    }
+    
+    /* 确保图片可见 */
+    img {
+        display: block !important;
+        max-width: 100% !important;
+        height: auto !important;
+        visibility: visible !important;
+    }
+    
+    /* 不打印类 */
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* 删除按钮样式 */
+.row-delete-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    width: 24px;
+    height: 24px;
+    line-height: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    transition: background-color 0.2s;
+}
+
+.row-delete-button:hover {
+    background-color: #cc0000;
+}
+
+.delete-cell {
+    width: 50px;
+    max-width: 50px;
+    min-width: 50px;
+    text-align: center;
+    padding: 2px !important;
+}
+
+/* 打印时隐藏删除按钮 */
+@media print {
+    .delete-cell, .row-delete-button {
+        display: none !important;
+    }
+}
+
+/* 特殊类，用于PDF导出时的额外样式控制 */
+body.is-exporting-pdf {
+    padding: 0;
+    margin: 0;
+    background-color: white;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+body.is-exporting-pdf * {
+    visibility: visible !important;
+}
+
+body.is-exporting-pdf .report-container {
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    background-color: white;
+    width: 100%;
+}
+
+body.is-exporting-pdf .step-nav,
+body.is-exporting-pdf .action-buttons,
+body.is-exporting-pdf #debug-info,
+body.is-exporting-pdf button,
+body.is-exporting-pdf .delete-cell,
+body.is-exporting-pdf .row-delete-button,
+body.is-exporting-pdf .editor-toolbar,
+body.is-exporting-pdf .control-panel,
+body.is-exporting-pdf .step-navigation,
+body.is-exporting-pdf .editor-buttons,
+body.is-exporting-pdf .edit-controls,
+body.is-exporting-pdf .toolbar {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+body.is-exporting-pdf .step {
+    display: block !important;
+    page-break-before: always;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+body.is-exporting-pdf #step1 {
+    page-break-before: avoid;
+}
+
+body.is-exporting-pdf [contenteditable="true"],
+body.is-exporting-pdf .input-field,
+body.is-exporting-pdf input,
+body.is-exporting-pdf textarea,
+body.is-exporting-pdf select {
+    border: none !important;
+    background: transparent !important;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: black !important;
+    min-height: 1em !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+}
+
+body.is-exporting-pdf table {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+body.is-exporting-pdf thead {
+    display: table-header-group !important;
+}
+
+body.is-exporting-pdf tbody {
+    display: table-row-group !important;
+}
+
+body.is-exporting-pdf tr {
+    display: table-row !important;
+    page-break-inside: avoid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+body.is-exporting-pdf th, 
+body.is-exporting-pdf td {
+    display: table-cell !important;
+    color: black !important;
+    border: 1px solid #000 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 4px 8px !important;
+}
+
+body.is-exporting-pdf p, 
+body.is-exporting-pdf h1, 
+body.is-exporting-pdf h2, 
+body.is-exporting-pdf h3,
+body.is-exporting-pdf span, 
+body.is-exporting-pdf div,
+body.is-exporting-pdf label {
+    color: black !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+body.is-exporting-pdf img {
+    display: block !important;
+    max-width: 100% !important;
+    height: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* 确保占位符内容可见 */
+body.is-exporting-pdf [data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    color: black !important;
+    font-style: normal;
+    visibility: visible !important;
+    opacity: 1 !important;
 }

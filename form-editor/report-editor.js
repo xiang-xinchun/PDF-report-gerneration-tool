@@ -1,3 +1,72 @@
+// 删除可编辑项的功能
+function hideEditableItem(containerId) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        // 隐藏元素而不是完全移除，以便于在需要时恢复
+        container.style.display = 'none';
+        
+        // 保存状态到 localStorage
+        localStorage.setItem('hidden_' + containerId, 'true');
+        
+        // 保留元素的内容
+        const inputElement = container.querySelector('[contenteditable="true"]');
+        if (inputElement && inputElement.id) {
+            // 仍然保存内容，以便在恢复时使用
+            localStorage.setItem('report_' + inputElement.id, inputElement.textContent);
+        }
+    }
+}
+
+// 恢复之前隐藏的可编辑项和表格行
+function restoreHiddenItems() {
+    // 查找所有具有ID并以-container结尾的元素
+    const containerElements = document.querySelectorAll('[id$="-container"]');
+    
+    containerElements.forEach(container => {
+        const containerId = container.id;
+        // 检查该元素是否已被隐藏
+        const isHidden = localStorage.getItem('hidden_' + containerId) === 'true';
+        
+        if (isHidden) {
+            // 如果元素之前被隐藏，则隐藏它
+            container.style.display = 'none';
+        }
+    });
+    
+    // 恢复所有已隐藏的表格行
+    const allTableRows = document.querySelectorAll('tr[id]');
+    allTableRows.forEach(row => {
+        const rowId = row.id;
+        if (rowId) {
+            const isHidden = localStorage.getItem('hidden_row_' + rowId) === 'true';
+            
+            if (isHidden) {
+                row.style.display = 'none';
+            }
+        }
+    });
+}
+
+// 表格行删除功能
+function hideTableRow(rowId) {
+    const row = document.getElementById(rowId);
+    if (row) {
+        // 隐藏表格行
+        row.style.display = 'none';
+        
+        // 保存状态到 localStorage
+        localStorage.setItem('hidden_row_' + rowId, 'true');
+        
+        // 保留表格行的内容
+        const editableElements = row.querySelectorAll('[contenteditable="true"]');
+        editableElements.forEach(element => {
+            if (element.id) {
+                localStorage.setItem('report_' + element.id, element.textContent);
+            }
+        });
+    }
+}
+
 // 页面加载后的初始化
 document.addEventListener('DOMContentLoaded', function() {
     // 获取DOM元素
@@ -28,6 +97,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // 初始化内容同步
     setupContentSync();
     
+    // 恢复之前隐藏的元素
+    restoreHiddenItems();
+    
     // 导出PDF按钮点击事件
     exportBtn.addEventListener('click', function() {
         // 在导出前准备报告内容
@@ -40,8 +112,35 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log('正在准备导出报告...');
             
-            // 添加导出类以应用特殊样式
+            // 添加导出类以应用特殊标志
             document.body.classList.add('is-exporting');
+            
+            // 隐藏所有删除按钮
+            document.querySelectorAll('.delete-button, .row-delete-button, .delete-cell').forEach(button => {
+                button.style.display = 'none';
+            });
+            
+            // 处理隐藏的元素，在PDF中完全移除
+            document.querySelectorAll('[id$="-container"]').forEach(container => {
+                if (container.style.display === 'none') {
+                    // 临时添加类以便在PDF中完全移除
+                    container.classList.add('pdf-hidden');
+                }
+            });
+            
+            // 处理隐藏的表格行
+            document.querySelectorAll('tr[id]').forEach(row => {
+                if (row.style.display === 'none') {
+                    // 临时添加类以便在PDF中完全移除
+                    row.classList.add('pdf-hidden');
+                }
+            });
+            
+            // 添加样式规则以隐藏这些元素
+            let style = document.createElement('style');
+            style.id = 'pdf-export-styles';
+            style.textContent = '.pdf-hidden { display: none !important; }';
+            document.head.appendChild(style);
             
             // 填充可编辑内容的基本操作
             // 处理所有可编辑区域，确保内容被保留
@@ -90,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         prevBtn.disabled = currentStep === 0;
         nextBtn.disabled = currentStep === steps.length - 1;
     }
-
+    
     // 设置内容同步
     function setupContentSync() {
         // 课程名称同步
@@ -169,6 +268,22 @@ document.addEventListener('DOMContentLoaded', function() {
                         // 导出完成后，恢复页面状态
                         document.body.classList.remove('is-exporting');
                         
+                        // 删除临时添加的样式
+                        const tempStyle = document.getElementById('pdf-export-styles');
+                        if (tempStyle) {
+                            tempStyle.remove();
+                        }
+                        
+                        // 恢复删除按钮的显示
+                        document.querySelectorAll('.delete-button, .row-delete-button, .delete-cell').forEach(button => {
+                            button.style.display = '';
+                        });
+                        
+                        // 移除临时标记类
+                        document.querySelectorAll('.pdf-hidden').forEach(element => {
+                            element.classList.remove('pdf-hidden');
+                        });
+                        
                         // 恢复步骤显示状态 - 基本恢复
                         steps.forEach((step, index) => {
                             if (index !== currentStep) {
@@ -210,4 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.showDebug('PDF导出初始化错误：' + error.message);
         }
     }
+    
+    // 初始化显示第一步
+    showStep(0);
 });
