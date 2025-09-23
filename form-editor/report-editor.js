@@ -1,7 +1,19 @@
+// 操作历史记录栈，用于撤销功能
+const operationHistory = [];
+const MAX_HISTORY = 50; // 最大历史记录数量
+
 // 删除可编辑项的功能
 function hideEditableItem(containerId) {
     const container = document.getElementById(containerId);
     if (container) {
+        // 记录操作到历史记录中，以便撤销
+        recordOperation({
+            type: 'hideEditableItem',
+            containerId: containerId,
+            previousDisplay: container.style.display,
+            previousContainerHTML: container.outerHTML
+        });
+        
         // 隐藏元素而不是完全移除，以便于在需要时恢复
         container.style.display = 'none';
         
@@ -14,6 +26,281 @@ function hideEditableItem(containerId) {
             // 仍然保存内容，以便在恢复时使用
             localStorage.setItem('report_' + inputElement.id, inputElement.textContent);
         }
+        
+        // 如果是目标项，则重排序后续的目标
+        if (containerId.startsWith('target') && containerId.endsWith('-container')) {
+            reorderTargets();
+        }
+    }
+}
+
+// 重新排序课程目标
+function reorderTargets() {
+    // 找出所有目标容器元素
+    const targetContainers = Array.from(document.querySelectorAll('[id^="target"][id$="-container"]'));
+    
+    // 找出所有目标的原始编号和顺序，包括隐藏的
+    const allTargetsInfo = targetContainers.map(container => {
+        const num = parseInt(container.id.match(/\d+/)[0]);
+        const isHidden = container.style.display === 'none' || 
+                         localStorage.getItem('hidden_' + container.id) === 'true';
+        return {
+            element: container,
+            number: num,
+            isHidden: isHidden
+        };
+    });
+    
+    // 过滤出可见的目标容器
+    const visibleTargets = allTargetsInfo.filter(info => !info.isHidden);
+    
+    // 排序可见容器，确保按照原始顺序
+    visibleTargets.sort((a, b) => a.number - b.number);
+    
+    // 记录目标重排映射（老编号 -> 新编号）
+    const targetMappings = {};
+    
+    // 更新目标文本和数据属性
+    visibleTargets.forEach((info, index) => {
+        const newTargetNumber = index + 1;
+        const oldTargetNumber = info.number;
+        
+        // 记录映射关系
+        targetMappings[oldTargetNumber] = newTargetNumber;
+        
+        const container = info.element;
+        
+        // 更新目标标题文本
+        const textNode = Array.from(container.childNodes)
+            .find(node => node.nodeType === Node.TEXT_NODE);
+        if (textNode) {
+            textNode.nodeValue = `目标${newTargetNumber}：`;
+        }
+    });
+    
+    // 更新所有表格中的课程目标标题和数据
+    updateTableHeaders(targetMappings);
+    
+    // 更新其他相关元素中的目标编号
+    updateOtherTargetReferences(targetMappings);
+}
+
+// 更新表格中的标题和列数据
+function updateTableHeaders(targetMappings) {
+    // 处理所有表格
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+        // 获取所有表头行
+        const headerRows = table.querySelectorAll('thead tr');
+        
+        headerRows.forEach(row => {
+            // 跳过操作列和前置列（如"指标点"列）
+            const headerCells = Array.from(row.querySelectorAll('th')).filter((cell, index) => {
+                // 排除第一列和最后一列（通常是标签列和操作列）
+                return index > 0 && index < row.querySelectorAll('th').length - 1;
+            });
+            
+            // 只处理包含"课程目标X"的表头
+            headerCells.forEach(cell => {
+                const match = cell.textContent.match(/课程目标(\d+)/);
+                if (match) {
+                    const oldTargetNumber = parseInt(match[1]);
+                    if (targetMappings[oldTargetNumber]) {
+                        cell.textContent = `课程目标${targetMappings[oldTargetNumber]}`;
+                    } else {
+                        // 如果这个目标被删除了，隐藏这一列
+                        const columnIndex = Array.from(cell.parentNode.children).indexOf(cell);
+                        hideTableColumn(table, columnIndex);
+                    }
+                }
+            });
+        });
+    });
+}
+
+// 隐藏表格中的某一列
+function hideTableColumn(table, columnIndex) {
+    const rows = table.querySelectorAll('tr');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td, th');
+        if (cells.length > columnIndex) {
+            cells[columnIndex].style.display = 'none';
+        }
+    });
+}
+
+// 记录操作到历史记录栈中
+function recordOperation(operation) {
+    // 限制历史记录大小
+    if (operationHistory.length >= MAX_HISTORY) {
+        operationHistory.shift(); // 移除最旧的记录
+    }
+    
+    // 添加时间戳
+    operation.timestamp = new Date().getTime();
+    
+    // 添加到历史记录
+    operationHistory.push(operation);
+    
+    // 更新撤销按钮状态
+    updateUndoButtonState();
+}
+
+// 更新其他涉及课程目标的引用
+function updateOtherTargetReferences(targetMappings = {}) {
+    // 找出所有包含"课程目标X"或"目标X"文本的元素
+    const allElements = document.querySelectorAll('*');
+    
+    allElements.forEach(element => {
+        // 跳过我们已经处理过的目标容器和表格标题
+        if (element.id && (element.id.startsWith('target') || element.tagName === 'TH')) {
+            return;
+        }
+        
+        // 检查元素中是否有课程目标相关的文本
+        for (const node of element.childNodes) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.nodeValue;
+                
+                // 匹配"课程目标X"或"目标X"的格式
+                const courseTargetMatch = text.match(/课程目标(\d+)/g);
+                const targetMatch = text.match(/目标(\d+)/g);
+                
+                if (courseTargetMatch || targetMatch) {
+                    let newText = text;
+                    
+                    // 处理"课程目标X"格式
+                    if (courseTargetMatch) {
+                        courseTargetMatch.forEach(match => {
+                            const num = parseInt(match.match(/\d+/)[0]);
+                            if (targetMappings[num]) {
+                                newText = newText.replace(
+                                    new RegExp(`课程目标${num}`, 'g'), 
+                                    `课程目标${targetMappings[num]}`
+                                );
+                            }
+                        });
+                    }
+                    
+                    // 处理"目标X"格式（不是目标容器内部）
+                    if (targetMatch && !element.closest('[id^="target"][id$="-container"]')) {
+                        targetMatch.forEach(match => {
+                            const num = parseInt(match.match(/\d+/)[0]);
+                            if (targetMappings[num]) {
+                                newText = newText.replace(
+                                    new RegExp(`目标${num}(?!-)`, 'g'), 
+                                    `目标${targetMappings[num]}`
+                                );
+                            }
+                        });
+                    }
+                    
+                    // 如果有更改，更新文本
+                    if (newText !== text) {
+                        node.nodeValue = newText;
+                    }
+                }
+            }
+        }
+    });
+    
+    // 更新data-placeholder属性中的目标编号
+    document.querySelectorAll('[data-placeholder^="请填写目标"]').forEach(element => {
+        const placeholder = element.getAttribute('data-placeholder');
+        const match = placeholder.match(/请填写目标(\d+)/);
+        if (match) {
+            const num = parseInt(match[1]);
+            if (targetMappings[num]) {
+                element.setAttribute('data-placeholder', `请填写目标${targetMappings[num]}`);
+            }
+        }
+    });
+}
+
+// 计算当前可见的目标数量
+function countVisibleTargets() {
+    const targetContainers = Array.from(document.querySelectorAll('[id^="target"][id$="-container"]'));
+    return targetContainers.filter(container => {
+        return container.style.display !== 'none' && 
+               localStorage.getItem('hidden_' + container.id) !== 'true';
+    }).length;
+}
+
+// 撤销上一次操作
+function undoLastOperation() {
+    if (operationHistory.length === 0) {
+        // 没有可撤销的操作
+        showNotification('提示', '没有可撤销的操作');
+        return;
+    }
+    
+    const lastOperation = operationHistory.pop();
+    
+    // 根据操作类型执行相应的撤销
+    switch (lastOperation.type) {
+        case 'hideEditableItem':
+            // 恢复被隐藏的可编辑项
+            const container = document.getElementById(lastOperation.containerId);
+            if (container) {
+                container.style.display = lastOperation.previousDisplay || '';
+                localStorage.removeItem('hidden_' + lastOperation.containerId);
+                
+                // 如果是目标项，需要重排序
+                if (lastOperation.containerId.startsWith('target') && lastOperation.containerId.endsWith('-container')) {
+                    reorderTargets();
+                }
+            }
+            break;
+            
+        case 'hideTableRow':
+            // 恢复被隐藏的表格行
+            const row = document.getElementById(lastOperation.rowId);
+            if (row) {
+                row.style.display = lastOperation.previousDisplay || '';
+                localStorage.removeItem('hidden_row_' + lastOperation.rowId);
+            }
+            break;
+            
+        default:
+            console.warn('未知的操作类型:', lastOperation.type);
+    }
+    
+    // 更新撤销按钮状态
+    updateUndoButtonState();
+    
+    // 显示撤销成功通知
+    showNotification('成功', '已撤销上一次操作');
+}
+
+// 更新撤销按钮状态
+function updateUndoButtonState() {
+    const undoButton = document.getElementById('undo-button');
+    if (undoButton) {
+        undoButton.disabled = operationHistory.length === 0;
+    }
+}
+
+// 显示通知
+function showNotification(title, message) {
+    // 如果页面中有Toast组件，使用它
+    const toastTitle = document.getElementById('toast-title');
+    const toastMessage = document.getElementById('toast-message');
+    const toast = document.getElementById('notification-toast');
+    
+    if (toastTitle && toastMessage && toast) {
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+        
+        // 显示自定义Toast通知
+        toast.style.display = 'block';
+        
+        // 3秒后自动隐藏
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    } else {
+        // 否则使用简单的alert
+        console.log(`${title}: ${message}`);
     }
 }
 
@@ -47,10 +334,62 @@ function restoreHiddenItems() {
     });
 }
 
+// 重置所有内容到最初状态（恢复所有隐藏的项目）
+function resetAllContent() {
+    // 清除所有隐藏状态
+    const keys = [];
+    
+    // 收集所有与隐藏状态相关的localStorage键
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('hidden_')) {
+            keys.push(key);
+        }
+    }
+    
+    // 删除所有隐藏状态
+    keys.forEach(key => {
+        localStorage.removeItem(key);
+    });
+    
+    // 显示所有目标容器
+    document.querySelectorAll('[id^="target"][id$="-container"]').forEach(container => {
+        container.style.display = '';
+    });
+    
+    // 显示所有表格行
+    document.querySelectorAll('tr[id]').forEach(row => {
+        row.style.display = '';
+    });
+    
+    // 显示所有表格列
+    document.querySelectorAll('th, td').forEach(cell => {
+        cell.style.display = '';
+    });
+    
+    // 清空操作历史
+    while(operationHistory.length > 0) {
+        operationHistory.pop();
+    }
+    
+    // 更新撤销按钮状态
+    updateUndoButtonState();
+    
+    // 显示通知
+    showNotification('成功', '已恢复所有内容到初始状态');
+}
+
 // 表格行删除功能
 function hideTableRow(rowId) {
     const row = document.getElementById(rowId);
     if (row) {
+        // 记录操作到历史记录中，以便撤销
+        recordOperation({
+            type: 'hideTableRow',
+            rowId: rowId,
+            previousDisplay: row.style.display
+        });
+        
         // 隐藏表格行
         row.style.display = 'none';
         
@@ -74,6 +413,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextBtn = document.getElementById('nextBtn');
     const exportBtn = document.getElementById('exportBtn');
     const steps = document.querySelectorAll('.step');
+    
+    // 初始化撤销按钮状态
+    updateUndoButtonState();
 
     // 全局变量
     let currentStep = 0;
@@ -99,6 +441,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 恢复之前隐藏的元素
     restoreHiddenItems();
+    
+    // 重排序课程目标
+    reorderTargets();
     
     // 导出PDF按钮点击事件
     exportBtn.addEventListener('click', function() {

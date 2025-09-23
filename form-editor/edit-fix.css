@@ -90,16 +90,28 @@ body.is-exporting-pdf select.input-field {
     background-color: #d32f2f;
 }
 
-/* 打印时隐藏删除按钮 */
+/* 打印时隐藏删除按钮和操作按钮 */
 @media print {
-    .delete-button {
+    .delete-button,
+    .undo-button,
+    .reset-button,
+    .edit-controls,
+    .toast-container {
         display: none !important;
     }
 }
 
-/* 导出PDF时隐藏删除按钮 */
+/* 导出PDF时隐藏删除按钮和操作按钮 */
 body.is-exporting-pdf .delete-button,
-body.is-exporting .delete-button {
+body.is-exporting .delete-button,
+body.is-exporting-pdf .undo-button,
+body.is-exporting .undo-button,
+body.is-exporting-pdf .reset-button,
+body.is-exporting .reset-button,
+body.is-exporting-pdf .edit-controls,
+body.is-exporting .edit-controls,
+body.is-exporting-pdf .toast-container,
+body.is-exporting .toast-container {
     display: none !important;
 }
 
