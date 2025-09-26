@@ -54,18 +54,30 @@
     <div class="report-container" id="reportContent">
         <div class="step active" id="step1">
             <header>
-                <img src="./校徽logo.png" alt="江西师范大学" class="school-logo">
+                <img src="./school_badge.png" alt="江西师范大学" class="school-logo">
                 <h1><span class="title-wrapper">《<span contenteditable="true" class="input-def" id="courseName" data-placeholder="请填写课程名称"></span>》</span>课程目标达成情况评价报告</h1>
             </header>
 
             <h2>一、课程简介</h2>
-            <p><input type="text" class="input-field" id="courseSubject" placeholder="请填写课程简介"></p>
+            <div class="input-field" id="courseSubject" contenteditable="true" rows="1"></div>
             <h2>二、课程目标</h2>
             <p class="paragraph">通过本课程的教学，学生应该具备如下知识和能力：</p>
-            <div class="paragraph" id="target1-container">目标1：<span class="editable-item-container"><span contenteditable="true" class="input-def" id="target1" data-placeholder="请填写目标1"></span><button class="delete-button" title="删除此项" onclick="hideEditableItem('target1-container')">×</button></span></div>
-            <div class="paragraph" id="target2-container">目标2：<span class="editable-item-container"><span contenteditable="true" class="input-def" id="target2" data-placeholder="请填写目标2"></span><button class="delete-button" title="删除此项" onclick="hideEditableItem('target2-container')">×</button></span></div>
-            <div class="paragraph" id="target3-container">目标3：<span class="editable-item-container"><span contenteditable="true" class="input-def" id="target3" data-placeholder="请填写目标3"></span><button class="delete-button" title="删除此项" onclick="hideEditableItem('target3-container')">×</button></span></div>
-            <div class="paragraph" id="target4-container">目标4：<span class="editable-item-container"><span contenteditable="true" class="input-def" id="target4" data-placeholder="请填写目标4"></span><button class="delete-button" title="删除此项" onclick="hideEditableItem('target4-container')">×</button></span></div>
+            <div class="paragraph" id="target1-container">目标1：
+                <div contenteditable="true" class="editable-text" id="target1" data-placeholder="请填写目标1"></div>
+                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target1-container')">×</button>
+            </div>
+            <div class="paragraph" id="target2-container">目标2：
+                <div contenteditable="true" class="editable-text" id="target2" data-placeholder="请填写目标2"></div>
+                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target2-container')">×</button>
+            </div>
+            <div class="paragraph" id="target3-container">目标3：
+                <div contenteditable="true" class="editable-text" id="target3" data-placeholder="请填写目标3"></div>
+                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target3-container')">×</button>
+            </div>
+            <div class="paragraph" id="target4-container">目标4：
+                <div contenteditable="true" class="editable-text" id="target4" data-placeholder="请填写目标4"></div>
+                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target4-container')">×</button>
+            </div>
 
             <h2>三、课程目标对毕业要求指标点的支撑关系</h2>
             <p class="paragraph">表1是依据江西师范大学材料化学专业人才培养方案和《
