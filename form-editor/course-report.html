@@ -54,18 +54,30 @@
     <div class="report-container" id="reportContent">
         <div class="step active" id="step1">
             <header>
-                <img src="./校徽logo.png" alt="江西师范大学" class="school-logo">
+                <img src="./school_badge.png" alt="江西师范大学" class="school-logo">
                 <h1><span class="title-wrapper">《<span contenteditable="true" class="input-def" id="courseName" data-placeholder="请填写课程名称"></span>》</span>课程目标达成情况评价报告</h1>
             </header>
 
             <h2>一、课程简介</h2>
-            <p><input type="text" class="input-field" id="courseSubject" placeholder="请填写课程简介"></p>
+            <div class="input-field" id="courseSubject" contenteditable="true" rows="1"></div>
             <h2>二、课程目标</h2>
             <p class="paragraph">通过本课程的教学，学生应该具备如下知识和能力：</p>
-            <div class="paragraph" id="target1-container">目标1：<span class="editable-item-container"><span contenteditable="true" class="input-def" id="target1" data-placeholder="请填写目标1"></span><button class="delete-button" title="删除此项" onclick="hideEditableItem('target1-container')">×</button></span></div>
-            <div class="paragraph" id="target2-container">目标2：<span class="editable-item-container"><span contenteditable="true" class="input-def" id="target2" data-placeholder="请填写目标2"></span><button class="delete-button" title="删除此项" onclick="hideEditableItem('target2-container')">×</button></span></div>
-            <div class="paragraph" id="target3-container">目标3：<span class="editable-item-container"><span contenteditable="true" class="input-def" id="target3" data-placeholder="请填写目标3"></span><button class="delete-button" title="删除此项" onclick="hideEditableItem('target3-container')">×</button></span></div>
-            <div class="paragraph" id="target4-container">目标4：<span class="editable-item-container"><span contenteditable="true" class="input-def" id="target4" data-placeholder="请填写目标4"></span><button class="delete-button" title="删除此项" onclick="hideEditableItem('target4-container')">×</button></span></div>
+            <div class="paragraph" id="target1-container">目标1：
+                <div contenteditable="true" class="editable-text" id="target1" data-placeholder="请填写目标1"></div>
+                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target1-container')">×</button>
+            </div>
+            <div class="paragraph" id="target2-container">目标2：
+                <div contenteditable="true" class="editable-text" id="target2" data-placeholder="请填写目标2"></div>
+                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target2-container')">×</button>
+            </div>
+            <div class="paragraph" id="target3-container">目标3：
+                <div contenteditable="true" class="editable-text" id="target3" data-placeholder="请填写目标3"></div>
+                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target3-container')">×</button>
+            </div>
+            <div class="paragraph" id="target4-container">目标4：
+                <div contenteditable="true" class="editable-text" id="target4" data-placeholder="请填写目标4"></div>
+                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target4-container')">×</button>
+            </div>
 
             <h2>三、课程目标对毕业要求指标点的支撑关系</h2>
             <p class="paragraph">表1是依据江西师范大学材料化学专业人才培养方案和《
@@ -88,82 +100,82 @@
                     <tbody>
                         <tr id="table-row-1">
                             <td class="table-td category" rowspan="1">师德规范</td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-1')">×</button></td>
                         </tr>
                         <tr id="table-row-2">
                             <td class="table-td category" rowspan="1">教育情怀</td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-2')">×</button></td>
                         </tr>
                         <tr id="table-row-3">
                             <td class="table-td category" rowspan="2">学科素养</td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-3')">×</button></td>
                         </tr>
                         <tr id="table-row-4">
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-4')">×</button></td>
                         </tr>
                         <tr id="table-row-5">
                             <td class="table-td category" rowspan="1">教学能力</td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-5')">×</button></td>
                         </tr>
                         <tr id="table-row-6">
                             <td class="table-td category" rowspan="1">班级指导</td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-6')">×</button></td>
                         </tr>
                         <tr id="table-row-7">
                             <td class="table-td category" rowspan="1">综合育人</td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-7')">×</button></td>
                         </tr>
                         <tr id="table-row-8">
                             <td class="table-td category" rowspan="1">学会反思</td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-8')">×</button></td>
                         </tr>
                         <tr id="table-row-9">
                             <td class="table-td category" rowspan="1">沟通合作</td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-9')">×</button></td>
                         </tr>
                     </tbody>
@@ -175,7 +187,7 @@
         <div class="step" id="step2">
             <h2>四、课程目标与考核方式的对应权重关系</h2>
             <div class="paragraph">本课程目标达成度评价采用直接评价方式进行。直接评价采用"考试成绩分析法"，数据源自抽取样本学生的课程考核成绩，对应的支撑材料为
-                <div contenteditable="true" class="input-def" id="supportMaterial" data-placeholder="请填写支撑材料"></div>
+                <div contenteditable="true" class="editable-text" id="supportMaterial" data-placeholder="请填写支撑材料"></div>
                 等成绩，其对应的各个课程目标考核方式与权重关系见下表2。
             </div>            
             <p style="font-size: 12px;" class="table-name">表2.课程考核方式对课程目标的权重关系矩阵</p>
@@ -198,38 +210,38 @@
                     <tbody>
                         <tr id="exam-row-1">
                             <td>课堂表现</td>
-                            <td><div contenteditable="true" class="input-field" id="score1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight1-1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight1-2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight1-3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight1-4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="score1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight1-1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight1-2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight1-3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight1-4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('exam-row-1')">×</button></td>
                         </tr>
                         <tr id="exam-row-2">
                             <td>课后作业</td>
-                            <td><div contenteditable="true" class="input-field" id="score2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight2-1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight2-2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight2-3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight2-4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="score2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight2-1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight2-2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight2-3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight2-4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('exam-row-2')">×</button></td>
                         </tr>
                         <tr id="exam-row-3">
                             <td>线上作业</td>
-                            <td><div contenteditable="true" class="input-field" id="score3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight3-1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight3-2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight3-3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight3-4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="score3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight3-1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight3-2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight3-3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight3-4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('exam-row-3')">×</button></td>
                         </tr>
                         <tr id="exam-row-4">
                             <td>期末考试</td>
-                            <td><div contenteditable="true" class="input-field" id="score4"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight4-1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight4-2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight4-3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="weight4-4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="score4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight4-1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight4-2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight4-3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight4-4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('exam-row-4')">×</button></td>
                         </tr>
                     </tbody>
@@ -249,7 +261,7 @@
                 <p class="formula-name">公式（1）</p>
             </div>
             <div class="paragraph">通过累加可以计算出单个课程目标对应的权值，以及总权值为
-                <div contenteditable="true" class="input-def" id="totalWeight" data-placeholder="此处生成总权值"></div>。
+                <div contenteditable="true" class="editable-text" id="totalWeight" data-placeholder="此处生成总权值"></div>。
                 《<span id="courseNameShow3"></span>》课程4个分目标对应的权重值计算如下：
             </div>
             
@@ -263,15 +275,17 @@
                             <th>课程目标2</th>
                             <th>课程目标3</th>
                             <th>课程目标4</th>
+                            <th class="delete-cell">操作</th>
+
                         </tr>
                     </thead>
                     <tbody>
                         <tr id="weight-value-row">
                             <td>权重值</td>
-                            <td><div contenteditable="true" class="input-field" id="targetWeight1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="targetWeight2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="targetWeight3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="targetWeight4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="targetWeight1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="targetWeight2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="targetWeight3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="targetWeight4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('weight-value-row')">×</button></td>
                         </tr>
                     </tbody>
@@ -305,18 +319,18 @@
                     <tbody>
                         <tr id="score-row-1">
                             <td>总分</td>
-                            <td><div contenteditable="true" class="input-field" id="totalScore1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="totalScore2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="totalScore3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="totalScore4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="totalScore1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="totalScore2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="totalScore3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="totalScore4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('score-row-1')">×</button></td>
                         </tr>
                         <tr id="score-row-2">
                             <td>平均分</td>
-                            <td><div contenteditable="true" class="input-field" id="avgScore1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="avgScore2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="avgScore3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="avgScore4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="avgScore1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="avgScore2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="avgScore3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="avgScore4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('score-row-2')">×</button></td>
                         </tr>
                     </tbody>
@@ -339,10 +353,10 @@
                     <tbody>
                         <tr id="achievement-row">
                             <td>课程分目标的达成度</td>
-                            <td><div contenteditable="true" class="input-field" id="targetAchieve1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="targetAchieve2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="targetAchieve3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="targetAchieve4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="targetAchieve1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="targetAchieve2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="targetAchieve3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="targetAchieve4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('achievement-row')">×</button></td>
                         </tr>
                     </tbody>
@@ -373,27 +387,27 @@
                     <tbody>
                         <tr id="goal-row-1">
                             <td>课程目标1</td>
-                            <td><div contenteditable="true" class="input-field" id="showWeight1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="showAchieve1"></div></td>
-                            <td rowspan="4"><input type="text" id="totalAchieve" class="input-field"></td>
+                            <td><div contenteditable="true" class="input-box" id="showWeight1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="showAchieve1"></div></td>
+                            <td rowspan="4"><div contenteditable="true" class="input-box" id="totalAchieve"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('goal-row-1')">×</button></td>
                         </tr>
                         <tr id="goal-row-2">
                             <td>课程目标2</td>
-                            <td><div contenteditable="true" class="input-field" id="showWeight2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="showAchieve2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="showWeight2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="showAchieve2"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('goal-row-2')">×</button></td>
                         </tr>
                         <tr id="goal-row-3">
                             <td>课程目标3</td>
-                            <td><div contenteditable="true" class="input-field" id="showWeight3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="showAchieve3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="showWeight3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="showAchieve3"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('goal-row-3')">×</button></td>
                         </tr>
                         <tr id="goal-row-4">
                             <td>课程目标4</td>
-                            <td><div contenteditable="true" class="input-field" id="showWeight4"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="showAchieve4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="showWeight4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="showAchieve4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('goal-row-4')">×</button></td>
                         </tr>
                     </tbody>
@@ -408,39 +422,39 @@
                             <td><strong>课程名称</strong></td>
                             <td><span id="courseNameShow5"></span></td>
                             <td><strong>课程类别</strong></td>
-                            <td><div contenteditable="true" class="input-field"></div></td>
+                            <td><div contenteditable="true" class="input-box"></div></td>
                             <td><strong>学时</strong></td>
-                            <td><div contenteditable="true" class="input-field"></div></td>
+                            <td><div contenteditable="true" class="input-box"></div></td>
                             <td><strong>学分</strong></td>
-                            <td><div contenteditable="true" class="input-field"></div></td>
+                            <td><div contenteditable="true" class="input-box"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('course-info-row-1')">×</button></td>
                         </tr>
                         <tr id="course-info-row-2">
                             <td><strong>任课教师</strong></td>
-                            <td><div contenteditable="true" class="input-field" id="teacherName"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="teacherName"></div></td>
                             <td><strong>教师职称</strong></td>
-                            <td><div contenteditable="true" class="input-field" id="teacherTitle"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="teacherTitle"></div></td>
                             <td colspan="2"><strong>授课时间</strong></td>
-                            <td colspan="2"><div contenteditable="true" class="input-field" id="teachTime"></div></td>
+                            <td colspan="2"><div contenteditable="true" class="input-box" id="teachTime"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('course-info-row-2')">×</button></td>
                         </tr>
                         <tr id="course-info-row-3">
                             <td><strong>授课班级</strong></td>
-                            <td><div contenteditable="true" class="input-field" id="className"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="className"></div></td>
                             <td><strong>学生人数</strong></td>
-                            <td><div contenteditable="true" class="input-field" id="studentCount"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="studentCount"></div></td>
                             <td colspan="2"><strong>期末考核方式</strong></td>
-                            <td colspan="2"><div contenteditable="true" class="input-field" id="examMethod"></div></td>
+                            <td colspan="2"><div contenteditable="true" class="input-box" id="examMethod"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('course-info-row-3')">×</button></td>
                         </tr>
                         <tr id="grade-analysis-row-1">
                             <td colspan="2" rowspan="4"><strong>成绩分析</strong></td>
                             <td><strong>最高分</strong></td>
-                            <td><div contenteditable="true" class="input-field" id="maxScore"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="maxScore"></div></td>
                             <td><strong>最低分</strong></td>
-                            <td><div contenteditable="true" class="input-field" id="minScore"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="minScore"></div></td>
                             <td><strong>平均分</strong></td>
-                            <td><div contenteditable="true" class="input-field" id="avgTotalScore"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="avgTotalScore"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('grade-analysis-row-1')">×</button></td>
                         </tr>
                         <tr id="grade-analysis-row-2">
@@ -454,20 +468,20 @@
                         </tr>
                         <tr id="grade-analysis-row-3">
                             <td><strong>人数</strong></td>
-                            <td><div contenteditable="true" class="input-field" id="count1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="count2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="count3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="count4"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="count5"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="count1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="count2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="count3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="count4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="count5"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('grade-analysis-row-3')">×</button></td>
                         </tr>
                         <tr id="grade-analysis-row-4">
                             <td><strong>百分比</strong></td>
-                            <td><div contenteditable="true" class="input-field" id="rate1"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="rate2"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="rate3"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="rate4"></div></td>
-                            <td><div contenteditable="true" class="input-field" id="rate5"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="rate1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="rate2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="rate3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="rate4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="rate5"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('grade-analysis-row-4')">×</button></td>
                         </tr>
                         <tr id="course-goal-row">

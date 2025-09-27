@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程目标达成情况评价报告生成工具</title>
+    <link rel="stylesheet" href="./index.css"></link>
+    <style>
+        .step { display: none; }
+        .step.active { display: block; }
+        .page-break { page-break-after: always; }
+        .content-section { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="report-container" id="reportContent">
+        <!-- 步骤将由JS动态生成 -->
+    </div>
+    
+    <div class="step-nav">
+        <button id="prevBtn" disabled>上一步</button>
+        <button id="nextBtn">下一步</button>
+        <button id="exportPdfBtn" style="display:none;">导出PDF</button>
+    </div>
+    <script>
+        const reportTemplate =`
+        <header>
+            <img src="../图片1.png" alt="江西师范大学" class="school-logo">
+            <h1>《<div contenteditable="true" class="input-def" id="courseName" data-placeholder="请填写课程名称"></div>》课程目标达成情况评价报告</h1>
+        </header>
+
+        <h2>一、课程简介</h2>
+        <p><input type="text" class="input-field" id="courseSubject"></p>
+
+        <h2>二、课程目标</h2>
+        <p class="paragraph">通过本课程的教学，学生应该具备如下知识和能力：</p>
+        <div class="paragraph" data-placeholder="请填写目标1">目标1：<div contenteditable="true" class="input-def" id="target1"></div></div>
+        <div class="paragraph" data-placeholder="请填写目标2">目标2：<div contenteditable="true" class="input-def" id="target2"></div></div>
+        <div class="paragraph" data-placeholder="请填写目标3">目标3：<div contenteditable="true" class="input-def" id="target3"></div></div>
+        <div class="paragraph" data-placeholder="请填写目标4">目标4：<div contenteditable="true" class="input-def" id="target4"></div></div>
+
+        <h2>三、课程目标对毕业要求指标点的支撑关系</h2>
+        <p class="paragraph">表1是依据江西师范大学材料化学专业人才培养方案和《<span id="courseNameShow1"></span>》课程大纲得到的课程目标对毕业要求各指标点的对应支撑关系矩阵。</p>
+        <div style="font-size: 12px;" class="table-name">表1.课程目标对毕业要求指标点的支撑矩阵</div>
+        <div class="table-container">
+            <table>
+                <thead class="table-header">
+                    <tr>
+                        <th class="table-th" colspan="2"></th>
+                        <th class="table-th">课程目标1</th>
+                        <th class="table-th">课程目标2</th>
+                        <th class="table-th">课程目标3</th>
+                        <th class="table-th">课程目标4</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="table-td category" rowspan="1">师德规范</td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></div></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                    </tr>
+                    <tr>
+                        <td class="table-td category" rowspan="1">教育情怀</td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                    </tr>
+                    <tr>
+                        <td class="table-td category" rowspan="2">学科素养</td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                    </tr>
+                    <tr>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                    </tr>
+                    <tr>
+                        <td class="table-td category" rowspan="1">教学能力</td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                    </tr>
+                    <tr>
+                        <td class="table-td category" rowspan="1">班级指导</td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                    </tr>
+                    <tr>
+                        <td class="table-td category" rowspan="1">综合育人</td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                    </tr>
+                    <tr>
+                        <td class="table-td category" rowspan="1">学会反思</td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                    </tr>
+                    <tr>
+                        <td class="table-td category" rowspan="1">沟通合作</td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                        <td class="table-td"><div contenteditable="true" class="input-field"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="font-size: 12px;">注："H"表示高关联度，"M"表示中等关联度，"L"表示低关联度。</p>
+        `;
+        let steps = [];
+        let currentStepIndex = 0;
+        const MAX_PAGE_HEIGHT = 1000; 
+        // 初始化函数
+        function init() {
+            // 将模板内容添加到报告容器
+            document.getElementById('reportContent').innerHTML = reportTemplate;
+            // 初始化课程名称联动
+            initCourseNameSync();
+            // 组织内容区块
+            organizeContentSections();
+            // 初始化步骤导航
+            initStepNavigation();
+        }
+        // 组织内容区块到步骤中
+        function organizeContentSections() {
+            const sections = document.querySelectorAll('.content-section');
+            let currentStepContent = '';
+            let currentHeight = 0;
+            let stepIndex = 0;
+            sections.forEach((section, index) => {
+                // 估算区块高度
+                const sectionHeight = estimateHeight(section);
+                // 如果当前步骤高度加上新区块高度超过最大值，创建新步骤
+                if (currentHeight + sectionHeight > MAX_PAGE_HEIGHT && currentHeight > 0) {
+                    createStep(stepIndex, currentStepContent);
+                    stepIndex++;
+                    currentStepContent = '';
+                    currentHeight = 0;
+                }
+                currentStepContent += section.outerHTML;
+                currentHeight += sectionHeight;
+                // 如果是最后一个区块，创建最终步骤
+                if (index === sections.length - 1) {
+                    createStep(stepIndex, currentStepContent);
+                }
+            });
+            // 显示第一步
+            showStep(0);
+        }
+        // 估算元素高度
+        function estimateHeight(element) {
+            return element.textContent.length / 50 * 20 + 100; // 简单基于字符数的估算
+        }
+        // 创建步骤
+        function createStep(index, content) {
+            const step = document.createElement('div');
+            step.className = 'step';
+            step.id = `step${index + 1}`;
+            step.innerHTML = content;
+            document.getElementById('reportContent').appendChild(step);
+            steps.push(step.id);
+        }
+        // 显示指定步骤
+        function showStep(index) {
+            steps.forEach(stepId => {
+                document.getElementById(stepId).classList.remove('active');
+            });
+            document.getElementById(steps[index]).classList.add('active');
+            // 更新导航按钮状态
+            updateNavButtons(index);
+        }
+        // 更新导航按钮状态
+        function updateNavButtons(currentIndex) {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const exportBtn = document.getElementById('exportPdfBtn');
+            prevBtn.disabled = currentIndex === 0;
+            if (currentIndex === steps.length - 1) {
+                nextBtn.style.display = 'none';
+                exportBtn.style.display = 'inline-block';
+            } else {
+                nextBtn.style.display = 'inline-block';
+                exportBtn.style.display = 'none';
+            }
+        }
+        // 初始化步骤导航
+        function initStepNavigation() {
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                if (currentStepIndex > 0) {
+                    currentStepIndex--;
+                    showStep(currentStepIndex);
+                }
+            });
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                if (currentStepIndex < steps.length - 1) {
+                    currentStepIndex++;
+                    showStep(currentStepIndex);
+                }
+            });
+            document.getElementById('exportPdfBtn').addEventListener('click', exportPdf);
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
