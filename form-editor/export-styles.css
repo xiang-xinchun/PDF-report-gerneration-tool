@@ -103,6 +103,30 @@ body.is-exporting-pdf h6 {
     display: block !important;
 }
 
+/* 确保公式正确显示 */
+body.is-exporting-pdf .formula {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin: 25px 0 !important;
+    page-break-inside: avoid !important;
+    padding: 5px 0 !important;
+}
+
+body.is-exporting-pdf .formula-content {
+    flex-grow: 1 !important;
+    text-align: center !important;
+    font-size: 18px !important;
+    padding: 5px 0 !important;
+}
+
+body.is-exporting-pdf .formula-name {
+    width: 90px !important;
+    text-align: right !important;
+    font-size: 15px !important;
+    padding-right: 10px !important;
+}
+
 /* 简化的隐藏样式 */
 body.is-exporting-pdf .no-print, 
 body.is-exporting-pdf .step-nav, 
