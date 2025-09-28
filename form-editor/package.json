@@ -2,7 +2,7 @@
   "name": "course-report-generator",
   "version": "1.0.0",
   "description": "课程目标达成情况评价报告生成工具",
-  "main": "course-report-main.js",
+  "main": "index.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
