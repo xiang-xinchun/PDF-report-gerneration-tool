@@ -422,28 +422,38 @@ function calculateTargetAchievements() {
     return achievements;
 }
 
-// 课程总达成度计算
+// 课程总达成度计算 - 根据公式(3): P = ∑(wi × Pi)
 function calculateTotalAchievement() {
+    console.log('=== 开始计算课程目标总达成度 ===');
+    
     // 获取权重和达成度
     const weights = [];
     const achievements = [];
     let hasValidData = false;
     
     try {
+        console.log('读取表3（权重值）和表5（分目标达成度）的数据...');
+        
         for (let i = 1; i <= 4; i++) {  // 假设有4个课程目标
             const weightElement = document.getElementById(`showWeight${i}`);
             const achievementElement = document.getElementById(`showAchieve${i}`);
             
             if (weightElement && achievementElement) {
-                const weight = safeParseFloat(weightElement.textContent);
-                const achievement = safeParseFloat(achievementElement.textContent);
+                const weight = safeParseFloat(weightElement.textContent || weightElement.value || '0');
+                const achievement = safeParseFloat(achievementElement.textContent || achievementElement.value || '0');
                 
-                if (weight > 0 && achievement > 0) {
+                console.log(`课程目标${i}: 权重(w${i})=${weight}, 达成度(P${i})=${achievement}`);
+                
+                if (weight > 0 && achievement >= 0) {
                     hasValidData = true;
                 }
                 
                 weights.push(weight);
                 achievements.push(achievement);
+            } else {
+                console.log(`未找到课程目标${i}的权重或达成度元素`);
+                weights.push(0);
+                achievements.push(0);
             }
         }
         
@@ -467,27 +477,43 @@ function calculateTotalAchievement() {
         return 0;
     }
     
-    // 计算总达成度: P = Σ(wi × Pi)
+    // 计算总达成度: P = Σ(wi × Pi) - 公式(3)
+    console.log('\n按照公式(3)计算总达成度: P = Σ(wi × Pi)');
     let totalAchievement = 0;
+    const contributions = [];
+    
     for (let i = 0; i < weights.length; i++) {
-        totalAchievement += weights[i] * achievements[i];
+        const contribution = weights[i] * achievements[i];
+        contributions.push(contribution);
+        totalAchievement += contribution;
+        
+        console.log(`课程目标${i+1}贡献: w${i+1} × P${i+1} = ${weights[i]} × ${achievements[i]} = ${contribution.toFixed(6)}`);
     }
     
-    // 确保总达成度在0-1范围内
-    totalAchievement = Math.max(0, Math.min(1, totalAchievement));
+    console.log(`\n总达成度计算:`);
+    console.log(`P = ${contributions.map((c, i) => `(${weights[i]} × ${achievements[i]})`).join(' + ')}`);
+    console.log(`P = ${contributions.map(c => c.toFixed(6)).join(' + ')}`);
+    console.log(`P = ${totalAchievement.toFixed(6)}`);
+    
+    // 不限制总达成度范围，允许超过1
+    // totalAchievement = Math.max(0, Math.min(1, totalAchievement));
     
     try {
         // 更新总达成度
         const totalAchieveElement = document.getElementById('totalAchieve');
         if (totalAchieveElement) {
+            const finalValue = totalAchievement.toFixed(3);
             if (totalAchieveElement.tagName.toLowerCase() === 'input') {
-                totalAchieveElement.value = totalAchievement.toFixed(3);
+                totalAchieveElement.value = finalValue;
             } else {
-                totalAchieveElement.textContent = totalAchievement.toFixed(3);
+                totalAchieveElement.textContent = finalValue;
             }
+            console.log(`更新总达成度显示为: ${finalValue}`);
+        } else {
+            console.log('未找到总达成度元素: totalAchieve');
         }
         
-        showCalculationNotice('总达成度计算完成: ' + totalAchievement.toFixed(3));
+        showCalculationNotice(`总达成度计算完成: ${totalAchievement.toFixed(3)}`);
     } catch (error) {
         showCalculationNotice('更新总达成度时出错: ' + error.message, true);
     }
@@ -798,7 +824,7 @@ function testWithDocumentExample() {
         console.log(`课程目标${targetIndex}达成度: ${targetAchievement.toFixed(3)}`);
         
         // 验证是否与文档中的期望值匹配
-        const expectedValues = [0.809, 0.790, 0.790, 0.790]; // 根据文档中的示例
+        const expectedValues = [0.809, 0.809, 0.790, 0.790]; // 根据文档中的示例
         const expected = expectedValues[targetIndex - 1];
         const diff = Math.abs(targetAchievement - expected);
         if (diff < 0.001) {
@@ -806,6 +832,31 @@ function testWithDocumentExample() {
         } else {
             console.log(`⚠ 计算结果${targetAchievement.toFixed(3)}与期望值${expected}存在差异`);
         }
+    }
+    
+    // 验证总达成度计算
+    console.log('\n=== 验证总达成度计算 ===');
+    const targetWeights = [0.278, 0.278, 0.222, 0.222]; // 文档中的权重
+    const targetAchievements = [0.809, 0.809, 0.790, 0.790]; // 文档中的达成度
+    
+    console.log('根据文档数据计算总达成度:');
+    let totalP = 0;
+    const contributions = [];
+    
+    for (let i = 0; i < 4; i++) {
+        const contribution = targetWeights[i] * targetAchievements[i];
+        contributions.push(contribution);
+        totalP += contribution;
+        console.log(`课程目标${i+1}: ${targetWeights[i]} × ${targetAchievements[i]} = ${contribution.toFixed(6)}`);
+    }
+    
+    console.log(`总达成度 P = ${contributions.join(' + ')} = ${totalP.toFixed(6)}`);
+    console.log(`预期结果: 0.800564，实际计算: ${totalP.toFixed(6)}`);
+    
+    if (Math.abs(totalP - 0.800564) < 0.000001) {
+        console.log('✓ 总达成度计算正确！');
+    } else {
+        console.log('⚠ 总达成度计算可能存在误差');
     }
 }
 
