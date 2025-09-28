@@ -603,30 +603,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 rateShowElement.textContent = rateElement.textContent;
             }
         });
-
-        const targetAchieveIds = ['targetAchieve1', 'targetAchieve2', 'targetAchieve3', 'targetAchieve4'];
-        const targetAchieveShowIds = [
-            ['targetAchieve1Show1', 'targetAchieve1Show2'],
-            ['targetAchieve2Show1', 'targetAchieve2Show2'],
-            ['targetAchieve3Show1', 'targetAchieve3Show2'],
-            ['targetAchieve4Show1', 'targetAchieve4Show2']
-        ];
-        targetAchieveIds.forEach((id, index) => {
-            const targetAchieveElement = document.getElementById(id);
-            const showElements = targetAchieveShowIds[index].map(showId => document.getElementById(showId));
-            if (targetAchieveElement) {
-                targetAchieveElement.addEventListener('input', function() {
-                    const value = this.textContent;
-                    showElements.forEach(element => {
-                        if (element) element.textContent = value;
-                    });
-                });
-                const initialValue = targetAchieveElement.textContent;
-                showElements.forEach(element => {
-                    if (element) element.textContent = initialValue;
-                });
-            }
-        });
         
         // 确保所有可编辑元素都可以进行编辑
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {

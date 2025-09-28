@@ -354,10 +354,10 @@
                     <tbody>
                         <tr id="achievement-row">
                             <td>课程分目标的达成度</td>
-                            <td><span id="targetAchieve1Show1"></span></td>
-                            <td><span id="targetAchieve2Show1"></span></td>
-                            <td><span id="targetAchieve3Show1"></span></td>
-                            <td><span id="targetAchieve4Show1"></span></td>
+                            <td><div contenteditable="true" class="input-box" id="targetAchieve1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="targetAchieve2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="targetAchieve3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="targetAchieve4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('achievement-row')">×</button></td>
                         </tr>
                     </tbody>
@@ -386,30 +386,30 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr id="goal-row-1">
+                        <tr>
                             <td>课程目标1</td>
                             <td><div contenteditable="true" class="input-box" id="showWeight1"></div></td>
-                            <td><span id="targetAchieve1Show2"></span></td>
+                            <td><div contenteditable="true" class="input-box" id="showAchieve1"></div></td>
                             <td rowspan="4"><div contenteditable="true" class="input-box" id="totalAchieve"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('goal-row-1')">×</button></td>
                         </tr>
-                        <tr id="goal-row-2">
+                        <tr>
                             <td>课程目标2</td>
                             <td><div contenteditable="true" class="input-box" id="showWeight2"></div></td>
-                            <td><span id="targetAchieve2Show2"></span></td>
-                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('goal-row-2')">×</button></td>
+                            <td><div contenteditable="true" class="input-box" id="showAchieve2"></div></td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('goal-row-1')">×</button></td>
                         </tr>
-                        <tr id="goal-row-3">
+                        <tr>
                             <td>课程目标3</td>
                             <td><div contenteditable="true" class="input-box" id="showWeight3"></div></td>
-                            <td><span id="targetAchieve3Show2"></span></td>
-                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('goal-row-3')">×</button></td>
+                            <td><div contenteditable="true" class="input-box" id="showAchieve3"></div></td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('goal-row-1')">×</button></td>
                         </tr>
-                        <tr id="goal-row-4">
+                        <tr>
                             <td>课程目标4</td>
                             <td><div contenteditable="true" class="input-box" id="showWeight4"></div></td>
-                            <td><span id="targetAchieve4Show2"></span></td>
-                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('goal-row-4')">×</button></td>
+                            <td><div contenteditable="true" class="input-box" id="showAchieve4"></div></td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('goal-row-1')">×</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -503,10 +503,10 @@
                                     -->最低分<span contenteditable="true" title="点击可编辑" id="minScore"></span>分，<!--
                                     -->平均分为<span contenteditable="true" title="点击可编辑" id="avgTotalScore"></span>分。<!--
                                     -->课程总达成度为<span contenteditable="true" title="点击可编辑"></span>。<!--
-                                    -->分析各个目标达成度，还发现课程目标1达成度为<span class="editable-span" contenteditable="true" title="点击可编辑" id="targetAchieve1"></span>，<!--
-                                    -->课程目标2达成度为<span class="editable-span" contenteditable="true" title="点击可编辑" id="targetAchieve2"></span>，<!--
-                                    -->课程目标3达成度为<span class="editable-span" contenteditable="true" title="点击可编辑" id="targetAchieve3"></span>，<!--
-                                    -->课程目标4达成度为<span class="editable-span" contenteditable="true" title="点击可编辑" id="targetAchieve4"></span>。
+                                    -->分析各个目标达成度，还发现课程目标1达成度为<span id="targetAchieve1"></span>，<!--
+                                    -->课程目标2达成度为<span id="targetAchieve2"></span>，<!--
+                                    -->课程目标3达成度为<span id="targetAchieve3"></span>，<!--
+                                    -->课程目标4达成度为<span id="targetAchieve4"></span>。
                                 </p>
                             </td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('course-goal-row')">×</button></td>
