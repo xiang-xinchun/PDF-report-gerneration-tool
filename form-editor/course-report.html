@@ -50,6 +50,7 @@
     <div class="edit-controls" style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
         <button id="reset-button" class="reset-button" title="恢复所有内容到初始状态" onclick="resetAllContent()"><i class="bi bi-arrow-repeat"></i> 恢复全部</button>
         <button id="undo-button" class="undo-button" title="撤销上一次删除操作" onclick="undoLastOperation()" disabled><i class="bi bi-arrow-counterclockwise"></i> 撤销</button>
+        <button id="scan-table-button" class="scan-button" title="扫描表格内容并重新计算" style="background-color:#4CAF50;" onclick="scanTableAndCalculate()"><i class="bi bi-calculator"></i> 刷新计算</button>
     </div>
     <div class="report-container" id="reportContent">
         <div class="step active" id="step1">
@@ -578,10 +579,113 @@
             }
             console.log('[DEBUG]', msg);
         };
+        
+        // 全局通知函数
+        window.showNotification = function(options) {
+            const title = options.title || '通知';
+            const message = options.message || '';
+            const type = options.type || 'info';
+            
+            // 创建通知元素
+            let notification = document.getElementById('notification-toast');
+            if (!notification) {
+                // 创建新的通知元素
+                notification = document.createElement('div');
+                notification.id = 'notification-toast';
+                notification.style.position = 'fixed';
+                notification.style.top = '20px';
+                notification.style.right = '20px';
+                notification.style.padding = '10px 20px';
+                notification.style.borderRadius = '4px';
+                notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+                notification.style.zIndex = '9999';
+                notification.style.transition = 'all 0.3s ease';
+                notification.style.opacity = '0';
+                
+                document.body.appendChild(notification);
+            }
+            
+            // 设置通知类型样式
+            if (type === 'error') {
+                notification.style.backgroundColor = '#f44336';
+                notification.style.color = 'white';
+            } else if (type === 'success') {
+                notification.style.backgroundColor = '#4caf50';
+                notification.style.color = 'white';
+            } else {
+                notification.style.backgroundColor = '#2196f3';
+                notification.style.color = 'white';
+            }
+            
+            // 设置通知内容
+            notification.innerHTML = `<strong>${title}</strong><br>${message}`;
+            
+            // 显示通知
+            notification.style.opacity = '1';
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        };
     </script>
 
     <!-- 页面脚本在外部JS文件中加载 -->
     <script src="report-editor.js"></script>
+    <script src="calculation-enhanced.js"></script>
+    <script>
+        // 辅助函数：重新计算所有数据
+        function recalculateAllData() {
+            console.log('重新计算所有数据...');
+            // 直接调用计算模块的函数
+            if (window.calculationModule) {
+                window.calculationModule.calculateWeights();
+                window.calculationModule.calculateAchievements();
+                window.calculationModule.calculateTotal();
+            }
+        }
+        
+        // 扫描表格并重新计算函数
+        function scanTableAndCalculate() {
+            console.log('开始扫描表格并重新计算...');
+            
+            // 强制重新计算所有内容
+            if (window.calculationModule) {
+                window.calculationModule.calculateWeights();
+                window.calculationModule.calculateAchievements();
+                window.calculationModule.calculateTotal();
+                
+                // 显示通知
+                showNotification({
+                    title: '计算已刷新',
+                    message: '已根据表格内容重新计算所有数据',
+                    type: 'success'
+                });
+            }
+        }
+        
+        // 页面加载完成后初始化计算模块
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.calculationModule && typeof window.calculationModule.init === 'function') {
+                window.calculationModule.init();
+                console.log('计算模块已加载');
+                
+                // 页面加载完成后延迟执行扫描和计算
+                setTimeout(function() {
+                    scanTableAndCalculate();
+                }, 1500);
+                
+                showNotification({
+                    title: '计算功能已启用',
+                    message: '当填写表格数据后，会自动计算结果，也可点击"刷新计算"按钮手动触发',
+                    type: 'info'
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
