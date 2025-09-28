@@ -227,6 +227,35 @@ table {
     padding-right: 10px;
 }
 
+td.data-source {
+    text-align: left;
+    padding: 15px 12px;
+}
+td.data-source p {
+    text-indent: 2em;
+    text-align: left;
+    margin: 0;
+    line-height: 1.6;
+    font-family: "SimSun", "宋体", serif;
+    font-size: 14px;
+    color: var(--primary-color);
+}
+td.data-source [contenteditable="true"] {
+    outline: none;
+    background: transparent;
+    cursor: text;
+    line-height: 1;
+}
+td.data-source [contenteditable="true"]:hover {
+    background-color: #f5f9ff;
+    border-radius: 2px;
+}
+td.data-source [contenteditable="true"]:focus {
+    background-color: #ebf5ff;
+    border-radius: 2px;
+}
+
+
 /* 按钮样式 */
 .action-buttons {
     text-align: center;

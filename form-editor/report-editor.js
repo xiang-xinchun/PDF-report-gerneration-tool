@@ -546,7 +546,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('courseNameShow4'),
             document.getElementById('courseNameShow5')
         ];
-        
         if (courseName) {
             courseName.addEventListener('input', function() {
                 const value = this.textContent;
@@ -555,6 +554,79 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
         }
+
+        const maxScore = document.getElementById('maxScore');
+        const maxScoreShow = document.getElementById('maxScoreShow');
+        if(maxScore){
+            maxScore.addEventListener('input', function() {
+                const value = this.textContent;
+                maxScoreShow.textContent = value;
+            });
+        }
+        const minScore = document.getElementById('minScore');
+        const minScoreShow = document.getElementById('minScoreShow');
+        if(minScore){
+            minScore.addEventListener('input', function() {
+                const value = this.textContent;
+                minScoreShow.textContent = value;
+            });
+        }
+        const avgTotalScore = document.getElementById('avgTotalScore');
+        const avgTotalScoreShow = document.getElementById('avgTotalScoreShow');
+        if(avgTotalScore){
+            avgTotalScore.addEventListener('input', function() {
+                const value = this.textContent;
+                avgTotalScoreShow.textContent = value;
+            });
+        }
+        const countIds = ['count1', 'count2', 'count3', 'count4', 'count5'];
+        const rateIds = ['rate1', 'rate2', 'rate3', 'rate4', 'rate5'];
+        const countShowIds = ['count1Show', 'count2Show', 'count3Show', 'count4Show', 'count5Show'];
+        const rateShowIds = ['rate1Show', 'rate2Show', 'rate3Show', 'rate4Show', 'rate5Show'];
+        countIds.forEach((id, index) => {
+            const countElement = document.getElementById(id);
+            const countShowElement = document.getElementById(countShowIds[index]);
+            if (countElement && countShowElement) {
+                countElement.addEventListener('input', function() {
+                    countShowElement.textContent = this.textContent;
+                });
+                countShowElement.textContent = countElement.textContent;
+            }
+        });
+        rateIds.forEach((id, index) => { 
+            const rateElement = document.getElementById(id);
+            const rateShowElement = document.getElementById(rateShowIds[index]);
+            if (rateElement && rateShowElement) {
+                rateElement.addEventListener('input', function() {
+                    rateShowElement.textContent = this.textContent;
+                });
+                rateShowElement.textContent = rateElement.textContent;
+            }
+        });
+
+        const targetAchieveIds = ['targetAchieve1', 'targetAchieve2', 'targetAchieve3', 'targetAchieve4'];
+        const targetAchieveShowIds = [
+            ['targetAchieve1Show1', 'targetAchieve1Show2'],
+            ['targetAchieve2Show1', 'targetAchieve2Show2'],
+            ['targetAchieve3Show1', 'targetAchieve3Show2'],
+            ['targetAchieve4Show1', 'targetAchieve4Show2']
+        ];
+        targetAchieveIds.forEach((id, index) => {
+            const targetAchieveElement = document.getElementById(id);
+            const showElements = targetAchieveShowIds[index].map(showId => document.getElementById(showId));
+            if (targetAchieveElement) {
+                targetAchieveElement.addEventListener('input', function() {
+                    const value = this.textContent;
+                    showElements.forEach(element => {
+                        if (element) element.textContent = value;
+                    });
+                });
+                const initialValue = targetAchieveElement.textContent;
+                showElements.forEach(element => {
+                    if (element) element.textContent = initialValue;
+                });
+            }
+        });
         
         // 确保所有可编辑元素都可以进行编辑
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {

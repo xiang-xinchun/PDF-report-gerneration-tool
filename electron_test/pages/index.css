@@ -105,9 +105,42 @@ table th {
     page-break-inside: avoid;
 }
 
+
 .table-header {
     display: table-header-group;
     /* 表头始终显示在页面顶部 */
+}
+
+td.data-source {
+    text-align: left;
+    padding: 12px 15px;
+}
+
+td.data-source p {
+    text-indent: 2em;
+    text-align: left;
+    margin: 0;
+    line-height: 1.6;
+    font-family: "SimSun", "宋体", serif;
+    font-size: 14px;
+    color: var(--primary-color);
+}
+
+td.data-source [contenteditable="true"] {
+    line-height: 1;
+    outline: none;
+    background: transparent;
+    cursor: text;
+}
+
+td.data-source [contenteditable="true"]:hover {
+    background-color: #f5f9ff;
+    border-radius: 2px;
+}
+
+td.data-source [contenteditable="true"]:focus {
+    background-color: #ebf5ff;
+    border-radius: 2px;
 }
 .formula{
     display: flex;
