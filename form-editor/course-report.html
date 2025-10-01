@@ -451,11 +451,11 @@
                         <tr id="grade-analysis-row-1">
                             <td colspan="2" rowspan="4"><strong>成绩分析</strong></td>
                             <td><strong>最高分</strong></td>
-                            <td><span id="maxScoreShow"></span></td>
+                            <td><div contenteditable="true" class="input-box" id="maxScoreShow"></div></td>
                             <td><strong>最低分</strong></td>
-                            <td><span id="minScoreShow"></span></td>
+                            <td><div contenteditable="true" class="input-box" id="minScoreShow"></div></td>
                             <td><strong>平均分</strong></td>
-                            <td><span id="avgTotalScoreShow"></span></td>
+                            <td><div contenteditable="true" class="input-box" id="avgTotalScoreShow"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('grade-analysis-row-1')">×</button></td>
                         </tr>
                         <tr id="grade-analysis-row-2">
@@ -469,45 +469,26 @@
                         </tr>
                         <tr id="grade-analysis-row-3">
                             <td><strong>人数</strong></td>
-                            <td><span id="count1Show"></span></td>
-                            <td><span id="count2Show"></span></td>
-                            <td><span id="count3Show"></span></td>
-                            <td><span id="count4Show"></span></td>
-                            <td><span id="count5Show"></span></td>
+                            <td><div contenteditable="true" class="input-box" id="count1Show"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="count2Show"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="count3Show"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="count4Show"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="count5Show"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('grade-analysis-row-3')">×</button></td>
                         </tr>
                         <tr id="grade-analysis-row-4">
                             <td><strong>百分比</strong></td>
-                            <td><span id="rate1Show"></span>%</td>
-                            <td><span id="rate2Show"></span>%</td>
-                            <td><span id="rate3Show"></span>%</td>
-                            <td><span id="rate4Show"></span>%</td>
-                            <td><span id="rate5Show"></span>%</td>
+                            <td><span id="rate1Show">0</span>%</td>
+                            <td><span id="rate2Show">0</span>%</td>
+                            <td><span id="rate3Show">0</span>%</td>
+                            <td><span id="rate4Show">0</span>%</td>
+                            <td><span id="rate5Show">0</span>%</td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('grade-analysis-row-4')">×</button></td>
                         </tr>
                         <tr id="course-goal-row">
                             <td colspan="2"><strong>课程目标达成情况分析</strong><br></td>
                             <td colspan="6" class="data-source">
-                                <p>
-                                    从期末测试来看最高分<span contenteditable="true" title="点击可编辑" id="maxScore"></span>分，<!--
-                                    -->90分以上<span contenteditable="true" title="点击可编辑" id="count1"></span>人，<!--
-                                    -->占比<span contenteditable="true" title="点击可编辑" id="rate1"></span>%，<!--
-                                    -->80分以上<span contenteditable="true" title="点击可编辑" id="count2"></span>人，<!--
-                                    -->占比<span contenteditable="true" title="点击可编辑" id="rate2"></span>%，<!--
-                                    -->70分以上<span contenteditable="true" title="点击可编辑" id="count3"></span>人，<!--
-                                    -->占比<span contenteditable="true" title="点击可编辑" id="rate3"></span>%，<!--
-                                    -->60分以上<span contenteditable="true" title="点击可编辑" id="count4"></span>人，<!--
-                                    -->占比<span contenteditable="true" title="点击可编辑" id="rate4"></span>%，<!--
-                                    -->60分以下<span contenteditable="true" title="点击可编辑" id="count5"></span>人，<!--
-                                    -->占比<span contenteditable="true" title="点击可编辑" id="rate5"></span>%，<!--
-                                    -->最低分<span contenteditable="true" title="点击可编辑" id="minScore"></span>分，<!--
-                                    -->平均分为<span contenteditable="true" title="点击可编辑" id="avgTotalScore"></span>分。<!--
-                                    -->课程总达成度为<span contenteditable="true" title="点击可编辑"></span>。<!--
-                                    -->分析各个目标达成度，还发现课程目标1达成度为<span id="targetAchieve1"></span>，<!--
-                                    -->课程目标2达成度为<span id="targetAchieve2"></span>，<!--
-                                    -->课程目标3达成度为<span id="targetAchieve3"></span>，<!--
-                                    -->课程目标4达成度为<span id="targetAchieve4"></span>。
-                                </p>
+                                <div contenteditable="true" class="input-field" data-placeholder="请输入课程目标达成情况分析内容..."></div>
                             </td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('course-goal-row')">×</button></td>
                         </tr>

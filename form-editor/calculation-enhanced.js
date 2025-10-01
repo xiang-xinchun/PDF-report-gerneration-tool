@@ -591,6 +591,9 @@ function setupCalculationEvents() {
     // 为表2和表4的所有输入框添加专门的事件监听器
     bindTable2And4Events();
     
+    // 为成绩分析部分添加事件监听器
+    bindGradeAnalysisEvents();
+    
     // 不再需要手动计算按钮，所有计算都自动进行
     // 移除已存在的计算按钮（如果有）
     const existingButton = document.querySelector('.action-button[data-purpose="calculate"]');
@@ -761,6 +764,7 @@ function initCalculationModule() {
             calculateTargetWeights();
             calculateTargetAchievements();
             calculateTotalAchievement();
+            calculateGradeAnalysis();
         }
         
         // 初始化计算（如果表格中已有数据）
@@ -860,11 +864,100 @@ function testWithDocumentExample() {
     }
 }
 
+// 成绩分析自动计算功能
+function calculateGradeAnalysis() {
+    console.log('=== 开始计算成绩分析百分比 ===');
+    
+    try {
+        // 读取学生总人数
+        const studentCountElement = document.getElementById('studentCount');
+        const totalStudents = studentCountElement ? safeParseFloat(studentCountElement.textContent || studentCountElement.value || '0') : 0;
+        
+        console.log(`学生总人数: ${totalStudents}`);
+        
+        if (totalStudents === 0) {
+            console.log('学生总人数为0，将所有百分比设为0');
+            // 如果总人数为0，将所有百分比设为0
+            for (let i = 1; i <= 5; i++) {
+                const rateElement = document.getElementById(`rate${i}Show`);
+                if (rateElement) {
+                    rateElement.textContent = '0.0';
+                }
+            }
+            return;
+        }
+        
+        // 读取各分数段人数并计算百分比
+        for (let i = 1; i <= 5; i++) {
+            const countElement = document.getElementById(`count${i}Show`);
+            const count = countElement ? safeParseFloat(countElement.textContent || countElement.value || '0') : 0;
+            
+            console.log(`分数段${i}人数: ${count}`);
+            
+            // 计算百分比：(分数段人数 / 学生总人数) × 100
+            const percentage = (count / totalStudents * 100).toFixed(1);
+            const rateElement = document.getElementById(`rate${i}Show`);
+            if (rateElement) {
+                rateElement.textContent = percentage;
+                console.log(`分数段${i}百分比: ${count}/${totalStudents} × 100 = ${percentage}%`);
+            }
+        }
+        
+        console.log('=== 成绩分析百分比计算完成 ===');
+        
+    } catch (error) {
+        console.error('计算成绩分析时出错:', error);
+        showCalculationNotice('计算成绩分析时出错: ' + error.message, true);
+    }
+}
+
+// 为成绩分析部分绑定事件监听
+function bindGradeAnalysisEvents() {
+    console.log('绑定成绩分析事件监听器...');
+    
+    // 为学生总人数输入框绑定事件
+    const studentCountElement = document.getElementById('studentCount');
+    if (studentCountElement) {
+        studentCountElement.addEventListener('input', function() {
+            console.log('学生总人数发生变化，重新计算百分比');
+            setTimeout(() => {
+                calculateGradeAnalysis();
+            }, 50);
+        });
+        studentCountElement.addEventListener('blur', function() {
+            setTimeout(() => {
+                calculateGradeAnalysis();
+            }, 50);
+        });
+    }
+    
+    // 为各分数段人数输入框绑定事件
+    for (let i = 1; i <= 5; i++) {
+        const countElement = document.getElementById(`count${i}Show`);
+        if (countElement) {
+            countElement.addEventListener('input', function() {
+                console.log(`分数段${i}人数发生变化，重新计算百分比`);
+                setTimeout(() => {
+                    calculateGradeAnalysis();
+                }, 50);
+            });
+            countElement.addEventListener('blur', function() {
+                setTimeout(() => {
+                    calculateGradeAnalysis();
+                }, 50);
+            });
+        }
+    }
+    
+    console.log('成绩分析事件监听器绑定完成');
+}
+
 // 添加到window对象以便全局访问
 window.calculationModule = {
     init: initCalculationModule,
     calculateWeights: calculateTargetWeights,
     calculateAchievements: calculateTargetAchievements,
     calculateTotal: calculateTotalAchievement,
+    calculateGrades: calculateGradeAnalysis,
     testExample: testWithDocumentExample
 };
