@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const XLSX = require('xlsx');
 
 // 禁用GPU加速以避免某些图形渲染问题
 app.disableHardwareAcceleration();
@@ -25,7 +26,7 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, 'course-report.html'));
 
     // 打开开发者工具
-    // mainWindow.webContents.openDevTools();
+    //mainWindow.webContents.openDevTools();
 
     // 当window被关闭时，触发以下事件
     mainWindow.on('closed', function () {
@@ -34,6 +35,98 @@ function createWindow() {
         // 与此同时，你应该删除相应的元素。
         mainWindow = null;
     });
+
+    // 处理打开 Excel 文件
+    ipcMain.handle('open-excel-file', async () => {
+        try {
+            const result = await dialog.showOpenDialog(mainWindow, {
+                properties: ['openFile'],
+                filters: [
+                    { name: 'Excel Files', extensions: ['xlsx', 'xls'] }
+                ]
+            });
+            return result;
+        } catch (error) {
+            console.error('打开 Excel 文件对话框错误:', error);
+            throw error;
+        }
+    });
+
+    ipcMain.handle('parse-excel-file', async (event, filePath) => {
+    try {
+        if (!filePath) {
+            return { success: false, message: '文件路径为空' };
+        }
+
+        const workbook = XLSX.readFile(filePath);
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        if (excelData.length === 0) {
+            return { success: false, message: 'Excel文件中没有数据' };
+        }
+
+        console.log('Excel数据总行数:', excelData.length);
+        console.log('前几行数据:', excelData.slice(0, 6));
+
+        // 计算成绩统计数据
+        const scores = []
+        for (let i = 3; i <= 40; i++) {
+            if (excelData[i] && excelData[i].length > 8) {
+                const scoreValue = excelData[i][8]; // 总成绩在第9列（索引8）
+                const scoreNum = Number(scoreValue);
+                console.log(`第${i+1}行成绩:`, scoreValue, '=>', scoreNum);
+                
+                if (!isNaN(scoreNum) && scoreNum >= 0) {
+                    scores.push(scoreNum);
+                }
+            }
+        }
+        console.log('解析到的有效成绩:', scores);
+        console.log('实际人数:', scores.length);
+        if (scores.length === 0) {
+            return { success: false, message: '未找到有效的成绩数据' };
+        }
+
+        const maxScore = Math.max(...scores);
+        const minScore = Math.min(...scores);
+        const avgScore = (scores.reduce((sum, s) => sum + s, 0) / scores.length).toFixed(1);
+
+        // 统计各分数段人数
+        const count1 = scores.filter(s => s >= 90 && s <= 100).length;
+        const count2 = scores.filter(s => s >= 80 && s < 90).length;
+        const count3 = scores.filter(s => s >= 70 && s < 80).length;
+        const count4 = scores.filter(s => s >= 60 && s < 70).length;
+        const count5 = scores.filter(s => s < 60).length;
+        const total = scores.length;
+
+        // 计算百分比
+        const calcRate = (count) => total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+
+        // 返回结构化数据
+        return {
+            success: true,
+            data: {
+                studentCount: total,
+                maxScore,
+                minScore,
+                avgTotalScore: avgScore,
+                counts: { count1, count2, count3, count4, count5 },
+                rates: {
+                    rate1: calcRate(count1),
+                    rate2: calcRate(count2),
+                    rate3: calcRate(count3),
+                    rate4: calcRate(count4),
+                    rate5: calcRate(count5)
+                }
+            }
+        };
+    } catch (error) {
+        console.error('解析Excel文件错误:', error);
+        return { success: false, message: error.message };
+    }
+});
 }
 
 // 当Electron完成初始化并准备好创建浏览器窗口时调用此方法

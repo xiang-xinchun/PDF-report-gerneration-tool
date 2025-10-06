@@ -2,6 +2,9 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 // 预加载脚本中创建安全的API桥接
 contextBridge.exposeInMainWorld('electronAPI', {
+    // Excel文件操作
+    openExcelFile: () => ipcRenderer.invoke('open-excel-file'),
+    parseExcelFile: (filePath) => ipcRenderer.invoke('parse-excel-file', filePath),
     // 导出PDF方法
     exportPDF: async () => {
         try {
