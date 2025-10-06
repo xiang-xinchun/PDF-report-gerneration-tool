@@ -26,14 +26,17 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, 'course-report.html'));
 
     // 打开开发者工具
-    //mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 
     // 当window被关闭时，触发以下事件
     mainWindow.on('closed', function () {
-        // 取消引用 window 对象，如果你的应用支持多窗口的话，
-        // 通常会把多个 window 对象存放在一个数组里面，
-        // 与此同时，你应该删除相应的元素。
-        mainWindow = null;
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.executeJavaScript(`...`).then(() => {
+          mainWindow = null;
+          });
+        } else {
+          mainWindow = null;
+        }
     });
 
     // 处理打开 Excel 文件

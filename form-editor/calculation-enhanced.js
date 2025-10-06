@@ -1,7 +1,7 @@
 /**
  * 课程目标达成度计算模块
  * 根据用户输入的数据自动计算权重、达成度和总达成度
- * 增强版：更强的验证和错误提示
+ * 增强版：更强的验证和错误提示，数据输入完成后才计算
  */
 
 // 辅助函数：解析权重值，支持百分比和小数格式
@@ -51,17 +51,18 @@ function safeParseFloat(value) {
 }
 
 // 辅助函数：显示计算通知
-function showCalculationNotice(message, isError = false) {
-    if (window.showNotification) {
-        window.showNotification({
-            title: isError ? '计算错误' : '自动计算',
-            message: message,
-            type: isError ? 'error' : 'info'
-        });
-    } else if (window.showDebug) {
-        window.showDebug(message);
-    } else {
-        console.log(message);
+function showCalculationNotice(message, isError = false, forcePopup = false) {
+    // 控制台始终输出
+    console.log(`${isError ? '错误' : '信息'}: ${message}`);
+    // 只有错误信息或强制弹窗时才显示弹窗
+    if (isError || forcePopup) {
+        if (window.showNotification) {
+            window.showNotification({
+                title: isError ? '计算错误' : '计算提示',
+                message: message,
+                type: isError ? 'error' : 'info'
+            });
+        }
     }
 }
 
@@ -82,8 +83,71 @@ function validateInput(value, fieldName, minValue = null, maxValue = null) {
     return true;
 }
 
+// 检查是否所有必要数据都已输入
+function checkAllRequiredData() {
+    // 检查表1支撑强度数据
+    let hasTable1Data = false;
+    const tableRows = document.querySelectorAll('table tbody tr[id^="table-row-"]');
+    if (tableRows.length > 0) {
+        for (let i = 0; i < tableRows.length; i++) {
+            const row = tableRows[i];
+            const cells = row.querySelectorAll('td');
+            for (let cell of cells) {
+                const inputBox = cell.querySelector('.input-box');
+                const content = inputBox ? inputBox.textContent.trim() : cell.textContent.trim();
+                if (content && ['H', 'h', 'M', 'm', 'L', 'l'].some(c => content.includes(c))) {
+                    hasTable1Data = true;
+                    break;
+                }
+            }
+            if (hasTable1Data) break;
+        }
+    }
+    
+    // 检查考核方式数据
+    let hasExamData = true;
+    for (let i = 1; i <= 4; i++) {
+        const totalScoreElement = document.getElementById(`totalScore${i}`);
+        const avgScoreElement = document.getElementById(`avgScore${i}`);
+        
+        if (!totalScoreElement || !avgScoreElement) continue;
+        
+        const totalScore = safeParseFloat(totalScoreElement.textContent || totalScoreElement.value || '0');
+        const avgScore = safeParseFloat(avgScoreElement.textContent || avgScoreElement.value || '0');
+        
+        if (totalScore <= 0 || avgScore <= 0) {
+            hasExamData = false;
+            break;
+        }
+    }
+    
+    // 检查权重数据
+    let hasWeightData = true;
+    for (let i = 1; i <= 4; i++) {
+        for (let j = 1; j <= 4; j++) {
+            const weightElement = document.getElementById(`weight${i}-${j}`);
+            if (!weightElement) continue;
+            
+            const weight = parseWeight(weightElement.textContent || weightElement.value || '0');
+            if (weight <= 0) {
+                hasWeightData = false;
+                break;
+            }
+        }
+        if (!hasWeightData) break;
+    }
+    
+    return hasTable1Data && hasExamData && hasWeightData;
+}
+
 // 课程目标权重计算
 function calculateTargetWeights() {
+    // 只有当所有必要数据都已输入才进行计算
+    if (!checkAllRequiredData()) {
+        console.log('数据不完整，暂不计算权重');
+        return [];
+    }
+    
     // 获取支撑强度值
     // 根据表格中的H、M、L数量计算强度值: Vi = 3x+2y+1z
     const targetStrengthValues = [];
@@ -275,6 +339,12 @@ function calculateTargetWeights() {
 
 // 课程分目标达成度计算
 function calculateTargetAchievements() {
+    // 只有当所有必要数据都已输入才进行计算
+    if (!checkAllRequiredData()) {
+        console.log('数据不完整，暂不计算达成度');
+        return [];
+    }
+    
     // 获取考核方式的权重、总分和平均分
     const examData = [];
     let hasValidData = false;
@@ -379,7 +449,6 @@ function calculateTargetAchievements() {
             console.log(`课程目标${targetIndex}的原始达成度: ${targetAchievement}`);
             
             // 不限制达成度在0-1范围内，允许超过1
-            // targetAchievement = Math.max(0, Math.min(1, targetAchievement));
             achievements.push(targetAchievement);
             
             console.log(`课程目标${targetIndex}的最终达成度: ${targetAchievement}`);
@@ -424,6 +493,12 @@ function calculateTargetAchievements() {
 
 // 课程总达成度计算 - 根据公式(3): P = ∑(wi × Pi)
 function calculateTotalAchievement() {
+    // 只有当所有必要数据都已输入才进行计算
+    if (!checkAllRequiredData()) {
+        console.log('数据不完整，暂不计算总达成度');
+        return 0;
+    }
+    
     console.log('=== 开始计算课程目标总达成度 ===');
     
     // 获取权重和达成度
@@ -496,8 +571,6 @@ function calculateTotalAchievement() {
     console.log(`P = ${totalAchievement.toFixed(6)}`);
     
     // 不限制总达成度范围，允许超过1
-    // totalAchievement = Math.max(0, Math.min(1, totalAchievement));
-    
     try {
         // 更新总达成度
         const totalAchieveElement = document.getElementById('totalAchieve');
@@ -550,9 +623,12 @@ function setupCalculationEvents() {
             target.id.startsWith('targetHCount') || 
             target.id.startsWith('targetMCount') || 
             target.id.startsWith('targetLCount')))) {
-            calculateTargetWeights();
-            calculateTargetAchievements();
-            calculateTotalAchievement();
+            // 检查数据是否完整，如果完整才计算
+            if (checkAllRequiredData()) {
+                calculateTargetWeights();
+                calculateTargetAchievements();
+                calculateTotalAchievement();
+            }
         }
         
         // 处理考核方式相关输入（表2和表4）
@@ -560,9 +636,12 @@ function setupCalculationEvents() {
             target.id.startsWith('avgScore') || 
             target.id.startsWith('score') ||
             (target.id.startsWith('weight') && target.id.includes('-')))) {
-            console.log('检测到考核数据变化，重新计算达成度');
-            calculateTargetAchievements();
-            calculateTotalAchievement();
+            console.log('检测到考核数据变化');
+            // 检查数据是否完整，如果完整才计算
+            if (checkAllRequiredData()) {
+                calculateTargetAchievements();
+                calculateTotalAchievement();
+            }
         }
         
         // 处理表2中的考核方式输入变化
@@ -580,19 +659,19 @@ function setupCalculationEvents() {
         }
         
         if (insideTable2 || insideTable4) {
-            console.log('检测到表2或表4数据变化，重新计算达成度');
-            setTimeout(() => {
-                calculateTargetAchievements();
-                calculateTotalAchievement();
-            }, 100); // 延迟100ms确保数据已更新
+            console.log('检测到表2或表4数据变化');
+            // 检查数据是否完整，如果完整才计算
+            if (checkAllRequiredData()) {
+                setTimeout(() => {
+                    calculateTargetAchievements();
+                    calculateTotalAchievement();
+                }, 100); // 延迟100ms确保数据已更新
+            }
         }
     });
     
-    // 为表2和表4的所有输入框添加专门的事件监听器
+    // 专门绑定表2和表4的事件监听
     bindTable2And4Events();
-    
-    // 为成绩分析部分添加事件监听器
-    bindGradeAnalysisEvents();
     
     // 不再需要手动计算按钮，所有计算都自动进行
     // 移除已存在的计算按钮（如果有）
@@ -612,17 +691,13 @@ function bindTable2And4Events() {
         const scoreElement = document.getElementById(`score${i}`);
         if (scoreElement) {
             scoreElement.addEventListener('input', function() {
-                console.log(`表2满分${i}发生变化，重新计算达成度`);
-                setTimeout(() => {
-                    calculateTargetAchievements();
-                    calculateTotalAchievement();
-                }, 50);
-            });
-            scoreElement.addEventListener('blur', function() {
-                setTimeout(() => {
-                    calculateTargetAchievements();
-                    calculateTotalAchievement();
-                }, 50);
+                console.log(`表2满分${i}发生变化`);
+                if (checkAllRequiredData()) {
+                    setTimeout(() => {
+                        calculateTargetAchievements();
+                        calculateTotalAchievement();
+                    }, 50);
+                }
             });
         }
         
@@ -631,17 +706,13 @@ function bindTable2And4Events() {
             const weightElement = document.getElementById(`weight${i}-${j}`);
             if (weightElement) {
                 weightElement.addEventListener('input', function() {
-                    console.log(`表2权重${i}-${j}发生变化，重新计算达成度`);
-                    setTimeout(() => {
-                        calculateTargetAchievements();
-                        calculateTotalAchievement();
-                    }, 50);
-                });
-                weightElement.addEventListener('blur', function() {
-                    setTimeout(() => {
-                        calculateTargetAchievements();
-                        calculateTotalAchievement();
-                    }, 50);
+                    console.log(`表2权重${i}-${j}发生变化`);
+                    if (checkAllRequiredData()) {
+                        setTimeout(() => {
+                            calculateTargetAchievements();
+                            calculateTotalAchievement();
+                        }, 50);
+                    }
                 });
             }
         }
@@ -653,17 +724,13 @@ function bindTable2And4Events() {
         const totalScoreElement = document.getElementById(`totalScore${i}`);
         if (totalScoreElement) {
             totalScoreElement.addEventListener('input', function() {
-                console.log(`表4总分${i}发生变化，重新计算达成度`);
-                setTimeout(() => {
-                    calculateTargetAchievements();
-                    calculateTotalAchievement();
-                }, 50);
-            });
-            totalScoreElement.addEventListener('blur', function() {
-                setTimeout(() => {
-                    calculateTargetAchievements();
-                    calculateTotalAchievement();
-                }, 50);
+                console.log(`表4总分${i}发生变化`);
+                if (checkAllRequiredData()) {
+                    setTimeout(() => {
+                        calculateTargetAchievements();
+                        calculateTotalAchievement();
+                    }, 50);
+                }
             });
         }
         
@@ -671,17 +738,13 @@ function bindTable2And4Events() {
         const avgScoreElement = document.getElementById(`avgScore${i}`);
         if (avgScoreElement) {
             avgScoreElement.addEventListener('input', function() {
-                console.log(`表4平均分${i}发生变化，重新计算达成度`);
-                setTimeout(() => {
-                    calculateTargetAchievements();
-                    calculateTotalAchievement();
-                }, 50);
-            });
-            avgScoreElement.addEventListener('blur', function() {
-                setTimeout(() => {
-                    calculateTargetAchievements();
-                    calculateTotalAchievement();
-                }, 50);
+                console.log(`表4平均分${i}发生变化`);
+                if (checkAllRequiredData()) {
+                    setTimeout(() => {
+                        calculateTargetAchievements();
+                        calculateTotalAchievement();
+                    }, 50);
+                }
             });
         }
     }
@@ -691,16 +754,12 @@ function bindTable2And4Events() {
     table2And4InputBoxes.forEach(function(inputBox) {
         inputBox.addEventListener('input', function() {
             console.log('检测到表2或表4的input-box变化');
-            setTimeout(() => {
-                calculateTargetAchievements();
-                calculateTotalAchievement();
-            }, 50);
-        });
-        inputBox.addEventListener('blur', function() {
-            setTimeout(() => {
-                calculateTargetAchievements();
-                calculateTotalAchievement();
-            }, 50);
+            if (checkAllRequiredData()) {
+                setTimeout(() => {
+                    calculateTargetAchievements();
+                    calculateTotalAchievement();
+                }, 50);
+            }
         });
     });
     
@@ -710,79 +769,37 @@ function bindTable2And4Events() {
 // 初始化计算模块
 function initCalculationModule() {
     console.log('初始化计算模块...');
+    // 确保初始时所有数据为空
+    function clearAllInputs() {
+        // 清空所有输入框
+        const editableDivs = document.querySelectorAll('div[contenteditable="true"]');
+        editableDivs.forEach(div => {
+            div.textContent = '';
+        });
+        
+        // 清空所有输入框的值
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.value = '';
+        });
+        
+        // 清空所有内容容器
+        const contentElements = document.querySelectorAll(
+            '#studentCount, #maxScoreShow, #minScoreShow, #avgTotalScoreShow, ' +
+            '[id^="count"], [id^="rate"], [id^="targetWeight"], [id^="targetAchieve"]'
+        );
+        contentElements.forEach(el => {
+            el.textContent = '';
+        });
+    }
     
     try {
+        clearAllInputs();
+        localStorage.clear();
+        sessionStorage.clear();
         // 绑定事件监听
         setupCalculationEvents();
-        
-        // 为表格中的所有单元格添加事件监听
-        const allTables = document.querySelectorAll('table');
-        for (let table of allTables) {
-            // 检查表格是否是支撑矩阵表格（表1）
-            const tableCaption = table.closest('.table-container')?.previousElementSibling;
-            const isTable1 = tableCaption && tableCaption.textContent && tableCaption.textContent.includes('表1');
-            
-            if (isTable1) {
-                console.log('找到表1支撑矩阵表格，添加特殊监听器');
-            }
-            
-            // 为所有单元格添加事件
-            const cells = table.querySelectorAll('td');
-            for (let cell of cells) {
-                // 对所有单元格直接添加监听器
-                cell.addEventListener('input', function() {
-                    calculateTargetWeights();
-                    calculateTargetAchievements();
-                    calculateTotalAchievement();
-                });
-                cell.addEventListener('blur', function() {
-                    calculateTargetWeights();
-                    calculateTargetAchievements();
-                    calculateTotalAchievement();
-                });
-                
-                // 同时为单元格内的input-box添加监听器
-                const inputBoxes = cell.querySelectorAll('.input-box');
-                for (let box of inputBoxes) {
-                    box.addEventListener('input', function() {
-                        calculateTargetWeights();
-                        calculateTargetAchievements();
-                        calculateTotalAchievement();
-                    });
-                    box.addEventListener('blur', function() {
-                        calculateTargetWeights();
-                        calculateTargetAchievements();
-                        calculateTotalAchievement();
-                    });
-                }
-            }
-        }
-        
-        // 添加辅助函数，重新计算所有内容
-        function recalculateAll() {
-            console.log('重新计算所有数据...');
-            calculateTargetWeights();
-            calculateTargetAchievements();
-            calculateTotalAchievement();
-            calculateGradeAnalysis();
-        }
-        
-        // 初始化计算（如果表格中已有数据）
-        // 使用多次尝试的方式，确保DOM完全加载后计算
-        setTimeout(() => {
-            recalculateAll();
-            
-            // 1秒后再次计算，确保数据已经正确加载
-            setTimeout(() => {
-                recalculateAll();
-                showCalculationNotice('数据自动计算已启用，所有结果将保留三位小数');
-                
-                // 2秒后再次计算，以应对可能的延迟加载
-                setTimeout(() => {
-                    recalculateAll();
-                }, 2000);
-            }, 1000);
-        }, 500);
+        console.log('计算功能已启用：当填写所有必要表格数据后，会自动计算结果');
         
         console.log('计算模块初始化完成');
     } catch (error) {
@@ -814,7 +831,7 @@ function testWithDocumentExample() {
     // 计算每个课程目标的达成度
     for (let targetIndex = 1; targetIndex <= 4; targetIndex++) {
         let targetAchievement = 0;
-        console.log(`\\n--- 计算课程目标${targetIndex}的达成度 ---`);
+        console.log(`\n--- 计算课程目标${targetIndex}的达成度 ---`);
         
         for (let methodIndex = 1; methodIndex <= 4; methodIndex++) {
             const weight = weights[targetIndex][methodIndex - 1];
@@ -822,142 +839,12 @@ function testWithDocumentExample() {
             const contribution = weight * (examInfo.avgScore / examInfo.totalScore);
             targetAchievement += contribution;
             
-            console.log(`${examInfo.name}贡献: ${weight} × (${examInfo.avgScore}/${examInfo.totalScore}) = ${weight} × ${(examInfo.avgScore / examInfo.totalScore).toFixed(3)} = ${contribution.toFixed(3)}`);
+            console.log(`${examInfo.name}贡献: ${weight} × (${examInfo.avgScore}/${examInfo.totalScore}) = ${contribution.toFixed(4)}`);
         }
         
-        console.log(`课程目标${targetIndex}达成度: ${targetAchievement.toFixed(3)}`);
-        
-        // 验证是否与文档中的期望值匹配
-        const expectedValues = [0.809, 0.809, 0.790, 0.790]; // 根据文档中的示例
-        const expected = expectedValues[targetIndex - 1];
-        const diff = Math.abs(targetAchievement - expected);
-        if (diff < 0.001) {
-            console.log(`✓ 计算结果正确，与期望值${expected}匹配`);
-        } else {
-            console.log(`⚠ 计算结果${targetAchievement.toFixed(3)}与期望值${expected}存在差异`);
-        }
-    }
-    
-    // 验证总达成度计算
-    console.log('\n=== 验证总达成度计算 ===');
-    const targetWeights = [0.278, 0.278, 0.222, 0.222]; // 文档中的权重
-    const targetAchievements = [0.809, 0.809, 0.790, 0.790]; // 文档中的达成度
-    
-    console.log('根据文档数据计算总达成度:');
-    let totalP = 0;
-    const contributions = [];
-    
-    for (let i = 0; i < 4; i++) {
-        const contribution = targetWeights[i] * targetAchievements[i];
-        contributions.push(contribution);
-        totalP += contribution;
-        console.log(`课程目标${i+1}: ${targetWeights[i]} × ${targetAchievements[i]} = ${contribution.toFixed(6)}`);
-    }
-    
-    console.log(`总达成度 P = ${contributions.join(' + ')} = ${totalP.toFixed(6)}`);
-    console.log(`预期结果: 0.800564，实际计算: ${totalP.toFixed(6)}`);
-    
-    if (Math.abs(totalP - 0.800564) < 0.000001) {
-        console.log('✓ 总达成度计算正确！');
-    } else {
-        console.log('⚠ 总达成度计算可能存在误差');
+        console.log(`课程目标${targetIndex}的达成度: ${targetAchievement.toFixed(4)}`);
     }
 }
 
-// 成绩分析自动计算功能
-function calculateGradeAnalysis() {
-    console.log('=== 开始计算成绩分析百分比 ===');
-    
-    try {
-        // 读取学生总人数
-        const studentCountElement = document.getElementById('studentCount');
-        const totalStudents = studentCountElement ? safeParseFloat(studentCountElement.textContent || studentCountElement.value || '0') : 0;
-        
-        console.log(`学生总人数: ${totalStudents}`);
-        
-        if (totalStudents === 0) {
-            console.log('学生总人数为0，将所有百分比设为0');
-            // 如果总人数为0，将所有百分比设为0
-            for (let i = 1; i <= 5; i++) {
-                const rateElement = document.getElementById(`rate${i}Show`);
-                if (rateElement) {
-                    rateElement.textContent = '0.0';
-                }
-            }
-            return;
-        }
-        
-        // 读取各分数段人数并计算百分比
-        for (let i = 1; i <= 5; i++) {
-            const countElement = document.getElementById(`count${i}Show`);
-            const count = countElement ? safeParseFloat(countElement.textContent || countElement.value || '0') : 0;
-            
-            console.log(`分数段${i}人数: ${count}`);
-            
-            // 计算百分比：(分数段人数 / 学生总人数) × 100
-            const percentage = (count / totalStudents * 100).toFixed(1);
-            const rateElement = document.getElementById(`rate${i}Show`);
-            if (rateElement) {
-                rateElement.textContent = percentage;
-                console.log(`分数段${i}百分比: ${count}/${totalStudents} × 100 = ${percentage}%`);
-            }
-        }
-        
-        console.log('=== 成绩分析百分比计算完成 ===');
-        
-    } catch (error) {
-        console.error('计算成绩分析时出错:', error);
-        showCalculationNotice('计算成绩分析时出错: ' + error.message, true);
-    }
-}
-
-// 为成绩分析部分绑定事件监听
-function bindGradeAnalysisEvents() {
-    console.log('绑定成绩分析事件监听器...');
-    
-    // 为学生总人数输入框绑定事件
-    const studentCountElement = document.getElementById('studentCount');
-    if (studentCountElement) {
-        studentCountElement.addEventListener('input', function() {
-            console.log('学生总人数发生变化，重新计算百分比');
-            setTimeout(() => {
-                calculateGradeAnalysis();
-            }, 50);
-        });
-        studentCountElement.addEventListener('blur', function() {
-            setTimeout(() => {
-                calculateGradeAnalysis();
-            }, 50);
-        });
-    }
-    
-    // 为各分数段人数输入框绑定事件
-    for (let i = 1; i <= 5; i++) {
-        const countElement = document.getElementById(`count${i}Show`);
-        if (countElement) {
-            countElement.addEventListener('input', function() {
-                console.log(`分数段${i}人数发生变化，重新计算百分比`);
-                setTimeout(() => {
-                    calculateGradeAnalysis();
-                }, 50);
-            });
-            countElement.addEventListener('blur', function() {
-                setTimeout(() => {
-                    calculateGradeAnalysis();
-                }, 50);
-            });
-        }
-    }
-    
-    console.log('成绩分析事件监听器绑定完成');
-}
-
-// 添加到window对象以便全局访问
-window.calculationModule = {
-    init: initCalculationModule,
-    calculateWeights: calculateTargetWeights,
-    calculateAchievements: calculateTargetAchievements,
-    calculateTotal: calculateTotalAchievement,
-    calculateGrades: calculateGradeAnalysis,
-    testExample: testWithDocumentExample
-};
+// 初始化模块
+initCalculationModule();

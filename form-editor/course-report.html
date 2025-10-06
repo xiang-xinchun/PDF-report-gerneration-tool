@@ -453,7 +453,7 @@
                             <td><strong>授课班级</strong></td>
                             <td><div contenteditable="true" class="input-box" id="className"></div></td>
                             <td><strong>学生人数</strong></td>
-                            <td><div contenteditable="true" class="input-box" id="studentCount"></div></td>
+                            <td><div id="studentCount"></div></td>
                             <td colspan="2"><strong>期末考核方式</strong></td>
                             <td colspan="2"><div contenteditable="true" class="input-box" id="examMethod"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('course-info-row-3')">×</button></td>
@@ -461,11 +461,11 @@
                         <tr id="grade-analysis-row-1">
                             <td colspan="2" rowspan="4"><strong>成绩分析</strong></td>
                             <td><strong>最高分</strong></td>
-                            <td><div contenteditable="true" class="input-box" id="maxScoreShow"></div></td>
+                            <td><div id="maxScoreShow"></div></td>
                             <td><strong>最低分</strong></td>
-                            <td><div contenteditable="true" class="input-box" id="minScoreShow"></div></td>
+                            <td><div id="minScoreShow"></div></td>
                             <td><strong>平均分</strong></td>
-                            <td><div contenteditable="true" class="input-box" id="avgTotalScoreShow"></div></td>
+                            <td><div id="avgTotalScoreShow"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('grade-analysis-row-1')">×</button></td>
                         </tr>
                         <tr id="grade-analysis-row-2">
@@ -479,11 +479,11 @@
                         </tr>
                         <tr id="grade-analysis-row-3">
                             <td><strong>人数</strong></td>
-                            <td><div contenteditable="true" class="input-box" id="count1Show"></div></td>
-                            <td><div contenteditable="true" class="input-box" id="count2Show"></div></td>
-                            <td><div contenteditable="true" class="input-box" id="count3Show"></div></td>
-                            <td><div contenteditable="true" class="input-box" id="count4Show"></div></td>
-                            <td><div contenteditable="true" class="input-box" id="count5Show"></div></td>
+                            <td><div id="count1Show"></div></td>
+                            <td><div id="count2Show"></div></td>
+                            <td><div id="count3Show"></div></td>
+                            <td><div id="count4Show"></div></td>
+                            <td><div id="count5Show"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('grade-analysis-row-3')">×</button></td>
                         </tr>
                         <tr id="grade-analysis-row-4">
@@ -497,9 +497,7 @@
                         </tr>
                         <tr id="course-goal-row">
                             <td colspan="2"><strong>课程目标达成情况分析</strong><br></td>
-                            <td colspan="6" class="data-source">
-                                <div contenteditable="true" class="input-field" data-placeholder="请输入课程目标达成情况分析内容..."></div>
-                            </td>
+                            <td colspan="6"><div contenteditable="true" class="input-field" id="rate6"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('course-goal-row')">×</button></td>
                         </tr>
                         <tr id="continuous-improvement-row">
