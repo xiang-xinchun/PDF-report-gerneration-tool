@@ -2,19 +2,23 @@
 .delete-cell {
     width: 60px;
     text-align: center;
+    /* 删除了display: none，使删除列可见 */
 }
 
 /* 表格行删除按钮样式 */
 .row-delete-button {
-    display: inline-flex;
+    display: inline-block; /* 修改为inline-block，使按钮可见 */
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     background-color: #f44336;
     color: white;
     border-radius: 50%;
-    font-size: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 20px;
+    text-align: center;
     cursor: pointer;
     border: none;
     outline: none;

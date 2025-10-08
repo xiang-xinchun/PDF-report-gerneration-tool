@@ -1,0 +1,45 @@
+/* 添加行按钮样式 */
+.add-row-button {
+    display: inline-block;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: background-color 0.3s;
+    margin-left: 8px;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 100;
+}
+
+.add-row-button:hover {
+    background-color: #45a049;
+}
+
+/* 类别单元格样式调整，添加相对定位使按钮能够正确定位 */
+.table-td.category {
+    position: relative;
+}
+
+/* 在导出时隐藏添加行按钮 */
+@media print {
+    .add-row-button {
+        display: none !important;
+    }
+}
+
+body.is-exporting-pdf .add-row-button,
+body.is-exporting .add-row-button {
+    display: none !important;
+}

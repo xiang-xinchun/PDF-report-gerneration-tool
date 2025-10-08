@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="edit-fix.css"><!-- 添加编辑功能修复CSS -->
     <link rel="stylesheet" href="table-styles.css"><!-- 添加表格样式CSS -->
     <link rel="stylesheet" href="export-hide.css"><!-- 添加导出隐藏样式 -->
+    <link rel="stylesheet" href="add-row-styles.css"><!-- 添加行按钮样式 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"><!-- 添加Bootstrap图标 -->
     <!-- 添加MathJax配置 -->
     <script>
@@ -34,34 +35,29 @@
 <body>
     <div id="debug-info" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; font-size: 12px; z-index: 9999; max-width: 400px; display: none;"></div>
     
-    <!-- Toast通知容器 -->
-    <div class="toast-container" style="position: fixed; top: 60px; right: 10px; z-index: 9999;">
-      <div id="notification-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: white; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <div class="toast-header" style="padding: 8px 12px; border-bottom: 1px solid #eee;">
-          <strong id="toast-title" style="margin-right: auto;">通知</strong>
-          <button type="button" class="btn-close" style="background: none; border: none; font-size: 16px; cursor: pointer;" onclick="this.closest('.toast').style.display='none';">&times;</button>
+    <!-- 通知容器 -->
+    <div id="notification-toast" style="position: fixed; top: 60px; right: 10px; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.2); border-radius: 4px; padding: 12px 15px; z-index: 10000; max-width: 300px; display: none;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <strong id="toast-title" style="color: #333;">通知</strong>
+            <span style="cursor: pointer; font-size: 18px;" onclick="document.getElementById('notification-toast').style.display='none';">&times;</span>
         </div>
-        <div id="toast-message" class="toast-body" style="padding: 10px 12px;">
-          消息内容
-        </div>
-      </div>
+        <p id="toast-message" style="margin: 8px 0 0 0; color: #555;">通知内容</p>
     </div>
     
     <!-- 操作按钮 -->
     <div class="edit-controls" style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
-        <button id="excel-upload-btn" class="upload-button" title="上传Excel成绩表" style="background-color:#f5e96b;">
+        <button id="excel-upload-btn" class="reset-button" title="上传Excel成绩表">
             <i class="bi bi-file-earmark-spreadsheet"></i> 上传成绩表
         </button>
         <button id="reset-button" class="reset-button" title="恢复所有内容到初始状态" onclick="resetAllContent()">
             <i class="bi bi-arrow-repeat"></i> 恢复全部
         </button>
-        <button id="undo-button" class="undo-button" title="撤销上一次删除操作" onclick="undoLastOperation()" disabled>
-            <i class="bi bi-arrow-counterclockwise"></i> 撤销
-        </button>
-        <button id="scan-table-button" class="scan-button" title="扫描表格内容并重新计算" style="background-color:#4CAF50;" onclick="scanTableAndCalculate()">
+        <button id="scan-table-button" class="reset-button" title="扫描表格内容并重新计算" onclick="scanTableAndCalculate()">
             <i class="bi bi-calculator"></i> 刷新计算
         </button>
     </div>
+    <!-- 添加导航样式 -->
+    <link rel="stylesheet" href="navigation-styles.css">
     <div class="report-container" id="reportContent">
         <div class="step active" id="step1">
             <header>
@@ -75,19 +71,15 @@
             <p class="paragraph">通过本课程的教学，学生应该具备如下知识和能力：</p>
             <div class="paragraph" id="target1-container">目标1：
                 <div contenteditable="true" class="editable-text" id="target1" data-placeholder="请填写目标1"></div>
-                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target1-container')">×</button>
             </div>
             <div class="paragraph" id="target2-container">目标2：
                 <div contenteditable="true" class="editable-text" id="target2" data-placeholder="请填写目标2"></div>
-                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target2-container')">×</button>
             </div>
             <div class="paragraph" id="target3-container">目标3：
                 <div contenteditable="true" class="editable-text" id="target3" data-placeholder="请填写目标3"></div>
-                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target3-container')">×</button>
             </div>
             <div class="paragraph" id="target4-container">目标4：
                 <div contenteditable="true" class="editable-text" id="target4" data-placeholder="请填写目标4"></div>
-                <button class="delete-button" title="删除此项" onclick="hideEditableItem('target4-container')">×</button>
             </div>
 
             <h2>三、课程目标对毕业要求指标点的支撑关系</h2>
@@ -107,84 +99,100 @@
                     </thead>
                     <tbody>
                         <tr id="table-row-1">
-                            <td class="table-td category" rowspan="1">师德规范</td>
+                            <td class="table-td category" rowspan="1" style="position:relative">
+                                师德规范
+                                <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-1')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
+                            </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-1')">×</button></td>
+                            <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-1')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-2">
-                            <td class="table-td category" rowspan="1">教育情怀</td>
+                            <td class="table-td category" rowspan="1" style="position:relative">
+                                教育情怀
+                                <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-2')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
+                            </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-2')">×</button></td>
+                            <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-2')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-3">
-                            <td class="table-td category" rowspan="2">学科素养</td>
+                            <td class="table-td category" rowspan="1" style="position:relative">
+                                学科素养
+                                <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-3')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
+                            </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-3')">×</button></td>
-                        </tr>
-                        <tr id="table-row-4">
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-4')">×</button></td>
+                            <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-3')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-5">
-                            <td class="table-td category" rowspan="1">教学能力</td>
+                            <td class="table-td category" rowspan="1" style="position:relative">
+                                教学能力
+                                <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-5')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
+                            </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-5')">×</button></td>
+                            <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-5')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-6">
-                            <td class="table-td category" rowspan="1">班级指导</td>
+                            <td class="table-td category" rowspan="1" style="position:relative">
+                                班级指导
+                                <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-6')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
+                            </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-6')">×</button></td>
+                            <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-6')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-7">
-                            <td class="table-td category" rowspan="1">综合育人</td>
+                            <td class="table-td category" rowspan="1" style="position:relative">
+                                综合育人
+                                <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-7')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
+                            </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-7')">×</button></td>
+                            <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-7')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-8">
-                            <td class="table-td category" rowspan="1">学会反思</td>
+                            <td class="table-td category" rowspan="1" style="position:relative">
+                                学会反思
+                                <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-8')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
+                            </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-8')">×</button></td>
+                            <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-8')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-9">
-                            <td class="table-td category" rowspan="1">沟通合作</td>
+                            <td class="table-td category" rowspan="1" style="position:relative">
+                                沟通合作
+                                <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-9')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
+                            </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('table-row-9')">×</button></td>
+                            <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-9')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -517,16 +525,13 @@
             
         </div>
         </div>
-        <!-- 步骤导航 - 只在编辑时可见 -->
-        <div class="step-nav no-print">
+        
+        <!-- 步骤导航和导出按钮 - 集中放置 -->
+        <div class="navigation-bar no-print">
             <button id="prevBtn" disabled>上一步</button>
+            <button id="exportBtn">导出PDF报告</button>
             <button id="nextBtn">下一步</button>
         </div>
-    </div>
-
-    <!-- 操作按钮 - 只在编辑时可见 -->
-    <div class="action-buttons no-print">
-        <button id="exportBtn" class="action-button">导出PDF报告</button>
     </div>
 
     <!-- 调试信息区域 -->
@@ -547,56 +552,19 @@
             console.log('[DEBUG]', msg);
         };
         
-        // 全局通知函数
+        // 全局通知函数 - 只使用控制台输出，不显示UI通知
         window.showNotification = function(options) {
             const title = options.title || '通知';
             const message = options.message || '';
             const type = options.type || 'info';
             
-            // 创建通知元素
-            let notification = document.getElementById('notification-toast');
-            if (!notification) {
-                // 创建新的通知元素
-                notification = document.createElement('div');
-                notification.id = 'notification-toast';
-                notification.style.position = 'fixed';
-                notification.style.top = '20px';
-                notification.style.right = '20px';
-                notification.style.padding = '10px 20px';
-                notification.style.borderRadius = '4px';
-                notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-                notification.style.zIndex = '9999';
-                notification.style.transition = 'all 0.3s ease';
-                notification.style.opacity = '0';
-                
-                document.body.appendChild(notification);
-            }
+            // 只在控制台输出消息
+            console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
             
-            // 设置通知类型样式
+            // 如果是错误，显示在调试区域
             if (type === 'error') {
-                notification.style.backgroundColor = '#f44336';
-                notification.style.color = 'white';
-            } else if (type === 'success') {
-                notification.style.backgroundColor = '#4caf50';
-                notification.style.color = 'white';
-            } else {
-                notification.style.backgroundColor = '#2196f3';
-                notification.style.color = 'white';
+                window.showDebug(`${title}: ${message}`);
             }
-            
-            // 设置通知内容
-            notification.innerHTML = `<strong>${title}</strong><br>${message}`;
-            
-            // 显示通知
-            notification.style.opacity = '1';
-            
-            // 3秒后自动隐藏
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
-            }, 3000);
         };
     </script>
 
@@ -635,11 +603,35 @@
             }
         }
         
+        // 同步两个表格的考核方式名称
+        function setupExamTypeSync() {
+            // 设置考核方式名称同步
+            for (let i = 1; i <= 4; i++) {
+                const examTypeElement = document.getElementById(`examType${i}`);
+                const examTypeHeaderElement = document.getElementById(`examTypeHeader${i}`);
+                
+                if (examTypeElement && examTypeHeaderElement) {
+                    // 从表2同步到表4
+                    examTypeElement.addEventListener('input', function() {
+                        examTypeHeaderElement.textContent = this.textContent;
+                    });
+                    
+                    // 从表4同步到表2
+                    examTypeHeaderElement.addEventListener('input', function() {
+                        examTypeElement.textContent = this.textContent;
+                    });
+                }
+            }
+        }
+        
         // 页面加载完成后初始化计算模块
         document.addEventListener('DOMContentLoaded', function() {
             if (window.calculationModule && typeof window.calculationModule.init === 'function') {
                 window.calculationModule.init();
                 console.log('计算模块已加载');
+                
+                // 设置考核方式名称同步
+                setupExamTypeSync();
                 
                 // 页面加载完成后延迟执行扫描和计算
                 setTimeout(function() {
@@ -652,6 +644,154 @@
                     type: 'info'
                 });
             }
+        });
+    </script>
+
+    <!-- 引入添加行功能JS -->
+    <script src="add-row-feature.js"></script>
+    
+    <!-- 直接添加表格按钮的脚本 -->
+    <script src="direct-table-buttons.js"></script>
+    
+    <!-- 初始化撤销按钮状态 -->
+    <script>
+        // 全局通知函数
+        window.showNotification = function(options) {
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toast = document.getElementById('notification-toast');
+            
+            if (toastTitle && toastMessage && toast) {
+                // 如果options是对象，使用其属性
+                if (typeof options === 'object') {
+                    toastTitle.textContent = options.title || '通知';
+                    toastMessage.textContent = options.message || '';
+                    
+                    // 根据类型设置标题颜色
+                    switch(options.type) {
+                        case 'success':
+                            toastTitle.style.color = '#4CAF50';
+                            break;
+                        case 'error':
+                            toastTitle.style.color = '#f44336';
+                            break;
+                        case 'info':
+                            toastTitle.style.color = '#2196F3';
+                            break;
+                        case 'warning':
+                            toastTitle.style.color = '#ff9800';
+                            break;
+                        default:
+                            toastTitle.style.color = '#333';
+                    }
+                } else {
+                    // 如果是旧版参数格式
+                    toastTitle.textContent = arguments[0] || '通知';
+                    toastMessage.textContent = arguments[1] || '';
+                    toastTitle.style.color = '#333';
+                }
+                
+                // 显示通知
+                toast.style.display = 'block';
+                
+                // 3秒后自动关闭
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            }
+        };
+        
+        // 确保撤销按钮状态在页面加载时正确初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 确保操作历史记录在全局可用
+            if (!window.operationHistory) {
+                window.operationHistory = [];
+            }
+            
+            // 确保记录操作的函数在全局可用
+            if (!window.recordOperation) {
+                window.recordOperation = function(operation) {
+                    // 限制历史记录大小
+                    const MAX_HISTORY = 50;
+                    if (window.operationHistory.length >= MAX_HISTORY) {
+                        window.operationHistory.shift(); // 移除最旧的记录
+                    }
+                    
+                    // 添加时间戳
+                    operation.timestamp = new Date().getTime();
+                    
+                    // 添加到历史记录
+                    window.operationHistory.push(operation);
+                    
+                    // 更新撤销按钮状态
+                    window.updateUndoButtonState();
+                };
+            }
+            
+            // 确保撤销函数在全局可用
+            if (!window.undoLastOperation || window.undoLastOperation === 'function' && !window.undoLastOperation.toString().includes('operationHistory')) {
+                window.undoLastOperation = function() {
+                    if (!window.operationHistory || window.operationHistory.length === 0) {
+                        alert('没有可撤销的操作');
+                        return;
+                    }
+                    
+                    const lastOperation = window.operationHistory.pop();
+                    
+                    // 根据操作类型执行相应的撤销
+                    if (lastOperation.type === 'addSubRow') {
+                        // 找到添加的行
+                        const addedRow = document.getElementById(lastOperation.newRowId);
+                        if (addedRow) {
+                            // 找到类别行
+                            const categoryRow = document.getElementById(lastOperation.categoryRowId);
+                            if (categoryRow) {
+                                // 找到类别单元格
+                                const categoryCell = categoryRow.querySelector('.category');
+                                if (categoryCell) {
+                                    // 恢复原来的rowspan值
+                                    categoryCell.setAttribute('rowspan', lastOperation.rowspan - 1);
+                                }
+                            }
+                            // 移除添加的行
+                            if (addedRow.parentNode) {
+                                addedRow.parentNode.removeChild(addedRow);
+                            }
+                        }
+                    } else if (lastOperation.type === 'removeSubRow') {
+                        console.log('暂不支持撤销删除行操作');
+                    } else {
+                        console.log('未知的操作类型:', lastOperation.type);
+                    }
+                    
+                    // 更新撤销按钮状态
+                    window.updateUndoButtonState();
+                    
+                    // 显示通知
+                    if (window.showNotification) {
+                        window.showNotification({
+                            title: '撤销成功',
+                            message: '已撤销上一步操作',
+                            type: 'info'
+                        });
+                    }
+                };
+            }
+            
+            // 确保更新撤销按钮状态的函数在全局可用
+            if (!window.updateUndoButtonState) {
+                window.updateUndoButtonState = function() {
+                    const undoButton = document.getElementById('undo-button');
+                    if (undoButton) {
+                        undoButton.disabled = !window.operationHistory || window.operationHistory.length === 0;
+                    }
+                };
+            }
+            
+            setTimeout(function() {
+                window.updateUndoButtonState();
+                console.log('撤销按钮状态已初始化');
+            }, 500);
         });
     </script>
 </body>
