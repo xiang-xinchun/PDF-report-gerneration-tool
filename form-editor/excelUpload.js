@@ -60,7 +60,7 @@ function showExcelExampleModal() {
     cancelBtn.textContent = '取消';
     cancelBtn.style.cssText = `
         padding: 8px 16px; border: none; border-radius: 4px;
-        background: #eee; color: #333; cursor: pointer;
+        background: #ddd; color: #fff; cursor: pointer;
     `;
     cancelBtn.addEventListener('click', () => modal.remove());
 
@@ -69,7 +69,7 @@ function showExcelExampleModal() {
     confirmBtn.textContent = '上传';
     confirmBtn.style.cssText = `
         padding: 8px 16px; border: none; border-radius: 4px;
-        background: #f5e96b; color: #333; cursor: pointer;
+        background: #2196f3; color: #fff; cursor: pointer;
     `;
     confirmBtn.addEventListener('click', () => {
         modal.remove();
