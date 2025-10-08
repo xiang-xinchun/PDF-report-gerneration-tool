@@ -24,6 +24,8 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 900,
+        autoHideMenuBar: true, // 自动隐藏菜单栏
+        menuBarVisible: false, // 默认隐藏菜单栏
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -143,6 +145,10 @@ function createWindow() {
 
 // 当Electron完成初始化并准备好创建浏览器窗口时调用此方法
 app.whenReady().then(() => {
+    // 设置空菜单以彻底移除菜单栏
+    const { Menu } = require('electron');
+    Menu.setApplicationMenu(null);
+    
     createWindow();
 
     app.on('activate', function () {

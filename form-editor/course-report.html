@@ -34,18 +34,7 @@
 <body>
     <div id="debug-info" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; font-size: 12px; z-index: 9999; max-width: 400px; display: none;"></div>
     
-    <!-- Toast通知容器 -->
-    <div class="toast-container" style="position: fixed; top: 60px; right: 10px; z-index: 9999;">
-      <div id="notification-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: white; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-        <div class="toast-header" style="padding: 8px 12px; border-bottom: 1px solid #eee;">
-          <strong id="toast-title" style="margin-right: auto;">通知</strong>
-          <button type="button" class="btn-close" style="background: none; border: none; font-size: 16px; cursor: pointer;" onclick="this.closest('.toast').style.display='none';">&times;</button>
-        </div>
-        <div id="toast-message" class="toast-body" style="padding: 10px 12px;">
-          消息内容
-        </div>
-      </div>
-    </div>
+    <!-- 删除了通知容器 -->
     
     <!-- 操作按钮 -->
     <div class="edit-controls" style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
@@ -59,6 +48,8 @@
             <i class="bi bi-calculator"></i> 刷新计算
         </button>
     </div>
+    <!-- 添加导航样式 -->
+    <link rel="stylesheet" href="navigation-styles.css">
     <div class="report-container" id="reportContent">
         <div class="step active" id="step1">
             <header>
@@ -213,7 +204,7 @@
                     </thead>
                     <tbody>
                         <tr id="exam-row-1">
-                            <td>课堂表现</td>
+                            <td><div contenteditable="true" class="input-box" id="examType1">课堂表现</div></td>
                             <td><div contenteditable="true" class="input-box" id="score1"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight1-1"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight1-2"></div></td>
@@ -222,7 +213,7 @@
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('exam-row-1')">×</button></td>
                         </tr>
                         <tr id="exam-row-2">
-                            <td>课后作业</td>
+                            <td><div contenteditable="true" class="input-box" id="examType2">课后作业</div></td>
                             <td><div contenteditable="true" class="input-box" id="score2"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight2-1"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight2-2"></div></td>
@@ -231,7 +222,7 @@
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('exam-row-2')">×</button></td>
                         </tr>
                         <tr id="exam-row-3">
-                            <td>线上作业</td>
+                            <td><div contenteditable="true" class="input-box" id="examType3">线上作业</div></td>
                             <td><div contenteditable="true" class="input-box" id="score3"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight3-1"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight3-2"></div></td>
@@ -240,7 +231,7 @@
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('exam-row-3')">×</button></td>
                         </tr>
                         <tr id="exam-row-4">
-                            <td>期末考试</td>
+                            <td><div contenteditable="true" class="input-box" id="examType4">期末考试</div></td>
                             <td><div contenteditable="true" class="input-box" id="score4"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight4-1"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight4-2"></div></td>
@@ -313,10 +304,10 @@
                     <thead class="table-header">
                         <tr>
                             <th></th>
-                            <th>课堂表现</th>
-                            <th>课后作业</th>
-                            <th>线上作业</th>
-                            <th>期末考试</th>
+                            <th><div contenteditable="true" class="input-box" id="examTypeHeader1">课堂表现</div></th>
+                            <th><div contenteditable="true" class="input-box" id="examTypeHeader2">课后作业</div></th>
+                            <th><div contenteditable="true" class="input-box" id="examTypeHeader3">线上作业</div></th>
+                            <th><div contenteditable="true" class="input-box" id="examTypeHeader4">期末考试</div></th>
                             <th class="delete-cell">操作</th>
                         </tr>
                     </thead>
@@ -532,16 +523,13 @@
             
         </div>
         </div>
-        <!-- 步骤导航 - 只在编辑时可见 -->
-        <div class="step-nav no-print">
+        
+        <!-- 步骤导航和导出按钮 - 集中放置 -->
+        <div class="navigation-bar no-print">
             <button id="prevBtn" disabled>上一步</button>
+            <button id="exportBtn">导出PDF报告</button>
             <button id="nextBtn">下一步</button>
         </div>
-    </div>
-
-    <!-- 操作按钮 - 只在编辑时可见 -->
-    <div class="action-buttons no-print">
-        <button id="exportBtn" class="action-button">导出PDF报告</button>
     </div>
 
     <!-- 调试信息区域 -->
@@ -562,56 +550,19 @@
             console.log('[DEBUG]', msg);
         };
         
-        // 全局通知函数
+        // 全局通知函数 - 只使用控制台输出，不显示UI通知
         window.showNotification = function(options) {
             const title = options.title || '通知';
             const message = options.message || '';
             const type = options.type || 'info';
             
-            // 创建通知元素
-            let notification = document.getElementById('notification-toast');
-            if (!notification) {
-                // 创建新的通知元素
-                notification = document.createElement('div');
-                notification.id = 'notification-toast';
-                notification.style.position = 'fixed';
-                notification.style.top = '20px';
-                notification.style.right = '20px';
-                notification.style.padding = '10px 20px';
-                notification.style.borderRadius = '4px';
-                notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-                notification.style.zIndex = '9999';
-                notification.style.transition = 'all 0.3s ease';
-                notification.style.opacity = '0';
-                
-                document.body.appendChild(notification);
-            }
+            // 只在控制台输出消息
+            console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
             
-            // 设置通知类型样式
+            // 如果是错误，显示在调试区域
             if (type === 'error') {
-                notification.style.backgroundColor = '#f44336';
-                notification.style.color = 'white';
-            } else if (type === 'success') {
-                notification.style.backgroundColor = '#4caf50';
-                notification.style.color = 'white';
-            } else {
-                notification.style.backgroundColor = '#2196f3';
-                notification.style.color = 'white';
+                window.showDebug(`${title}: ${message}`);
             }
-            
-            // 设置通知内容
-            notification.innerHTML = `<strong>${title}</strong><br>${message}`;
-            
-            // 显示通知
-            notification.style.opacity = '1';
-            
-            // 3秒后自动隐藏
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
-            }, 3000);
         };
     </script>
 
@@ -650,11 +601,35 @@
             }
         }
         
+        // 同步两个表格的考核方式名称
+        function setupExamTypeSync() {
+            // 设置考核方式名称同步
+            for (let i = 1; i <= 4; i++) {
+                const examTypeElement = document.getElementById(`examType${i}`);
+                const examTypeHeaderElement = document.getElementById(`examTypeHeader${i}`);
+                
+                if (examTypeElement && examTypeHeaderElement) {
+                    // 从表2同步到表4
+                    examTypeElement.addEventListener('input', function() {
+                        examTypeHeaderElement.textContent = this.textContent;
+                    });
+                    
+                    // 从表4同步到表2
+                    examTypeHeaderElement.addEventListener('input', function() {
+                        examTypeElement.textContent = this.textContent;
+                    });
+                }
+            }
+        }
+        
         // 页面加载完成后初始化计算模块
         document.addEventListener('DOMContentLoaded', function() {
             if (window.calculationModule && typeof window.calculationModule.init === 'function') {
                 window.calculationModule.init();
                 console.log('计算模块已加载');
+                
+                // 设置考核方式名称同步
+                setupExamTypeSync();
                 
                 // 页面加载完成后延迟执行扫描和计算
                 setTimeout(function() {
