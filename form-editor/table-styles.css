@@ -2,12 +2,23 @@
 .delete-cell {
     width: 60px;
     text-align: center;
-    /* 删除了display: none，使删除列可见 */
+    /* 默认隐藏删除列 */
+    display: none !important;
+}
+
+/* 只在表1中显示操作列 */
+#table1-container .delete-cell {
+    display: table-cell !important;
+}
+
+/* 对于其他表格，强制隐藏操作列 */
+.table-container:not(#table1-container) .delete-cell {
+    display: none !important;
 }
 
 /* 表格行删除按钮样式 */
 .row-delete-button {
-    display: inline-block; /* 修改为inline-block，使按钮可见 */
+    display: none; /* 默认隐藏所有删除按钮 */
     align-items: center;
     justify-content: center;
     width: 22px;
@@ -26,6 +37,16 @@
     margin: 0 auto;
 }
 
+/* 只在表1中显示删除按钮 */
+#table1-container .row-delete-button {
+    display: inline-block !important;
+}
+
+/* 其他表格隐藏删除按钮 */
+.table-container:not(#table1-container) .row-delete-button {
+    display: none !important;
+}
+
 .row-delete-button:hover {
     background-color: #d32f2f;
 }
@@ -42,5 +63,19 @@ body.is-exporting-pdf .delete-cell,
 body.is-exporting-pdf .row-delete-button,
 body.is-exporting .delete-cell,
 body.is-exporting .row-delete-button {
+    display: none !important;
+}
+
+/* 全局隐藏所有除表1外的表格操作列 */
+#table2-container .delete-cell,
+#table3-container .delete-cell,
+#table4-container .delete-cell,
+#table5-container .delete-cell,
+#table6-container .delete-cell,
+#table2-container .row-delete-button,
+#table3-container .row-delete-button,
+#table4-container .row-delete-button,
+#table5-container .row-delete-button,
+#table6-container .row-delete-button {
     display: none !important;
 }
