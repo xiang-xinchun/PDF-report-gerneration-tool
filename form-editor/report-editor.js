@@ -234,6 +234,11 @@ function undoLastOperation() {
         return;
     }
     
+    // 添加确认对话框
+    if (!confirm("确认撤销吗？")) {
+        return; // 用户取消了撤销操作
+    }
+    
     const lastOperation = operationHistory.pop();
     
     // 根据操作类型执行相应的撤销
@@ -268,8 +273,7 @@ function undoLastOperation() {
     // 更新撤销按钮状态
     updateUndoButtonState();
     
-    // 显示撤销成功通知
-    showNotification('成功', '已撤销上一次操作');
+    // 不再显示额外的成功通知，因为已经有了确认对话框
 }
 
 // 更新撤销按钮状态
@@ -336,6 +340,11 @@ function restoreHiddenItems() {
 
 // 重置所有内容到最初状态（恢复所有隐藏的项目）
 function resetAllContent() {
+    // 添加确认对话框
+    if (!confirm("确认恢复全部内容吗？")) {
+        return; // 用户取消了恢复操作
+    }
+    
     // 清除所有隐藏状态
     const keys = [];
     
@@ -375,8 +384,7 @@ function resetAllContent() {
     // 更新撤销按钮状态
     updateUndoButtonState();
     
-    // 显示通知
-    showNotification('成功', '已恢复所有内容到初始状态');
+    // 不再显示额外的成功通知，因为已经有了确认对话框
 }
 
 // 表格行删除功能
