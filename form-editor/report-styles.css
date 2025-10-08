@@ -169,6 +169,7 @@ table {
     pointer-events: auto;
     text-align: justify;
     overflow: hidden;
+    margin: 0;
 }
 
 .input-def {
@@ -309,23 +310,23 @@ td.data-source [contenteditable="true"]:focus {
 
 /* 签名区域样式 */
 .signature-cell {
-    height: 80px;
+    height: 150px;
     position: relative;
 }
 
 .signature-group {
     position: absolute;
-    bottom: 10px;
+    bottom: 2px;
     right: 10px;
     text-align: right;
 }
 
 .signature-item {
-    margin: 5px 0;
+    margin: 2px 0;
 }
 
 .signature-label {
-    margin-right: 80px;
+    margin-right: 100px;
 }
 
 /* 打印样式优化 */

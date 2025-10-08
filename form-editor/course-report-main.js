@@ -79,24 +79,40 @@ function createWindow() {
             return { success: false, message: 'Excel文件中没有数据' };
         }
 
-        console.log('Excel数据总行数:', excelData.length);
-        console.log('前几行数据:', excelData.slice(0, 6));
-
-        // 计算成绩统计数据
+        // 获取考核方式
+        const assessmentTitles = [4, 5, 6, 7];
+        const assessmentScores = assessmentTitles.map(() => []);
         const scores = []
-        for (let i = 3; i <= 40; i++) {
+        for (let i = 4; i < excelData.length; i++) {
             if (excelData[i] && excelData[i].length > 8) {
+                // 收集各个考核方式的成绩
+                assessmentTitles.forEach((colIndex, idx) => {
+                    const scoreValue = excelData[i][colIndex];
+                    const scoreNum = Number(scoreValue);
+                    if (!isNaN(scoreNum) && scoreNum >= 0) {
+                        assessmentScores[idx].push(scoreNum);
+                    }
+                });
+
                 const scoreValue = excelData[i][8]; // 总成绩在第9列（索引8）
                 const scoreNum = Number(scoreValue);
-                console.log(`第${i+1}行成绩:`, scoreValue, '=>', scoreNum);
-                
                 if (!isNaN(scoreNum) && scoreNum >= 0) {
                     scores.push(scoreNum);
                 }
             }
         }
-        console.log('解析到的有效成绩:', scores);
-        console.log('实际人数:', scores.length);
+
+        // 计算各考核方式的平均分
+        const assessmentAverages = assessmentTitles.map((colIndex, idx) => {
+            const scores = assessmentScores[idx];
+            let average = 0;
+            if (scores.length > 0) {
+                const sum = scores.reduce((acc, score) => acc + score, 0);
+                average = sum / scores.length;
+            }
+            return { average: average }; 
+        });
+
         if (scores.length === 0) {
             return { success: false, message: '未找到有效的成绩数据' };
         }
@@ -121,6 +137,7 @@ function createWindow() {
             success: true,
             data: {
                 studentCount: total,
+                assessmentAverages: assessmentAverages,
                 maxScore,
                 minScore,
                 avgTotalScore: avgScore,
