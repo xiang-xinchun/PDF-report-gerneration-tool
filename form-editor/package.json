@@ -7,17 +7,25 @@
     "start": "electron .",
     "dev": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf dist",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "dist:win": "npm run clean && electron-builder --win --x64",
+    "dist:win32": "npm run clean && electron-builder --win --ia32",
+    "build:win": "npm run clean && npm run dist:win",
+    "build:win32": "npm run clean && npm run dist:win32",
+    "build:all": "npm run clean && electron-builder --win --x64 --ia32"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "electron": "^38.1.2",
-    "electron-builder": "^24.6.4"
+    "electron-builder": "^24.6.4",
+    "rimraf": "^6.0.1"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
+    "electron-log": "^4.4.8",
     "electron-pdf": "^25.0.0",
     "xlsx": "^0.18.5"
   },
@@ -27,8 +35,33 @@
     "directories": {
       "output": "dist"
     },
+    "files": [
+      "**/*",
+      "node_modules/",
+      "package.json",
+      "icudtl.dat"
+    ],
+    "extraResources": [
+      "node_modules/xlsx/**/*",
+      "icudtl.dat"
+    ],
+    "asar": {
+      "smartUnpack": true
+    },
     "win": {
-      "target": "nsis"
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "${productName}-${version}-Setup.${ext}",
+      "publisherName": "课程目标达成情况评价报告生成工具"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "课程目标达成情况评价报告生成工具"
     }
   }
 }

@@ -1,0 +1,35 @@
+{
+  "appId": "com.electron.course-report-generator",
+  "productName": "课程目标达成情况评价报告生成工具",
+  "directories": {
+    "output": "dist"
+  },
+  "files": [
+    "**/*",
+    "node_modules/",
+    "package.json",
+    "icudtl.dat"
+  ],
+  "extraResources": [
+    "node_modules/xlsx/**/*",
+    "icudtl.dat"
+  ],
+  "asar": {
+    "smartUnpack": true
+  },
+  "win": {
+    "target": [
+      "nsis"
+    ],
+    "artifactName": "${productName}-${version}-Setup.${ext}",
+    "publisherName": "课程目标达成情况评价报告生成工具"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "perMachine": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "课程目标达成情况评价报告生成工具"
+  }
+}

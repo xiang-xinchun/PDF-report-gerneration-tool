@@ -3,6 +3,15 @@ const path = require('path');
 const fs = require('fs');
 const XLSX = require('xlsx');
 
+// 导入版本信息模块
+let versionInfo;
+try {
+    versionInfo = require('./version-info');
+    versionInfo.logVersionInfo();
+} catch (error) {
+    console.error('加载版本信息失败:', error);
+}
+
 // 禁用GPU加速以避免某些图形渲染问题
 app.disableHardwareAcceleration();
 
