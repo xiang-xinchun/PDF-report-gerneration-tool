@@ -17,6 +17,7 @@
     <!-- 非关键CSS延迟加载 -->
     <link rel="stylesheet" href="export-hide.css" media="print"><!-- 添加导出隐藏样式 -->
     <link rel="stylesheet" href="add-row-styles.css"><!-- 添加行按钮样式 -->
+    <link rel="stylesheet" href="formula-styles.css"><!-- 添加公式样式 -->
     
     <!-- 资源加载优化脚本 -->
     <script>
@@ -343,9 +344,16 @@
             <h2>五、课程目标达成度评价</h2>
             <h3>（一）课程分目标的权重值</h3>
             <p class="paragraph">《<span id="courseNameShow2"></span>》课程中有4个课程目标，设本课程有n个课程分目标，第i个课程分目标对应8个毕业要求分解指标点的支撑强度值为Vi（第i个课程分目标对8个毕业要求分解指标点的支撑强度分别有x个H、y个M、z个L，按照赋值H=3、M=2、L=1计算，则第i个课程分目标的支撑强度值Vi=3x+2y+1z），则第i个课程目标的权重值(wi)计算公式为：</p>
-            <div class="formula">
-                <p class="formula-content">wi = vi∑i=Onvi, (i=1,2,3,...n)</p>
-                <p class="formula-name">公式（1）</p>
+            <!-- 使用图片显示公式1 -->
+            <div class="formula-container">
+                <div class="formula-wrapper">
+                    <div class="formula-content-container">
+                        <div class="formula-img-container">
+                            <img src="./images/公式1.jpg" alt="课程目标权重值计算公式" class="formula-img" />
+                        </div>
+                    </div>
+                    <div class="formula-number">公式（1）</div>
+                </div>
             </div>
             <div class="paragraph">通过累加可以计算出单个课程目标对应的权值，以及总权值为<div contenteditable="true" class="editable-text" id="totalWeight" data-placeholder="此处生成总权值"></div>。《<span id="courseNameShow3"></span>》课程4个分目标对应的权重值计算如下：</div>
             <p class="table-name">表3.课程目标的权重值</p>

@@ -228,6 +228,25 @@ table {
     padding-right: 10px;
 }
 
+/* 公式图片样式 */
+.formula-img {
+    display: block;
+    margin: 10px auto;
+    max-width: 50%;  /* 从80%减小到50% */
+    width: 300px;    /* 固定宽度为300px */
+    height: auto;
+}
+
+.formula-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 15px 0;  /* 减小上下边距 */
+    width: 100%;
+    text-indent: 0;
+}
+
 td.data-source {
     text-align: left;
     padding: 15px 12px;

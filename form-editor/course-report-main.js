@@ -6,6 +6,15 @@ const fs = require('fs');
 const appStartTime = Date.now();
 console.log('应用启动时间:', new Date().toISOString());
 
+// 导入图片检查模块
+let checkFormulaImage;
+try {
+    const imageChecker = require('./check-formula-image');
+    checkFormulaImage = imageChecker.checkFormulaImage;
+} catch (error) {
+    console.error('加载公式图片检查模块失败:', error);
+}
+
 // 使用 require 动态加载重量级模块，避免启动时的阻塞
 let XLSX;
 setTimeout(() => {
@@ -103,6 +112,13 @@ function createWindow() {
     // 记录主窗口创建时间
     const mainWindowStartTime = Date.now();
     
+    // 检查公式图片是否存在
+    if (typeof checkFormulaImage === 'function') {
+        setTimeout(() => {
+            checkFormulaImage();
+        }, 3000); // 延迟3秒检查，确保不影响启动速度
+    }
+    
     // 创建浏览器窗口。
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -132,6 +148,34 @@ function createWindow() {
         
         // 显示主窗口
         mainWindow.show();
+        
+        // 检查images目录是否存在，如果不存在则创建
+        const imagesDir = path.join(__dirname, 'images');
+        if (!fs.existsSync(imagesDir)) {
+            try {
+                fs.mkdirSync(imagesDir);
+                console.log('创建images目录成功');
+            } catch (err) {
+                console.error('创建images目录失败:', err);
+            }
+        }
+        
+        // 检查公式图片是否存在
+        const formulaImagePath = path.join(imagesDir, '公式1.jpg');
+        if (!fs.existsSync(formulaImagePath)) {
+            // 延迟2秒显示提示，确保窗口完全加载
+            setTimeout(() => {
+                dialog.showMessageBox(mainWindow, {
+                    type: 'info',
+                    title: '提示',
+                    message: '需要添加公式图片',
+                    detail: '为了正确显示公式，请将名为"公式1.jpg"的公式图片放置在以下位置：\n\n' + 
+                            formulaImagePath + '\n\n' +
+                            '详情请查看 images 文件夹中的说明文件。',
+                    buttons: ['确定']
+                });
+            }, 2000);
+        }
     });
     
     // 生产环境不打开开发者工具
