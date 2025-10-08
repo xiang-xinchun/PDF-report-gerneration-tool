@@ -562,55 +562,81 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
         }
+        // 获取表2中的数据到表4
+        const evaluations = ['evaluation1','evaluation2','evaluation3','evaluation4'];
+        const evaluationShows = ['evaluationShow1', 'evaluationShow2', 'evaluationShow3', 'evaluationShow4'];
+        evaluations.forEach((id, index) => { 
+            const evaluationName = document.getElementById(id);
+            const evaluationNameShow = document.getElementById(evaluationShows[index]);
+            if (evaluationName && evaluationNameShow) {
+                evaluationName.addEventListener('input', function() {
+                    evaluationNameShow.textContent = this.textContent;
+                });
+                evaluationNameShow.textContent = evaluationName.textContent;
+            }
+        });
 
-        const maxScore = document.getElementById('maxScore');
-        const maxScoreShow = document.getElementById('maxScoreShow');
-        if(maxScore){
-            maxScore.addEventListener('input', function() {
-                const value = this.textContent;
-                maxScoreShow.textContent = value;
-            });
-        }
-        const minScore = document.getElementById('minScore');
-        const minScoreShow = document.getElementById('minScoreShow');
-        if(minScore){
-            minScore.addEventListener('input', function() {
-                const value = this.textContent;
-                minScoreShow.textContent = value;
-            });
-        }
-        const avgTotalScore = document.getElementById('avgTotalScore');
-        const avgTotalScoreShow = document.getElementById('avgTotalScoreShow');
-        if(avgTotalScore){
-            avgTotalScore.addEventListener('input', function() {
-                const value = this.textContent;
-                avgTotalScoreShow.textContent = value;
-            });
-        }
-        const countIds = ['count1', 'count2', 'count3', 'count4', 'count5'];
-        const rateIds = ['rate1', 'rate2', 'rate3', 'rate4', 'rate5'];
-        const countShowIds = ['count1Show', 'count2Show', 'count3Show', 'count4Show', 'count5Show'];
-        const rateShowIds = ['rate1Show', 'rate2Show', 'rate3Show', 'rate4Show', 'rate5Show'];
-        countIds.forEach((id, index) => {
-            const countElement = document.getElementById(id);
-            const countShowElement = document.getElementById(countShowIds[index]);
-            if (countElement && countShowElement) {
-                countElement.addEventListener('input', function() {
-                    countShowElement.textContent = this.textContent;
+        const scores=['score1','score2','score3','score4'];
+        const scoreShows = ['totalScore1', 'totalScore2', 'totalScore3', 'totalScore4'];
+        scores.forEach((id, index) => { 
+            const score = document.getElementById(id);
+            const scoreShow = document.getElementById(scoreShows[index]);
+            if (score && scoreShow) {
+                score.addEventListener('input', function() {
+                    scoreShow.textContent = this.textContent;
                 });
-                countShowElement.textContent = countElement.textContent;
+                scoreShow.textContent = score.textContent;
             }
         });
-        rateIds.forEach((id, index) => { 
-            const rateElement = document.getElementById(id);
-            const rateShowElement = document.getElementById(rateShowIds[index]);
-            if (rateElement && rateShowElement) {
-                rateElement.addEventListener('input', function() {
-                    rateShowElement.textContent = this.textContent;
-                });
-                rateShowElement.textContent = rateElement.textContent;
-            }
-        });
+
+        // const maxScore = document.getElementById('maxScore');
+        // const maxScoreShow = document.getElementById('maxScoreShow');
+        // if(maxScore){
+        //     maxScore.addEventListener('input', function() {
+        //         const value = this.textContent;
+        //         maxScoreShow.textContent = value;
+        //     });
+        // }
+        // const minScore = document.getElementById('minScore');
+        // const minScoreShow = document.getElementById('minScoreShow');
+        // if(minScore){
+        //     minScore.addEventListener('input', function() {
+        //         const value = this.textContent;
+        //         minScoreShow.textContent = value;
+        //     });
+        // }
+        // const avgTotalScore = document.getElementById('avgTotalScore');
+        // const avgTotalScoreShow = document.getElementById('avgTotalScoreShow');
+        // if(avgTotalScore){
+        //     avgTotalScore.addEventListener('input', function() {
+        //         const value = this.textContent;
+        //         avgTotalScoreShow.textContent = value;
+        //     });
+        // }
+        // const countIds = ['count1', 'count2', 'count3', 'count4', 'count5'];
+        // const rateIds = ['rate1', 'rate2', 'rate3', 'rate4', 'rate5'];
+        // const countShowIds = ['count1Show', 'count2Show', 'count3Show', 'count4Show', 'count5Show'];
+        // const rateShowIds = ['rate1Show', 'rate2Show', 'rate3Show', 'rate4Show', 'rate5Show'];
+        // countIds.forEach((id, index) => {
+        //     const countElement = document.getElementById(id);
+        //     const countShowElement = document.getElementById(countShowIds[index]);
+        //     if (countElement && countShowElement) {
+        //         countElement.addEventListener('input', function() {
+        //             countShowElement.textContent = this.textContent;
+        //         });
+        //         countShowElement.textContent = countElement.textContent;
+        //     }
+        // });
+        // rateIds.forEach((id, index) => { 
+        //     const rateElement = document.getElementById(id);
+        //     const rateShowElement = document.getElementById(rateShowIds[index]);
+        //     if (rateElement && rateShowElement) {
+        //         rateElement.addEventListener('input', function() {
+        //             rateShowElement.textContent = this.textContent;
+        //         });
+        //         rateShowElement.textContent = rateElement.textContent;
+        //     }
+        // });
         
         // 确保所有可编辑元素都可以进行编辑
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {
