@@ -1,12 +1,13 @@
-/* 表格行删除按钮和操作列样式 */
+/* 表格行删除按钮和操作列样式 - 已隐藏 */
 .delete-cell {
     width: 60px;
     text-align: center;
+    display: none; /* 始终隐藏删除列 */
 }
 
-/* 表格行删除按钮样式 */
+/* 表格行删除按钮样式 - 已隐藏 */
 .row-delete-button {
-    display: inline-flex;
+    display: none; /* 始终隐藏删除按钮 */
     align-items: center;
     justify-content: center;
     width: 20px;

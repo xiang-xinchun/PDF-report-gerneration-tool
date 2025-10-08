@@ -64,9 +64,9 @@ body.is-exporting-pdf select.input-field {
     margin-right: 5px;
 }
 
-/* 删除按钮样式 */
+/* 删除按钮样式 - 已隐藏 */
 .delete-button, .row-delete-button {
-    display: inline-flex;
+    display: none; /* 始终隐藏所有删除按钮 */
     align-items: center;
     justify-content: center;
     width: 20px;

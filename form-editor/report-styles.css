@@ -475,7 +475,7 @@ td.data-source [contenteditable="true"]:focus {
     }
 }
 
-/* 删除按钮样式 */
+/* 删除按钮样式 - 已隐藏 */
 .row-delete-button {
     background-color: #ff4d4d;
     color: white;
@@ -486,7 +486,7 @@ td.data-source [contenteditable="true"]:focus {
     line-height: 20px;
     font-size: 16px;
     cursor: pointer;
-    display: inline-block;
+    display: none; /* 始终隐藏所有删除按钮 */
     text-align: center;
     vertical-align: middle;
     transition: background-color 0.2s;
