@@ -1,16 +1,32 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const XLSX = require('xlsx');
 
-// 导入版本信息模块
+// 记录应用启动时间
+const appStartTime = Date.now();
+console.log('应用启动时间:', new Date().toISOString());
+
+// 使用 require 动态加载重量级模块，避免启动时的阻塞
+let XLSX;
+setTimeout(() => {
+    try {
+        XLSX = require('xlsx');
+        console.log('XLSX 模块加载完成, 用时:', Date.now() - appStartTime, 'ms');
+    } catch (error) {
+        console.error('加载 XLSX 模块失败:', error);
+    }
+}, 1000);
+
+// 导入版本信息模块 - 延迟加载非关键模块
 let versionInfo;
-try {
-    versionInfo = require('./version-info');
-    versionInfo.logVersionInfo();
-} catch (error) {
-    console.error('加载版本信息失败:', error);
-}
+setTimeout(() => {
+    try {
+        versionInfo = require('./version-info');
+        versionInfo.logVersionInfo();
+    } catch (error) {
+        console.error('加载版本信息失败:', error);
+    }
+}, 2000);
 
 // 禁用GPU加速以避免某些图形渲染问题
 app.disableHardwareAcceleration();
@@ -18,12 +34,80 @@ app.disableHardwareAcceleration();
 // 保持对window对象的全局引用，如果不这样做的话，当JavaScript对象被
 // 垃圾回收的时候，window对象将会自动的关闭
 let mainWindow;
+let splashWindow;
+
+// 创建加载窗口
+function createSplashWindow() {
+    splashWindow = new BrowserWindow({
+        width: 400,
+        height: 300,
+        transparent: true,
+        frame: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        }
+    });
+    
+    // 创建简单的启动屏幕HTML内容
+    const splashHtml = `
+    <html>
+    <head>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                background-color: rgba(255, 255, 255, 0.8);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                color: #333;
+                overflow: hidden;
+                border-radius: 10px;
+            }
+            .loader {
+                width: 60px;
+                height: 60px;
+                border: 8px solid #f3f3f3;
+                border-top: 8px solid #3498db;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            .title {
+                margin-top: 20px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="loader"></div>
+        <div class="title">课程目标达成情况评价报告生成工具</div>
+        <div style="margin-top: 10px;">正在启动，请稍候...</div>
+    </body>
+    </html>`;
+    
+    // 使用数据URL加载HTML内容
+    splashWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(splashHtml)}`);
+}
 
 function createWindow() {
+    // 记录主窗口创建时间
+    const mainWindowStartTime = Date.now();
+    
     // 创建浏览器窗口。
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 900,
+        show: false, // 先不显示主窗口
         autoHideMenuBar: true, // 自动隐藏菜单栏
         menuBarVisible: false, // 默认隐藏菜单栏
         webPreferences: {
@@ -33,11 +117,27 @@ function createWindow() {
         }
     });
 
-    // 加载index.html
+    // 加载HTML文件
     mainWindow.loadFile(path.join(__dirname, 'course-report.html'));
-
-    // 打开开发者工具
-    mainWindow.webContents.openDevTools();
+    
+    // 在主窗口准备好后显示
+    mainWindow.once('ready-to-show', () => {
+        console.log('主窗口准备显示, 耗时:', Date.now() - mainWindowStartTime, 'ms');
+        
+        // 关闭启动窗口
+        if (splashWindow && !splashWindow.isDestroyed()) {
+            splashWindow.close();
+            splashWindow = null;
+        }
+        
+        // 显示主窗口
+        mainWindow.show();
+    });
+    
+    // 生产环境不打开开发者工具
+    if (process.env.NODE_ENV === 'development') {
+        mainWindow.webContents.openDevTools();
+    }
 
     // 当window被关闭时，触发以下事件
     mainWindow.on('closed', function () {
@@ -145,11 +245,20 @@ function createWindow() {
 
 // 当Electron完成初始化并准备好创建浏览器窗口时调用此方法
 app.whenReady().then(() => {
+    // 记录就绪时间
+    console.log('Electron应用就绪, 用时:', Date.now() - appStartTime, 'ms');
+    
     // 设置空菜单以彻底移除菜单栏
     const { Menu } = require('electron');
     Menu.setApplicationMenu(null);
     
-    createWindow();
+    // 首先创建启动窗口
+    createSplashWindow();
+    
+    // 延迟创建主窗口，让启动窗口有时间显示
+    setTimeout(() => {
+        createWindow();
+    }, 800);
 
     app.on('activate', function () {
         // 在macOS上，当点击dock图标并且没有其他窗口打开时，

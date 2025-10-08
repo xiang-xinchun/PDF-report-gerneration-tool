@@ -411,12 +411,36 @@ const addRowFeature = {
     }
 };
 
-// 在文档加载完成后初始化
+// 在文档加载完成后延迟初始化，避免阻塞UI渲染
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('文档加载完成，初始化添加行功能模块...');
-    setTimeout(() => {
-        addRowFeature.init();
-    }, 500);
+    // 标记初始化开始
+    const initStart = performance.now();
+    console.log('文档加载完成，准备初始化添加行功能模块...');
+    
+    // 立即暴露核心功能，延迟初始化完整功能
+    window.addRowFeature = addRowFeature;
+    
+    // 使用requestIdleCallback在浏览器空闲时初始化（如果支持）
+    if (window.requestIdleCallback) {
+        requestIdleCallback(() => {
+            addRowFeature.init();
+            console.log('添加行功能模块初始化完成，用时:', (performance.now() - initStart).toFixed(2), 'ms');
+            // 更新加载进度（如果函数存在）
+            if (typeof updateLoadingProgress === 'function') {
+                updateLoadingProgress('表格功能初始化完成');
+            }
+        }, { timeout: 2000 }); // 最多等待2秒
+    } else {
+        // 降级方案：使用setTimeout
+        setTimeout(() => {
+            addRowFeature.init();
+            console.log('添加行功能模块初始化完成，用时:', (performance.now() - initStart).toFixed(2), 'ms');
+            // 更新加载进度（如果函数存在）
+            if (typeof updateLoadingProgress === 'function') {
+                updateLoadingProgress('表格功能初始化完成');
+            }
+        }, 800); // 延迟800毫秒，让UI先渲染
+    }
 });
 
 // 暴露给全局，以便内联onclick事件可以调用
