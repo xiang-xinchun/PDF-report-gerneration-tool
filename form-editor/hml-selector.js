@@ -7,7 +7,7 @@
 const hmlSelections = {};
 
 /**
- * 选择HML选项
+ * 选择HML选项（支持取消选择）
  * @param {HTMLElement} element - 被点击的选项元素
  * @param {string} value - 选项值 (H, M, 或 L)
  */
@@ -15,16 +15,25 @@ function selectHML(element, value) {
     const container = element.parentElement;
     const selectorId = container.id;
     
+    // 检查当前元素是否已被选中
+    const isCurrentlySelected = element.classList.contains('selected');
+    
     // 清除同一容器内所有选项的选中状态
     container.querySelectorAll('.hml-option').forEach(option => {
         option.classList.remove('selected');
     });
     
-    // 设置当前选项的选中状态
-    element.classList.add('selected');
-    
-    // 存储选择状态
-    hmlSelections[selectorId] = value;
+    // 如果当前元素未被选中，则选中它；如果已选中，则取消选择（不做任何操作）
+    if (!isCurrentlySelected) {
+        element.classList.add('selected');
+        // 存储选择状态
+        hmlSelections[selectorId] = value;
+        console.log(`已选择 ${value} (选择器ID: ${selectorId})`);
+    } else {
+        // 取消选择，从存储中删除
+        delete hmlSelections[selectorId];
+        console.log(`已取消选择 (选择器ID: ${selectorId})`);
+    }
     
     // 将选择保存到localStorage
     saveHMLSelectionsToStorage();
@@ -35,7 +44,13 @@ function selectHML(element, value) {
         updateExportDisplayMode();
     }
     
-    console.log(`已选择 ${value} (选择器ID: ${selectorId})`);
+    // 触发权重计算更新
+    if (typeof window.calculationModule !== 'undefined' && 
+        typeof window.calculationModule.calculateWeights === 'function') {
+        setTimeout(() => {
+            window.calculationModule.calculateWeights();
+        }, 50);
+    }
 }
 
 /**
