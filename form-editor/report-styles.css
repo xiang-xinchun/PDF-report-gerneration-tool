@@ -120,6 +120,7 @@ p {
 table {
     width: 100%;
     border-collapse: collapse;
+    border-spacing: 0;
     border: 1px solid var(--border-color);
 }
 
@@ -149,7 +150,7 @@ table {
 }
 
 .input-box {
-    border: 1px solid var(--border-color);
+    border: none; /* 避免与表格边框叠加导致粗细不一 */
     width: 100%;
     min-height: 24px;
     font-family: inherit;
@@ -356,6 +357,28 @@ td.data-source [contenteditable="true"]:focus {
 
 /* 打印样式优化 */
 @media print {
+    /* 防止边界“重叠/断裂”：统一采用右/下边框，去掉左/上边框 */
+    th, td {
+        border-left: none !important;
+        border-top: none !important;
+    }
+    /* 保证表格整体外框仍然画出来：第一列和第一行补边 */
+    tr > th:first-child, tr > td:first-child {
+        border-left: 2px solid #000 !important;
+    }
+    thead tr:first-child > th {
+        border-top: 2px solid #000 !important;
+    }
+    tbody tr:first-child > td { /* 若没有thead也能兜底 */
+        border-top: 2px solid #000 !important;
+    }
+    /* 最后一行与最后一列外框 */
+    tr:last-child > th, tr:last-child > td {
+        border-bottom: 2px solid #000 !important;
+    }
+    tr > th:last-child, tr > td:last-child {
+        border-right: 2px solid #000 !important;
+    }
     @page {
         size: A4;
         margin: 1.5cm;
@@ -419,6 +442,9 @@ td.data-source [contenteditable="true"]:focus {
         page-break-inside: auto;
         width: 100% !important;
         border-collapse: collapse !important;
+        border-spacing: 0 !important;
+        border: none !important; /* 由单元格提供外框，避免重叠加粗 */
+        table-layout: fixed !important; /* 固定列宽避免亚像素导致断裂 */
         display: table !important;
     }
     
@@ -436,10 +462,26 @@ td.data-source [contenteditable="true"]:focus {
         display: table-row !important;
     }
     
+    thead th {
+        border: 2px solid #000 !important;
+    }
+
     th, td {
         display: table-cell !important;
         color: black !important;
-        border: 1px solid #000 !important;
+        border: 2px solid #000 !important; /* 统一粗色内边框 */
+        box-sizing: border-box !important;
+    }
+
+    /* 强化表头与正文分隔线一致性 */
+    thead tr:last-child th {
+        border-bottom: 2px solid #000 !important;
+    }
+
+    /* 避免单元格内的输入框边框影响PDF中的线条一致性 */
+    .input-box {
+        border: none !important;
+        background: transparent !important;
     }
     
     /* 确保第一页不是空白页 */
@@ -721,4 +763,61 @@ body.is-exporting-pdf [data-placeholder]:empty:before {
     font-style: normal;
     visibility: visible !important;
     opacity: 1 !important;
+}
+
+/* 当以导出模式生成PDF时（非打印预览环境），同样统一粗线与颜色 */
+body.is-exporting table,
+body.is-exporting-pdf table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    border: none !important; /* 外框交由单元格边框承担 */
+    table-layout: fixed !important;
+}
+
+body.is-exporting th, body.is-exporting td,
+body.is-exporting-pdf th, body.is-exporting-pdf td {
+    border: 2px solid #000 !important;
+    color: #000 !important;
+}
+
+body.is-exporting thead th,
+body.is-exporting-pdf thead th {
+    border: 2px solid #000 !important;
+}
+
+body.is-exporting thead tr:last-child th,
+body.is-exporting-pdf thead tr:last-child th {
+    border-bottom: 2px solid #000 !important;
+}
+
+/* 防重叠策略在导出模式同样生效 */
+body.is-exporting th, body.is-exporting td,
+body.is-exporting-pdf th, body.is-exporting-pdf td {
+    border-left: none !important;
+    border-top: none !important;
+    box-sizing: border-box !important;
+}
+body.is-exporting tr > th:first-child, body.is-exporting tr > td:first-child,
+body.is-exporting-pdf tr > th:first-child, body.is-exporting-pdf tr > td:first-child {
+    border-left: 2px solid #000 !important;
+}
+body.is-exporting thead tr:first-child > th,
+body.is-exporting-pdf thead tr:first-child > th,
+body.is-exporting tbody tr:first-child > td,
+body.is-exporting-pdf tbody tr:first-child > td {
+    border-top: 2px solid #000 !important;
+}
+body.is-exporting tr:last-child > th, body.is-exporting tr:last-child > td,
+body.is-exporting-pdf tr:last-child > th, body.is-exporting-pdf tr:last-child > td {
+    border-bottom: 2px solid #000 !important;
+}
+body.is-exporting tr > th:last-child, body.is-exporting tr > td:last-child,
+body.is-exporting-pdf tr > th:last-child, body.is-exporting-pdf tr > td:last-child {
+    border-right: 2px solid #000 !important;
+}
+
+body.is-exporting .input-box,
+body.is-exporting-pdf .input-box {
+    border: none !important;
+    background: transparent !important;
 }
