@@ -1,0 +1,38 @@
+/* 导出PDF时的表格边框修复 */
+
+/* 所有表格设置为边框折叠模式，确保边框无间隙 */
+body.is-exporting table, body.is-exporting-pdf table {
+    border-collapse: collapse !important;
+    border: 2px solid black !important;
+    width: 100% !important;
+}
+
+/* 所有表格单元格设置统一边框，解决边框断裂问题 */
+body.is-exporting th, body.is-exporting td,
+body.is-exporting-pdf th, body.is-exporting-pdf td {
+    border: 1px solid black !important;
+    padding: 6px !important;
+}
+
+/* 确保操作列不会显示在导出的PDF中 */
+body.is-exporting .delete-cell, 
+body.is-exporting-pdf .delete-cell,
+body.is-exporting .row-delete-button,
+body.is-exporting-pdf .row-delete-button,
+body.is-exporting #table1-container .delete-cell,
+body.is-exporting-pdf #table1-container .delete-cell,
+body.is-exporting #table1-container .row-delete-button,
+body.is-exporting-pdf #table1-container .row-delete-button {
+    display: none !important;
+    width: 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+}
+
+/* 移除任何可能导致边框问题的样式 */
+body.is-exporting table *,
+body.is-exporting-pdf table * {
+    box-shadow: none !important;
+}

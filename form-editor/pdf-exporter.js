@@ -60,15 +60,69 @@ async function exportToPdf(htmlPath, pdfPath) {
         // 锁定缩放比，避免打印时边框被缩放导致粗细不一致
         await win.webContents.setVisualZoomLevelLimits(1, 1);
         win.webContents.setZoomFactor(1);
+        
+        // 强制删除所有操作列
+        await win.webContents.executeJavaScript(`
+          // 移除所有删除单元格
+          document.querySelectorAll('.delete-cell').forEach(cell => {
+            cell.style.display = 'none';
+            cell.style.width = '0px';
+            cell.style.padding = '0px';
+            cell.style.border = 'none';
+          });
+          
+          // 特别处理表格1的操作列
+          document.querySelectorAll('#table1-container .delete-cell').forEach(cell => {
+            cell.style.display = 'none';
+            cell.style.width = '0px';
+            cell.style.padding = '0px';
+            cell.style.border = 'none';
+          });
+          
+          // 强制应用导出模式样式
+          document.body.classList.add('is-exporting-pdf');
+          
+          // 修复表格边框
+          document.querySelectorAll('table').forEach(table => {
+            // 给表格添加明显的外框
+            table.style.border = '2px solid #000';
+            table.style.borderCollapse = 'collapse';
+            
+            // 确保所有单元格有一致的边框
+            table.querySelectorAll('th, td').forEach(cell => {
+              // 排除操作列
+              if (!cell.classList.contains('delete-cell')) {
+                cell.style.border = '1px solid #000';
+              }
+            });
+          });
+        `);
 
         // 注入打印专用样式，确保表格边框统一
         await win.webContents.insertCSS(`
           @media print {
-            table { border-collapse: collapse !important; }
-            table, th, td {
+            table { 
+              border-collapse: collapse !important; 
+              border: 2px solid #000 !important;
+              width: 100% !important;
+              table-layout: fixed !important;
+            }
+            
+            th, td {
               border: 1px solid #000 !important;
-              -webkit-print-color-adjust: exact;
+              padding: 6px !important;
               print-color-adjust: exact;
+            }
+            
+            /* 强制隐藏所有操作列，特别是表1的操作列 */
+            .delete-cell, .row-delete-button,
+            #table1-container .delete-cell, 
+            #table1-container .row-delete-button {
+              display: none !important;
+              width: 0 !important;
+              padding: 0 !important;
+              margin: 0 !important;
+              border: none !important;
             }
           }
         `);

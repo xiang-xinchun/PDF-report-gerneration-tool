@@ -791,29 +791,68 @@ body.is-exporting-pdf thead tr:last-child th {
 }
 
 /* 防重叠策略在导出模式同样生效 */
+/* 导出模式下的表格单元格样式 */
 body.is-exporting th, body.is-exporting td,
 body.is-exporting-pdf th, body.is-exporting-pdf td {
-    border-left: none !important;
-    border-top: none !important;
     box-sizing: border-box !important;
+    padding: 5px !important; /* 确保内容与边框有足够间距 */
+    background-clip: padding-box !important; /* 确保背景不会溢出到边框 */
+    border: 1px solid #000 !important; /* 统一使用1px实线边框，避免重叠造成的粗细不一 */
 }
-body.is-exporting tr > th:first-child, body.is-exporting tr > td:first-child,
-body.is-exporting-pdf tr > th:first-child, body.is-exporting-pdf tr > td:first-child {
-    border-left: 2px solid #000 !important;
+/* 不再需要单独设置左边框，使用统一的border设置 */
+
+/* 解决表格单元格连接处可能存在的问题 */
+body.is-exporting table, body.is-exporting-pdf table {
+    border: 2px solid #000 !important; /* 给整个表格添加完整外框 */
 }
-body.is-exporting thead tr:first-child > th,
-body.is-exporting-pdf thead tr:first-child > th,
-body.is-exporting tbody tr:first-child > td,
-body.is-exporting-pdf tbody tr:first-child > td {
-    border-top: 2px solid #000 !important;
+
+/* 特殊处理表头和表体连接处的边框 */
+body.is-exporting thead tr:last-child > th,
+body.is-exporting-pdf thead tr:last-child > th {
+    border-bottom: 2px solid #000 !important; /* 确保表头底部边框清晰 */
 }
-body.is-exporting tr:last-child > th, body.is-exporting tr:last-child > td,
-body.is-exporting-pdf tr:last-child > th, body.is-exporting-pdf tr:last-child > td {
-    border-bottom: 2px solid #000 !important;
+
+/* 解决表格边框渲染中可能的细微问题 */
+body.is-exporting-pdf table, body.is-exporting table {
+    print-color-adjust: exact !important; /* 标准属性，确保背景色正确打印 */
+    table-layout: fixed !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: avoid !important;
 }
-body.is-exporting tr > th:last-child, body.is-exporting tr > td:last-child,
-body.is-exporting-pdf tr > th:last-child, body.is-exporting-pdf tr > td:last-child {
-    border-right: 2px solid #000 !important;
+
+/* 强化打印和导出模式下的表格样式 */
+@media print {
+    table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        border: 2px solid #000 !important;
+    }
+    
+    th, td {
+        border: 1px solid #000 !important;
+        padding: 4px !important;
+    }
+    
+    /* 隐藏所有操作列，包括表格1 */
+    .delete-cell, .row-delete-button {
+        display: none !important;
+    }
+}
+
+/* 确保表格整体有外框并正确渲染 */
+body.is-exporting table, body.is-exporting-pdf table {
+    border-collapse: collapse !important; /* 合并边框 */
+    border-spacing: 0 !important; /* 消除单元格间距 */
+    table-layout: fixed !important; /* 固定表格布局，防止自动调整 */
+    width: 100% !important; /* 确保表格宽度填满容器 */
+    margin-bottom: 15px !important; /* 表格之间留出间距 */
+    page-break-inside: avoid !important; /* 尽量避免表格在页面间断开 */
+    border: 2px solid #000 !important; /* 给整个表格添加一个完整的外框 */
+}
+/* 给表格外框设置更粗的边框，确保表格边缘清晰可见 */
+body.is-exporting table, body.is-exporting-pdf table {
+    border: 2px solid #000 !important;
 }
 
 body.is-exporting .input-box,
