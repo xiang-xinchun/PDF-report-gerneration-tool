@@ -1,0 +1,101 @@
+/* 子行HML选择器样式修复 */
+tr.subrow .hml-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+tr.subrow .table-td {
+    vertical-align: middle;
+    text-align: center;
+    padding: 5px;
+}
+
+/* 确保子行中的HML选项正确对齐 */
+tr.subrow .hml-option {
+    margin: 0 3px;
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+}
+
+/* 子行的子类别单元格样式 */
+tr.subrow .sub-category {
+    padding-left: 15px;
+    text-align: center; /* 改为居中对齐 */
+}
+
+/* 确保子行的内容居中显示 */
+tr.subrow .sub-category .input-box {
+    text-align: center; /* 子类别的输入框内容居中 */
+    width: 100%;
+    display: block;
+}
+
+/* 修复表格1中子行的布局 */
+#table1-container tr.subrow td:first-child {
+    width: 25%;
+    text-align: left;
+}
+
+/* 确保表格1中子行的HML选择器单元格宽度一致 */
+#table1-container tr.subrow td:not(:first-child):not(.delete-cell) {
+    width: calc(75% / 4);
+}
+
+/* 表格1特殊子行样式 */
+tr.table1-subrow .hml-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* HML单元格样式 */
+.hml-cell {
+    text-align: center !important;
+    padding: 5px !important;
+    width: auto !important;
+    vertical-align: middle !important;
+}
+
+/* 确保子行正确布局 */
+#table1-container tbody tr.subrow {
+    display: table-row !important;
+}
+
+#table1-container tbody tr.subrow td {
+    display: table-cell !important;
+    border: 1px solid #000 !important; /* 确保每个单元格都有边框 */
+}
+
+/* 确保子行在打印和导出时也有边框 */
+@media print {
+    tr.subrow td {
+        border: 1px solid #000 !important;
+    }
+}
+
+body.is-exporting tr.subrow td,
+body.is-exporting-pdf tr.subrow td {
+    border: 1px solid #000 !important;
+}
+
+/* 适配打印和导出模式 */
+@media print {
+    tr.subrow .hml-selector .hml-option.selected {
+        margin: 0;
+        width: auto;
+        height: auto;
+    }
+}
+
+body.is-exporting tr.subrow .hml-selector .hml-option.selected,
+body.is-exporting-pdf tr.subrow .hml-selector .hml-option.selected {
+    margin: 0;
+    width: auto;
+    height: auto;
+}

@@ -1,0 +1,64 @@
+/* 
+ * 修复子行表格样式问题
+ * - 添加明确的边框样式
+ * - 确保文本正确居中
+ * - 修复表格线丢失问题
+ */
+
+/* 基本表格和单元格边框样式 */
+table {
+    border-collapse: collapse !important;
+    width: 100%;
+}
+
+table td, table th {
+    border: 1px solid #000;
+}
+
+/* 子行特殊样式 */
+tr.subrow {
+    border-top: 1px solid #000 !important;
+    border-bottom: 1px solid #000 !important;
+}
+
+/* 确保子行每个单元格都有清晰边框 */
+tr.subrow > td {
+    border: 1px solid #000 !important;
+    padding: 8px !important;
+    vertical-align: middle !important;
+}
+
+/* 输入框内文本居中 */
+tr.subrow .input-box {
+    text-align: center !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    display: block !important;
+}
+
+/* 确保表格1中的子行有正确的边界 */
+#table1-container tr.subrow {
+    border: 1px solid #000 !important;
+}
+
+/* 在打印和导出模式下保持边框可见 */
+@media print {
+    tr.subrow td {
+        border: 1px solid #000 !important;
+    }
+    
+    tr.subrow {
+        border-top: 1px solid #000 !important;
+        border-bottom: 1px solid #000 !important;
+    }
+}
+
+body.is-exporting table,
+body.is-exporting-pdf table {
+    border-collapse: collapse !important;
+}
+
+body.is-exporting tr.subrow td,
+body.is-exporting-pdf tr.subrow td {
+    border: 1px solid #000 !important;
+}

@@ -1,0 +1,88 @@
+/* 
+ * 统一表格线样式
+ * 确保原始行和动态添加的行有一致的边框样式
+ */
+
+/* 基础表格样式 */
+table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    width: 100%;
+}
+
+/* 所有表格单元格基础边框 */
+table td, table th {
+    border: 1px solid #000 !important;
+    padding: 8px !important;
+}
+
+/* 表格行统一边框 */
+tr {
+    border: 1px solid #000 !important;
+}
+
+/* 确保所有子行与原始行保持一致 */
+tr.subrow {
+    display: table-row !important;
+    border: 1px solid #000 !important;
+}
+
+tr.subrow td {
+    border: 1px solid #000 !important;
+    border-collapse: collapse !important;
+    padding: 8px !important;
+    vertical-align: middle !important;
+}
+
+/* 标准子行样式 */
+tr.standard-subrow {
+    border-style: solid !important;
+    border-width: 1px !important;
+    border-color: #000 !important;
+}
+
+tr.standard-subrow td {
+    border: 1px solid #000 !important;
+    border-collapse: collapse !important;
+}
+
+/* 特定表格样式 */
+#table1-container tr.subrow td:first-child {
+    text-align: center !important;
+}
+
+/* 确保表格1中的HML选择器单元格样式统一 */
+#table1-container tr.subrow .hml-cell {
+    vertical-align: middle !important;
+    text-align: center !important;
+    padding: 8px !important;
+    border: 1px solid #000 !important;
+}
+
+/* 打印和导出模式下的边框保留 */
+@media print {
+    tr, td, th, table {
+        border-color: #000 !important;
+        border-width: 1px !important;
+        border-style: solid !important;
+        border-collapse: collapse !important;
+    }
+    
+    tr.subrow, tr.subrow td {
+        border: 1px solid #000 !important;
+    }
+}
+
+body.is-exporting tr,
+body.is-exporting td,
+body.is-exporting th,
+body.is-exporting table,
+body.is-exporting-pdf tr,
+body.is-exporting-pdf td,
+body.is-exporting-pdf th,
+body.is-exporting-pdf table {
+    border-color: #000 !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-collapse: collapse !important;
+}

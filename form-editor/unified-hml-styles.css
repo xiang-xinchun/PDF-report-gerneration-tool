@@ -1,0 +1,105 @@
+/* 统一HML选择器样式 */
+
+/* 确保所有HML选择器（包括动态添加的行）有一致的样式 */
+.hml-selector {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 5px !important;
+    padding: 2px !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 auto !important;
+}
+
+/* 统一所有HML选项的样式 */
+.hml-option {
+    cursor: pointer !important;
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    border: 1px solid #ccc !important;
+    font-weight: bold !important;
+    transition: all 0.2s !important;
+    color: #333 !important;
+    margin: 0 3px !important;
+    font-size: 14px !important;
+}
+
+.hml-option:hover {
+    background-color: #f0f0f0 !important;
+}
+
+.hml-option.selected {
+    color: white !important;
+}
+
+.hml-option.h-option.selected {
+    background-color: #2196F3 !important;
+    border-color: #2196F3 !important;
+}
+
+.hml-option.m-option.selected {
+    background-color: #4CAF50 !important;
+    border-color: #4CAF50 !important;
+}
+
+.hml-option.l-option.selected {
+    background-color: #FF9800 !important;
+    border-color: #FF9800 !important;
+}
+
+/* 确保所有单元格正确对齐 */
+.hml-cell {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 8px !important;
+}
+
+/* 子行样式统一 */
+tr.subrow .hml-selector {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 5px !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+tr.subrow .hml-option {
+    width: 26px !important;
+    height: 26px !important;
+    margin: 0 3px !important;
+}
+
+/* 打印和导出模式下的样式 */
+@media print {
+    .hml-selector .hml-option:not(.selected) {
+        display: none !important;
+    }
+    
+    .hml-selector .hml-option.selected {
+        border: none !important;
+        background-color: transparent !important;
+        color: #000 !important;
+        width: auto !important;
+        height: auto !important;
+    }
+}
+
+body.is-exporting .hml-selector .hml-option:not(.selected),
+body.is-exporting-pdf .hml-selector .hml-option:not(.selected) {
+    display: none !important;
+}
+
+body.is-exporting .hml-selector .hml-option.selected,
+body.is-exporting-pdf .hml-selector .hml-option.selected {
+    border: none !important;
+    background-color: transparent !important;
+    color: #000 !important;
+    width: auto !important;
+    height: auto !important;
+}

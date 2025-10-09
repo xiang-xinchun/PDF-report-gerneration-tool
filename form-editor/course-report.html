@@ -18,6 +18,13 @@
     <link rel="stylesheet" href="export-hide.css" media="print"><!-- 添加导出隐藏样式 -->
     <link rel="stylesheet" href="add-row-styles.css"><!-- 添加行按钮样式 -->
     <link rel="stylesheet" href="formula-styles.css"><!-- 添加公式样式 -->
+    <link rel="stylesheet" href="select-styles.css"><!-- 添加HML选择器样式 -->
+    <link rel="stylesheet" href="subrow-fix.css"><!-- 添加子行样式修复 -->
+    <link rel="stylesheet" href="hml-subrow-styles.css"><!-- 添加HML子行样式统一 -->
+    <link rel="stylesheet" href="unified-table-style.css"><!-- 添加统一表格线样式 -->
+    <link rel="stylesheet" href="unified-hml-styles.css"><!-- 添加统一HML选择器样式 -->
+    <link rel="stylesheet" href="table-border-fix.css"><!-- 添加表格边框修复样式 -->
+    <link rel="stylesheet" href="export-fixes.css"><!-- 添加导出表格修复样式 -->
     
     <!-- 资源加载优化脚本 -->
     <script>
@@ -185,10 +192,34 @@
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-1')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target1-selector-1">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target2-selector-1">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target3-selector-1">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target4-selector-1">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-1')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-2">
@@ -197,10 +228,34 @@
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-2')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target1-selector-2">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target2-selector-2">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target3-selector-2">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target4-selector-2">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-2')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-3">
@@ -209,10 +264,34 @@
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-3')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target1-selector-3">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target2-selector-3">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target3-selector-3">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target4-selector-3">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-3')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-5">
@@ -221,10 +300,34 @@
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-5')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target1-selector-5">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target2-selector-5">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target3-selector-5">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target4-selector-5">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-5')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-6">
@@ -233,10 +336,34 @@
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-6')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target1-selector-6">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target2-selector-6">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target3-selector-6">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target4-selector-6">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-6')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-7">
@@ -245,10 +372,34 @@
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-7')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target1-selector-7">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target2-selector-7">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target3-selector-7">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target4-selector-7">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-7')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-8">
@@ -257,10 +408,34 @@
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-8')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target1-selector-8">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target2-selector-8">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target3-selector-8">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target4-selector-8">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-8')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                         <tr id="table-row-9">
@@ -269,10 +444,34 @@
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-9')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
                             <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target1-selector-9">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target2-selector-9">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target3-selector-9">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
+                            <td class="table-td">
+                                <div class="hml-selector" id="target4-selector-9">
+                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
+                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
+                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
+                                </div>
+                            </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-9')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
                     </tbody>
@@ -355,10 +554,10 @@
                     <div class="formula-number">公式（1）</div>
                 </div>
             </div>
-            <div class="paragraph">通过累加可以计算出单个课程目标对应的权值，以及总权值为<div contenteditable="true" class="editable-text" id="totalWeight" data-placeholder="此处生成总权值"></div>。《<span id="courseNameShow3"></span>》课程4个分目标对应的权重值计算如下：</div>
+            <div class="paragraph">通过权加可以计算出单个课程目标标对应的权值，以及总权值为<div contenteditable="true" class="editable-text" id="totalWeight" data-placeholder="此处生成总权值"></div>。《<span id="courseNameShow3"></span>》课程4个分目标对应的权重值计算如下：</div>
             <p class="table-name">表3.课程目标的权重值</p>
             <div class="table-container" id="table3-container">
-                <table>
+                <table id="weight-table">
                     <thead class="table-header">
                         <tr>
                             <th></th>
@@ -367,7 +566,6 @@
                             <th>课程目标3</th>
                             <th>课程目标4</th>
                             <th class="delete-cell">操作</th>
-
                         </tr>
                     </thead>
                     <tbody>
@@ -955,6 +1153,22 @@
     </script>
     <!-- 添加表格操作控制脚本 -->
     <script src="table-operation-control.js"></script>
+    <!-- 添加HML选择器脚本 -->
+    <script src="hml-selector.js"></script>
+    <!-- 添加子行样式增强脚本 -->
+    <script src="subrow-enhancer.js"></script>
+    <!-- 添加HML子行选择器增强脚本 -->
+    <script src="hml-subrow-enhancer.js"></script>
+    <!-- 添加表格边框统一处理脚本 -->
+    <script src="table-border-unifier.js"></script>
+    <!-- 添加表格边框修复器 -->
+    <script src="table-border-fixer.js"></script>
+    <!-- 添加通知处理脚本 -->
+    <script src="notification-handler.js"></script>
+    <!-- 添加权重计算修复脚本 -->
+    <script src="weight-calculator-fix.js"></script>
+    <!-- 添加HML选择器样式增强脚本 -->
+    <script src="hml-style-enhancer.js"></script>
 </body>
 
 </html>

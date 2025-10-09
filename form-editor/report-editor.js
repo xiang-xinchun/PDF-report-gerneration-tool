@@ -341,8 +341,13 @@ function restoreHiddenItems() {
 // 重置所有内容到最初状态（恢复所有隐藏的项目）
 function resetAllContent() {
     // 添加确认对话框
-    if (!confirm("确认恢复全部内容吗？")) {
+    if (!confirm("确认恢复全部内容吗？这将清空所有已填写的内容！")) {
         return; // 用户取消了恢复操作
+    }
+    
+    // 显示正在处理的通知
+    if (typeof window.showNotification === 'function') {
+        window.showNotification('正在处理', '正在恢复所有内容...', 'info');
     }
     
     // 清除所有隐藏状态
@@ -363,11 +368,27 @@ function resetAllContent() {
     keys.forEach(key => {
         localStorage.removeItem(key);
     });
+
+    // 额外清除 HML 选择存档
+    localStorage.removeItem('hmlSelections');
+
+    // 额外清除所有被隐藏的表格行标记
+    const hiddenRowKeys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('hidden_row_')) {
+            hiddenRowKeys.push(k);
+        }
+    }
+    hiddenRowKeys.forEach(k => localStorage.removeItem(k));
     
     // 显示所有目标容器
     document.querySelectorAll('[id^="target"][id$="-container"]').forEach(container => {
         container.style.display = '';
     });
+    
+    // 触发自定义事件通知其他组件重置
+    document.dispatchEvent(new CustomEvent('reportReset'));
     
     // 显示所有表格行
     document.querySelectorAll('tr[id]').forEach(row => {
@@ -387,6 +408,78 @@ function resetAllContent() {
     document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(element => {
         element.value = '';
     });
+    
+    // 取消所有HML选择
+    document.querySelectorAll('.hml-option.selected').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    // 清空权重表格数据
+    document.querySelectorAll('[id^="targetWeight"]').forEach(element => {
+        element.textContent = '';
+    });
+    
+    // 使用计算模块的清空函数
+    if (typeof window.calculationModule !== 'undefined') {
+        if (typeof window.calculationModule.clearWeights === 'function') {
+            window.calculationModule.clearWeights();
+        }
+    }
+
+    // 彻底退出导出/只读模式，恢复可编辑态
+    document.body.classList.remove('is-exporting');
+    document.body.classList.remove('is-exporting-pdf');
+    // 移除导出时注入的样式
+    const tempExportStyle = document.getElementById('pdf-export-styles');
+    if (tempExportStyle) {
+        tempExportStyle.remove();
+    }
+    // 移除可能残留的 pdf-hidden 类
+    document.querySelectorAll('.pdf-hidden').forEach(el => {
+        el.classList.remove('pdf-hidden');
+    });
+    // 重新启用所有可编辑区域的交互
+    document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+        el.setAttribute('contenteditable', 'true');
+        el.style.pointerEvents = 'auto';
+        el.style.userSelect = 'text';
+        el.style.cursor = 'text';
+    });
+
+    // 保障所有预期可编辑的区域都标记为可编辑
+    document.querySelectorAll('.editable-text, .input-box').forEach(el => {
+        el.setAttribute('contenteditable', 'true');
+        el.style.pointerEvents = 'auto';
+        el.style.userSelect = 'text';
+        el.style.cursor = 'text';
+    });
+
+    // 恢复所有输入框与文本域可编辑
+    document.querySelectorAll('input, textarea').forEach(el => {
+        try {
+            el.removeAttribute('disabled');
+            el.readOnly = false;
+            el.style.pointerEvents = 'auto';
+        } catch (_) {}
+    });
+
+    // 恢复 body 的交互性（防止被全局样式锁住）
+    document.body.style.pointerEvents = 'auto';
+    document.body.style.userSelect = 'text';
+    
+    // 刷新页面以确保完全重置
+    setTimeout(function() {
+        // 显示成功通知
+        if (typeof window.showNotification === 'function') {
+            window.showNotification('重置成功', '所有内容已恢复到初始状态', 'success');
+        } else {
+            showNotification('重置成功', '所有内容已恢复到初始状态');
+        }
+        // 额外保障：重算一次（会保持空白，因为未选择）
+        if (window.calculationModule && typeof window.calculationModule.calculateWeights === 'function') {
+            window.calculationModule.calculateWeights();
+        }
+    }, 200);
 
     // 清空自动计算与同步显示区域
     const textSelectors = [
