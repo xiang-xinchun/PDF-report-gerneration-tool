@@ -562,8 +562,22 @@ function initCalculationModule() {
         sessionStorage.clear();
         
         setupCalculationEvents();
+
+        window.calculationModule = {
+            init: smartCalculate,
+            smartCalculate,
+            calculateTargetWeights,
+            calculateTargetAchievements,
+            calculateTotalAchievement,
+            calculateWeights: calculateTargetWeights,
+            calculateAchievements: calculateTargetAchievements,
+            calculateTotal: calculateTotalAchievement,
+            checkTable1Data,
+            checkTable2Data,
+            checkTable4Data
+        };
+
         console.log('计算功能已启用：智能计算模式，根据数据完整性自动计算相应结果');
-        
         console.log('计算模块初始化完成');
     } catch (error) {
         console.error('计算模块初始化失败:', error);

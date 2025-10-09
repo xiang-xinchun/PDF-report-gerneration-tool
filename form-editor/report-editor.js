@@ -338,54 +338,102 @@ function restoreHiddenItems() {
     });
 }
 
-// 重置所有内容到最初状态（彻底恢复编辑器加载时的状态）
+// 重置所有内容到最初状态（恢复所有隐藏的项目）
 function resetAllContent() {
-    // 二次确认，避免误触
-    if (!confirm('确认将所有内容恢复到最初状态？此操作会清除本地保存的数据并重新载入页面。')) {
-        return;
+    // 添加确认对话框
+    if (!confirm("确认恢复全部内容吗？")) {
+        return; // 用户取消了恢复操作
     }
-
-    try {
-        // 1) 清理本地存储的所有编辑痕迹
-        const prefixes = ['hidden_', 'hidden_row_', 'report_'];
-        const keysToRemove = [];
-
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (prefixes.some(p => key.startsWith(p))) {
-                keysToRemove.push(key);
-            }
+    
+    // 清除所有隐藏状态
+    const keys = [];
+    
+    // 收集所有与隐藏状态相关的localStorage键
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('hidden_')) {
+            keys.push(key);
         }
-        keysToRemove.forEach(k => localStorage.removeItem(k));
-
-        // 可选：清空与当前会话相关的缓存
-        try { sessionStorage.clear(); } catch (_) {}
-
-        // 2) 移除导出相关的状态与样式，避免影响后续渲染
-    document.body.classList.remove('is-exporting', 'is-exporting-pdf');
-    // 移除导出过程中加到元素上的临时类
-    document.querySelectorAll('.pdf-hidden').forEach(el => el.classList.remove('pdf-hidden'));
-        const exportStyle = document.getElementById('pdf-export-styles');
-        if (exportStyle && exportStyle.parentNode) exportStyle.parentNode.removeChild(exportStyle);
-
-        // 3) 基础显示恢复（以防不刷新时也能看到变更）
-        document.querySelectorAll('[id^="target"][id$="-container"]').forEach(el => el.removeAttribute('style'));
-        document.querySelectorAll('tr[id]').forEach(el => el.removeAttribute('style'));
-        document.querySelectorAll('th, td').forEach(el => el.removeAttribute('style'));
-
-        // 4) 清空操作历史并更新撤销按钮
-        operationHistory.length = 0;
-        updateUndoButtonState();
-
-        // 5) 最后刷新页面，回到初始HTML与脚本状态
-        // 说明：页面初始化脚本会重新绑定事件和默认内容，这是最可靠的“完全恢复”。
-        setTimeout(() => {
-            window.location.reload();
-        }, 50);
-    } catch (err) {
-        console.error('恢复全部失败:', err);
-        alert('恢复失败，请重试或重启应用。错误信息：' + err.message);
+        if (key.startsWith('report_')) {
+            keys.push(key);
+        }
     }
+    
+    // 删除所有隐藏状态
+    keys.forEach(key => {
+        localStorage.removeItem(key);
+    });
+    
+    // 显示所有目标容器
+    document.querySelectorAll('[id^="target"][id$="-container"]').forEach(container => {
+        container.style.display = '';
+    });
+    
+    // 显示所有表格行
+    document.querySelectorAll('tr[id]').forEach(row => {
+        row.style.display = '';
+    });
+    
+    // 显示所有表格列
+    document.querySelectorAll('th, td').forEach(cell => {
+        cell.style.display = '';
+    });
+
+    // 清空所有可编辑文本和输入框
+    document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+        element.innerHTML = '';
+    });
+
+    document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(element => {
+        element.value = '';
+    });
+
+    // 清空自动计算与同步显示区域
+    const textSelectors = [
+        '[id^="courseNameShow"]',
+        '#supportMaterial',
+        '#totalWeight',
+        '#totalAchieve',
+        '#studentCount',
+        '#maxScoreShow',
+        '#minScoreShow',
+        '#avgTotalScoreShow',
+        '[id^="count"]',
+        '[id^="rate"]',
+        '[id^="targetWeight"]',
+        '[id^="targetAchieve"]',
+        '[id^="showWeight"]',
+        '[id^="showAchieve"]',
+        '[id^="evaluationShow"]',
+        '[id^="totalScore"]',
+        '[id^="avgScore"]'
+    ];
+
+    textSelectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach(element => {
+            element.textContent = '';
+        });
+    });
+
+    // 清空预览 iframe
+    const pdfPreview = document.getElementById('pdf-preview');
+    if (pdfPreview) {
+        pdfPreview.src = '';
+    }
+    
+    // 清空操作历史
+    while(operationHistory.length > 0) {
+        operationHistory.pop();
+    }
+    
+    // 更新撤销按钮状态
+    updateUndoButtonState();
+
+    if (window.calculationModule && typeof window.calculationModule.smartCalculate === 'function') {
+        window.calculationModule.smartCalculate();
+    }
+    
+    // 不再显示额外的成功通知，因为已经有了确认对话框
 }
 
 // 表格行删除功能

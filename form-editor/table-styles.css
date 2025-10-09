@@ -55,29 +55,14 @@
 @media print {
     .delete-cell, .row-delete-button {
         display: none !important;
-        width: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        border: none !important;
-    }
-    
-    /* 特别强制隐藏表1的操作列 */
-    #table1-container .delete-cell,
-    #table1-container .row-delete-button {
-        display: none !important;
-        width: 0 !important;
     }
 }
 
-/* 导出PDF时隐藏删除按钮和操作列，强制所有表格包括表格1都隐藏 */
+/* 导出PDF时隐藏删除按钮和操作列 */
 body.is-exporting-pdf .delete-cell,
 body.is-exporting-pdf .row-delete-button,
 body.is-exporting .delete-cell,
-body.is-exporting .row-delete-button,
-body.is-exporting #table1-container .delete-cell,
-body.is-exporting-pdf #table1-container .delete-cell,
-body.is-exporting #table1-container .row-delete-button,
-body.is-exporting-pdf #table1-container .row-delete-button {
+body.is-exporting .row-delete-button {
     display: none !important;
 }
 

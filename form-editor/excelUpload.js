@@ -203,6 +203,10 @@ function fillDataToPage(data) {
     document.getElementById('rate3Show').textContent = data.rates?.rate3 || '0%';
     document.getElementById('rate4Show').textContent = data.rates?.rate4 || '0%';
     document.getElementById('rate5Show').textContent = data.rates?.rate5 || '0%';
+
+    if (window.calculationModule && typeof window.calculationModule.smartCalculate === 'function') {
+        window.calculationModule.smartCalculate();
+    }
 }
 
 // 工具函数2：计算成绩统计指标

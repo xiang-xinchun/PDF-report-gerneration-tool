@@ -26,6 +26,18 @@ setTimeout(() => {
     }
 }, 1000);
 
+function ensureXLSXLoaded() {
+    if (!XLSX) {
+        try {
+            XLSX = require('xlsx');
+            console.log('XLSX 模块按需加载成功');
+        } catch (error) {
+            console.error('按需加载 XLSX 模块失败:', error);
+            throw error;
+        }
+    }
+}
+
 // 导入版本信息模块 - 延迟加载非关键模块
 let versionInfo;
 setTimeout(() => {
@@ -215,6 +227,8 @@ function createWindow() {
         if (!filePath) {
             return { success: false, message: '文件路径为空' };
         }
+
+        ensureXLSXLoaded();
 
         const workbook = XLSX.readFile(filePath);
         const firstSheetName = workbook.SheetNames[0];
