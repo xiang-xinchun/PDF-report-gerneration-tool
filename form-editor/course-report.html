@@ -137,9 +137,6 @@
         <button id="excel-upload-btn" class="reset-button" title="上传Excel成绩表">
             <i class="bi bi-file-earmark-spreadsheet"></i> 上传成绩表
         </button>
-        <button id="reset-button" class="reset-button" title="恢复所有内容到初始状态" onclick="resetAllContent()">
-            <i class="bi bi-arrow-repeat"></i> 恢复全部
-        </button>
         <button id="scan-table-button" class="reset-button" title="扫描表格内容并重新计算" onclick="scanTableAndCalculate()">
             <i class="bi bi-calculator"></i> 刷新计算
         </button>
@@ -613,10 +610,10 @@
                         </tr>
                         <tr id="score-row-2">
                             <td>平均分</td>
-                            <td><div id="avgScore1"></div></td>
-                            <td><div id="avgScore2"></div></td>
-                            <td><div id="avgScore3"></div></td>
-                            <td><div id="avgScore4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="avgScore1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="avgScore2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="avgScore3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="avgScore4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('score-row-2')">×</button></td>
                         </tr>
                     </tbody>
@@ -858,6 +855,8 @@
     <script src="report-editor.js"></script>
     <script src="excelUpload.js"></script>
     <script src="calculation-enhanced.js"></script>
+    <!-- 调试工具（开发时使用） -->
+    <script src="debug-table5.js"></script>
     <script>
         // 辅助函数：重新计算所有数据
         function recalculateAllData() {
