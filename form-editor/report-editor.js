@@ -23,8 +23,8 @@
     prepareEditableElements();
     attachNavigationHandlers();
     
-    // 初始化表2到表4的同步
-    initializeTable2ToTable4Sync();
+    // 初始化表2到表4的同步和表3的同步
+    initializeTableSync();
     
     currentStep = 0;
     showStep(currentStep);
@@ -87,6 +87,10 @@
       nextBtn.removeEventListener('click', handleNextClick);
       nextBtn.addEventListener('click', handleNextClick);
     }
+    if (exportBtn) {
+      exportBtn.removeEventListener('click', handleExportClick);
+      exportBtn.addEventListener('click', handleExportClick);
+    }
   }
 
   function handlePrevClick() {
@@ -100,6 +104,153 @@
     if (currentStep < steps.length - 1) {
       showStep(currentStep + 1);
       updateNavigationState();
+    }
+  }
+
+  async function handleExportClick() {
+    console.log('[Export] 开始导出PDF...');
+    
+    // 禁用按钮防止重复点击
+    if (exportBtn) {
+      exportBtn.disabled = true;
+      exportBtn.textContent = '正在导出...';
+    }
+    
+    try {
+      // 检查 electronAPI 是否存在
+      if (!window.electronAPI || !window.electronAPI.exportPDF) {
+        throw new Error('导出功能不可用，请确保应用程序正确启动');
+      }
+      
+      // 调用导出API
+      const result = await window.electronAPI.exportPDF();
+      
+      if (result.success) {
+        console.log('[Export] PDF导出成功:', result.filePath);
+        alert(`PDF报告已成功导出到:\n${result.filePath}`);
+      } else {
+        console.error('[Export] PDF导出失败:', result.message);
+        alert(`导出失败: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('[Export] 导出过程出错:', error);
+      alert(`导出时发生错误: ${error.message}`);
+    } finally {
+      // 延迟执行清理，确保导出完成
+      setTimeout(() => {
+        forceCleanupAfterExport();
+      }, 500);
+      
+      // 恢复按钮状态
+      if (exportBtn) {
+        exportBtn.disabled = false;
+        exportBtn.textContent = '导出PDF报告';
+      }
+    }
+  }
+
+  function forceCleanupAfterExport() {
+    console.log('[Export] 强制清理导出状态...');
+    
+    try {
+      // 1. 移除所有导出相关的类
+      document.body.classList.remove('is-exporting', 'is-exporting-pdf', 'exporting');
+      console.log('[Export] ✓ 已移除导出类');
+      
+      // 2. 移除所有可能的导出样式表
+      const stylesheets = document.querySelectorAll('#export-styles, link[href*="export"]');
+      stylesheets.forEach(sheet => {
+        if (sheet.parentNode) {
+          sheet.parentNode.removeChild(sheet);
+          console.log('[Export] ✓ 已移除样式表:', sheet.id || sheet.href);
+        }
+      });
+      
+      // 3. 恢复所有步骤的显示状态
+      document.querySelectorAll('.step').forEach((step, index) => {
+        // 移除内联样式
+        step.style.cssText = '';
+        // 只显示当前激活的步骤
+        if (index === currentStep) {
+          step.classList.add('active');
+          step.style.display = 'block';
+        } else {
+          step.classList.remove('active');
+          step.style.display = 'none';
+        }
+      });
+      console.log('[Export] ✓ 已恢复步骤显示状态');
+      
+      // 4. 强制恢复所有可编辑元素
+      const editableSelectors = [
+        '[contenteditable]',
+        '.input-box',
+        '.editable-text',
+        'input',
+        'textarea',
+        'select'
+      ];
+      
+      editableSelectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach(element => {
+          // 移除所有内联样式
+          element.style.pointerEvents = '';
+          element.style.userSelect = '';
+          element.style.webkitUserSelect = '';
+          element.style.cursor = '';
+          element.style.opacity = '';
+          element.style.visibility = '';
+          
+          // 恢复可编辑属性
+          if (element.hasAttribute('contenteditable')) {
+            element.setAttribute('contenteditable', 'true');
+            element.contentEditable = 'true';
+          }
+          
+          // 移除禁用属性
+          element.removeAttribute('disabled');
+          element.removeAttribute('readonly');
+          if (element.tagName !== 'BUTTON' || element.id !== 'exportBtn') {
+            element.disabled = false;
+          }
+          element.readOnly = false;
+        });
+      });
+      console.log('[Export] ✓ 已恢复所有可编辑元素');
+      
+      // 5. 清除所有数据集属性
+      delete document.body.dataset.prevActiveStep;
+      delete document.body.dataset.prevActiveStepIndex;
+      document.querySelectorAll('.step').forEach(step => {
+        delete step.dataset.prevDisplay;
+      });
+      console.log('[Export] ✓ 已清除临时数据');
+      
+      // 6. 重新调用解锁函数
+      if (typeof unlockEditableElements === 'function') {
+        unlockEditableElements();
+        console.log('[Export] ✓ 已调用解锁函数');
+      }
+      
+      // 7. 重新初始化可编辑元素
+      if (typeof prepareEditableElements === 'function') {
+        prepareEditableElements();
+        console.log('[Export] ✓ 已重新初始化可编辑元素');
+      }
+      
+      // 8. 强制重绘
+      document.body.style.display = 'none';
+      document.body.offsetHeight; // 触发重排
+      document.body.style.display = '';
+      
+      console.log('[Export] ✅ 导出状态清理完成，编辑器已完全恢复');
+      console.log('[Export] 当前步骤:', currentStep);
+      console.log('[Export] body类列表:', document.body.className);
+      
+    } catch (cleanupError) {
+      console.error('[Export] ❌ 清理导出状态时出错:', cleanupError);
+      // 即使出错也尝试基本恢复
+      document.body.classList.remove('is-exporting', 'is-exporting-pdf');
     }
   }
 
@@ -253,12 +404,13 @@
     return overlay;
   }
 
-  // 表2到表4的同步功能
-  function initializeTable2ToTable4Sync() {
-    console.log('[Sync] 初始化表2到表4的同步...');
+  // 表格同步功能（表2→表4，表3→公式3下的表）
+  function initializeTableSync() {
+    console.log('[Sync] 初始化表格同步...');
     
     // 首次加载时同步数据
     syncTable2ToTable4();
+    syncTable3ToShowWeight();
     
     // 为表2中的考核方式和满分字段添加监听器
     for (let i = 1; i <= 4; i++) {
@@ -325,6 +477,23 @@
           subtree: true
         });
       }
+      
+      // ===== 新增：监听表3的权重值变化 =====
+      const targetWeightElement = document.getElementById(`targetWeight${i}`);
+      if (targetWeightElement) {
+        // 使用 MutationObserver 监听 targetWeight 的变化
+        const weightObserver = new MutationObserver(() => {
+          const value = targetWeightElement.textContent.trim();
+          console.log(`[Sync] 表3权重值 targetWeight${i} 已变化: ${value}`);
+          syncTargetWeightToShow(i);
+        });
+        
+        weightObserver.observe(targetWeightElement, {
+          characterData: true,
+          childList: true,
+          subtree: true
+        });
+      }
     }
     
     // 初始化完成后，立即触发一次计算（延迟以确保DOM完全加载）
@@ -333,7 +502,7 @@
       triggerTable5Calculation();
     }, 1000);
     
-    console.log('[Sync] 表2到表4同步初始化完成');
+    console.log('[Sync] 表格同步初始化完成');
   }
   
   function syncTable2ToTable4() {
@@ -364,6 +533,26 @@
       const value = scoreElement.textContent.trim();
       totalScoreElement.textContent = value;
       console.log(`[Sync] 已同步满分${index}: ${value}`);
+    }
+  }
+  
+  // 同步表3的权重值到公式(3)下的表
+  function syncTable3ToShowWeight() {
+    console.log('[Sync] 同步表3权重值到显示表...');
+    
+    for (let i = 1; i <= 4; i++) {
+      syncTargetWeightToShow(i);
+    }
+  }
+  
+  function syncTargetWeightToShow(index) {
+    const targetWeightElement = document.getElementById(`targetWeight${index}`);
+    const showWeightElement = document.getElementById(`showWeight${index}`);
+    
+    if (targetWeightElement && showWeightElement) {
+      const value = targetWeightElement.textContent.trim();
+      showWeightElement.textContent = value;
+      console.log(`[Sync] 已同步权重值${index}: ${value} (targetWeight${index} → showWeight${index})`);
     }
   }
   

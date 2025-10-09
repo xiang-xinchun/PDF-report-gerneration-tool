@@ -56,6 +56,30 @@ function debugCheckElements() {
     const value = el ? el.textContent : 'N/A';
     console.log(`  ${exists} targetAchieve${i}: "${value}"`);
   }
+  
+  console.log('\n表3 - 权重值元素:');
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`targetWeight${i}`);
+    const exists = el ? '✓' : '✗';
+    const value = el ? el.textContent : 'N/A';
+    console.log(`  ${exists} targetWeight${i}: "${value}"`);
+  }
+  
+  console.log('\n公式3下的表 - 显示权重元素:');
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`showWeight${i}`);
+    const exists = el ? '✓' : '✗';
+    const value = el ? el.textContent : 'N/A';
+    console.log(`  ${exists} showWeight${i}: "${value}"`);
+  }
+  
+  console.log('\n公式3下的表 - 显示达成度元素:');
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`showAchieve${i}`);
+    const exists = el ? '✓' : '✗';
+    const value = el ? el.textContent : 'N/A';
+    console.log(`  ${exists} showAchieve${i}: "${value}"`);
+  }
 }
 
 // 填充测试数据
