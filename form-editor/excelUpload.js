@@ -36,7 +36,7 @@ function showExcelExampleModal() {
 
     // 示例图片
     const exampleImg = document.createElement('img');
-    exampleImg.src = './gradeTable.png';  
+    exampleImg.src = './gradeExample.png';  
     exampleImg.alt = 'Excel成绩表示例样式';
     exampleImg.style.cssText = `
         width: 100%; height: auto; border: 1px solid #eee;

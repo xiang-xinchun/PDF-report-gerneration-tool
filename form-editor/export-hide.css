@@ -1,26 +1,20 @@
-/* 打印和导出时隐藏表格的操作列 */
+/* 打印和导出时仅隐藏带有 delete-cell 类的操作列 */
 @media print {
     .table-th.delete-cell,
-    .table-td.delete-cell {
-        display: none !important;
-    }
-    
-    table th:last-child,
-    table td:last-child {
+    .table-td.delete-cell,
+    th.delete-cell,
+    td.delete-cell {
         display: none !important;
     }
 }
 
 body.is-exporting-pdf .table-th.delete-cell,
 body.is-exporting-pdf .table-td.delete-cell,
+body.is-exporting-pdf th.delete-cell,
+body.is-exporting-pdf td.delete-cell,
 body.is-exporting .table-th.delete-cell,
-body.is-exporting .table-td.delete-cell {
-    display: none !important;
-}
-
-body.is-exporting-pdf table th:last-child,
-body.is-exporting-pdf table td:last-child,
-body.is-exporting table th:last-child,
-body.is-exporting table td:last-child {
+body.is-exporting .table-td.delete-cell,
+body.is-exporting th.delete-cell,
+body.is-exporting td.delete-cell {
     display: none !important;
 }

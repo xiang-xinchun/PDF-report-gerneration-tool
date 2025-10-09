@@ -229,7 +229,7 @@ function createWindow() {
         const assessmentTitles = [4, 5, 6, 7];
         const assessmentScores = assessmentTitles.map(() => []);
         const scores = []
-        for (let i = 4; i < excelData.length; i++) {
+        for (let i = 1; i < excelData.length; i++) {
             if (excelData[i] && excelData[i].length > 8) {
                 // 收集各个考核方式的成绩
                 assessmentTitles.forEach((colIndex, idx) => {
@@ -363,8 +363,24 @@ ipcMain.handle('export-pdf', async () => {
                     // 添加导出类
                     document.body.classList.add('is-exporting-pdf');
                     
-                    // 基本的可见性处理
+                    // 基本的可见性处理，记录原始display以便还原
+                    const activeStep = document.querySelector('.step.active');
+                    if (activeStep) {
+                        document.body.dataset.prevActiveStep = activeStep.id;
+                        if (typeof window.currentStep === 'number') {
+                            document.body.dataset.prevActiveStepIndex = window.currentStep.toString();
+                        } else {
+                            const match = activeStep.id && activeStep.id.match(/step(\d+)/);
+                            if (match) {
+                                document.body.dataset.prevActiveStepIndex = match[1];
+                            }
+                        }
+                    }
+
                     document.querySelectorAll('.step').forEach(step => {
+                        if (step.dataset.prevDisplay === undefined) {
+                            step.dataset.prevDisplay = step.style.display || '';
+                        }
                         step.style.display = 'block';
                     });
 
@@ -407,16 +423,66 @@ ipcMain.handle('export-pdf', async () => {
                     document.body.classList.remove('is-exporting-pdf');
                     
                     // 恢复步骤显示状态
-                    const currentStep = document.querySelector('.step.active');
-                    if (currentStep) {
-                        document.querySelectorAll('.step').forEach(step => {
-                            if (step !== currentStep) {
-                                step.style.display = 'none';
+                    document.querySelectorAll('.step').forEach(step => {
+                        if (step.dataset.prevDisplay !== undefined) {
+                            if (step.dataset.prevDisplay) {
+                                step.style.display = step.dataset.prevDisplay;
                             } else {
-                                step.style.display = 'block';
+                                step.style.removeProperty('display');
+                            }
+                            delete step.dataset.prevDisplay;
+                        } else {
+                            step.style.removeProperty('display');
+                        }
+                    });
+
+                    const prevActiveStepId = document.body.dataset.prevActiveStep;
+                    const prevActiveStepIndex = document.body.dataset.prevActiveStepIndex;
+                    if (prevActiveStepId) {
+                        document.querySelectorAll('.step').forEach(step => {
+                            if (step.id === prevActiveStepId) {
+                                step.classList.add('active');
+                            } else {
+                                step.classList.remove('active');
                             }
                         });
+                        delete document.body.dataset.prevActiveStep;
+                        delete document.body.dataset.prevActiveStepIndex;
+                    } else {
+                        // 如果没有记录，确保至少第一步为激活状态
+                        const firstStep = document.querySelector('.step');
+                        if (firstStep) {
+                            document.querySelectorAll('.step').forEach((step, index) => {
+                                step.classList.toggle('active', index === 0);
+                            });
+                            document.body.dataset.prevActiveStepIndex = '1';
+                        }
                     }
+
+                    if (prevActiveStepIndex) {
+                        const stepIndexNum = parseInt(prevActiveStepIndex, 10);
+                        if (!Number.isNaN(stepIndexNum)) {
+                            window.currentStep = stepIndexNum;
+                        }
+                        delete document.body.dataset.prevActiveStepIndex;
+                    } else if (typeof window.currentStep !== 'number' || Number.isNaN(window.currentStep)) {
+                        window.currentStep = 1;
+                    }
+
+                    if (typeof window.renderCurrentStep === 'function') {
+                        window.renderCurrentStep();
+                    }
+                    if (typeof window.updateStepIndicator === 'function') {
+                        window.updateStepIndicator();
+                    }
+                    if (typeof window.updateButtonStates === 'function') {
+                        window.updateButtonStates();
+                    }
+
+                    console.log('导出后状态恢复:', {
+                        currentStep: window.currentStep,
+                        activeStepId: document.querySelector('.step.active')?.id
+                    });
                     
                     console.log('PDF导出后清理完成');
                 } catch (err) {

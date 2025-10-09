@@ -498,25 +498,34 @@ document.addEventListener('DOMContentLoaded', function() {
             // 填充可编辑内容的基本操作
             // 处理所有可编辑区域，确保内容被保留
             document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                // 保存原始内容以便导出后恢复
+                element.dataset.exportOriginalContent = element.innerHTML;
+
                 // 如果元素为空，使用占位符内容或添加空格
                 if (element.textContent.trim() === '') {
                     const placeholder = element.getAttribute('data-placeholder');
                     if (placeholder) {
                         element.textContent = placeholder;
+                        element.dataset.exportInsertedPlaceholder = 'true';
                     } else {
-                        element.textContent = ' ';
+                        element.innerHTML = '&nbsp;';
+                        element.dataset.exportInsertedPlaceholder = 'true';
                     }
                 }
             });
             
             // 处理所有输入框
             document.querySelectorAll('input.input-field').forEach(element => {
+                element.dataset.exportOriginalValue = element.value;
+
                 if (element.value.trim() === '') {
                     const placeholder = element.getAttribute('placeholder');
                     if (placeholder) {
                         element.value = placeholder;
+                        element.dataset.exportInsertedPlaceholder = 'true';
                     } else {
-                        element.value = ' ';
+                        element.value = ' ';
+                        element.dataset.exportInsertedPlaceholder = 'true';
                     }
                 }
             });
@@ -575,7 +584,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 evaluationNameShow.textContent = evaluationName.textContent;
             }
         });
+    
+        const supportMaterialElem = document.getElementById('supportMaterial');
+        // 定义更新支撑材料的函数
+        function updateSupportMaterial() {
+            if (!supportMaterialElem) return;
+            
+            const validEvaluations = evaluations
+                .map(id => document.getElementById(id)?.textContent?.trim())
+                .filter(content => content);
+            
+            const supportText = validEvaluations.join('、');
+            supportMaterialElem.textContent = supportText;
+        }
+        
+        // 为每个考核方式添加输入监听
+        evaluations.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', updateSupportMaterial);
+            }
+        });
+        updateSupportMaterial();
 
+
+        
         const scores=['score1','score2','score3','score4'];
         const scoreShows = ['totalScore1', 'totalScore2', 'totalScore3', 'totalScore4'];
         scores.forEach((id, index) => { 
@@ -588,55 +621,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 scoreShow.textContent = score.textContent;
             }
         });
-
-        // const maxScore = document.getElementById('maxScore');
-        // const maxScoreShow = document.getElementById('maxScoreShow');
-        // if(maxScore){
-        //     maxScore.addEventListener('input', function() {
-        //         const value = this.textContent;
-        //         maxScoreShow.textContent = value;
-        //     });
-        // }
-        // const minScore = document.getElementById('minScore');
-        // const minScoreShow = document.getElementById('minScoreShow');
-        // if(minScore){
-        //     minScore.addEventListener('input', function() {
-        //         const value = this.textContent;
-        //         minScoreShow.textContent = value;
-        //     });
-        // }
-        // const avgTotalScore = document.getElementById('avgTotalScore');
-        // const avgTotalScoreShow = document.getElementById('avgTotalScoreShow');
-        // if(avgTotalScore){
-        //     avgTotalScore.addEventListener('input', function() {
-        //         const value = this.textContent;
-        //         avgTotalScoreShow.textContent = value;
-        //     });
-        // }
-        // const countIds = ['count1', 'count2', 'count3', 'count4', 'count5'];
-        // const rateIds = ['rate1', 'rate2', 'rate3', 'rate4', 'rate5'];
-        // const countShowIds = ['count1Show', 'count2Show', 'count3Show', 'count4Show', 'count5Show'];
-        // const rateShowIds = ['rate1Show', 'rate2Show', 'rate3Show', 'rate4Show', 'rate5Show'];
-        // countIds.forEach((id, index) => {
-        //     const countElement = document.getElementById(id);
-        //     const countShowElement = document.getElementById(countShowIds[index]);
-        //     if (countElement && countShowElement) {
-        //         countElement.addEventListener('input', function() {
-        //             countShowElement.textContent = this.textContent;
-        //         });
-        //         countShowElement.textContent = countElement.textContent;
-        //     }
-        // });
-        // rateIds.forEach((id, index) => { 
-        //     const rateElement = document.getElementById(id);
-        //     const rateShowElement = document.getElementById(rateShowIds[index]);
-        //     if (rateElement && rateShowElement) {
-        //         rateElement.addEventListener('input', function() {
-        //             rateShowElement.textContent = this.textContent;
-        //         });
-        //         rateShowElement.textContent = rateElement.textContent;
-        //     }
-        // });
         
         // 确保所有可编辑元素都可以进行编辑
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {
@@ -705,20 +689,40 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.querySelectorAll('.delete-button, .row-delete-button, .delete-cell').forEach(button => {
                             button.style.display = '';
                         });
-                        
+
+                        // 恢复导出时插入的占位内容
+                        document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                            if (element.dataset.exportInsertedPlaceholder === 'true') {
+                                element.innerHTML = '';
+                            }
+                            if (element.dataset.exportOriginalContent !== undefined) {
+                                element.innerHTML = element.dataset.exportOriginalContent;
+                                delete element.dataset.exportOriginalContent;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
+                        });
+
+                        document.querySelectorAll('input.input-field').forEach(element => {
+                            if (element.dataset.exportOriginalValue !== undefined) {
+                                element.value = element.dataset.exportOriginalValue;
+                                delete element.dataset.exportOriginalValue;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
+                        });
+
                         // 移除临时标记类
                         document.querySelectorAll('.pdf-hidden').forEach(element => {
                             element.classList.remove('pdf-hidden');
                         });
-                        
-                        // 恢复步骤显示状态 - 基本恢复
-                        steps.forEach((step, index) => {
-                            if (index !== currentStep) {
-                                step.style.display = 'none';
-                            } else {
-                                step.style.display = 'block';
+
+                        // 恢复步骤显示状态 - 移除内联display并调用showStep确保状态一致
+                        steps.forEach(step => {
+                            step.style.removeProperty('display');
+                            if (step.dataset && step.dataset.prevDisplay !== undefined) {
+                                delete step.dataset.prevDisplay;
                             }
                         });
+                        showStep(currentStep);
                         
                         if (result.success) {
                             window.showDebug('PDF导出成功：' + result.filePath);
@@ -736,13 +740,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // 确保恢复基本显示状态
                     try {
-                        steps.forEach((step, index) => {
-                            if (index !== currentStep) {
-                                step.style.display = 'none';
-                            } else {
-                                step.style.display = 'block';
+                        // 恢复导出时插入的占位内容
+                        document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                            if (element.dataset.exportInsertedPlaceholder === 'true') {
+                                element.innerHTML = '';
                             }
+                            if (element.dataset.exportOriginalContent !== undefined) {
+                                element.innerHTML = element.dataset.exportOriginalContent;
+                                delete element.dataset.exportOriginalContent;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
                         });
+
+                        document.querySelectorAll('input.input-field').forEach(element => {
+                            if (element.dataset.exportOriginalValue !== undefined) {
+                                element.value = element.dataset.exportOriginalValue;
+                                delete element.dataset.exportOriginalValue;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
+                        });
+
+                        steps.forEach(step => {
+                            step.style.removeProperty('display');
+                        });
+                        showStep(currentStep);
                     } catch (displayErr) {
                         console.error('恢复显示状态出错:', displayErr);
                     }

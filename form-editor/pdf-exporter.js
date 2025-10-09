@@ -27,55 +27,79 @@ async function exportToPdf(htmlPath, pdfPath) {
   return new Promise((resolve, reject) => {
     console.log(`正在导出PDF，源文件: ${htmlPath}`);
     console.log(`目标文件: ${pdfPath}`);
-    
-    // 创建一个隐藏的浏览器窗口
+
     const win = new BrowserWindow({
       width: 800,
       height: 600,
       show: false,
       webPreferences: {
         nodeIntegration: false,
-        contextIsolation: true
+        contextIsolation: true,
+        sandbox: true
       }
     });
-    
-    win.loadFile(htmlPath)
-      .then(() => {
-        // 等待一秒确保页面完全渲染
-        setTimeout(() => {
-          win.webContents.printToPDF({
-            printBackground: true,
-            pageSize: 'A4',
-            margins: {
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0
-            }
-          }).then(data => {
-            // 写入PDF文件
-            fs.writeFile(pdfPath, data, (error) => {
-              if (error) {
-                console.error('写入PDF失败:', error);
-                reject(error);
-              } else {
-                console.log(`PDF导出成功: ${pdfPath}`);
-                resolve(pdfPath);
-              }
-              win.destroy();
-            });
-          }).catch(error => {
-            console.error('PDF生成失败:', error);
-            win.destroy();
-            reject(error);
-          });
-        }, 1000);
-      })
-      .catch(error => {
-        console.error('加载HTML失败:', error);
+
+    const cleanup = () => {
+      if (!win.isDestroyed()) {
         win.destroy();
-        reject(error);
-      });
+      }
+    };
+
+    const handleFailure = (stage, error) => {
+      console.error(`${stage}失败:`, error);
+      cleanup();
+      reject(error);
+    };
+
+    win.webContents.once('did-fail-load', (_event, errorCode, errorDescription) => {
+      handleFailure('加载HTML', new Error(`${errorCode}: ${errorDescription}`));
+    });
+
+    win.webContents.once('did-finish-load', async () => {
+      try {
+        // 锁定缩放比，避免打印时边框被缩放导致粗细不一致
+        await win.webContents.setVisualZoomLevelLimits(1, 1);
+        win.webContents.setZoomFactor(1);
+
+        // 注入打印专用样式，确保表格边框统一
+        await win.webContents.insertCSS(`
+          @media print {
+            table { border-collapse: collapse !important; }
+            table, th, td {
+              border: 1px solid #000 !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
+        `);
+
+        const pdfBuffer = await win.webContents.printToPDF({
+          printBackground: true,
+          pageSize: 'A4',
+          margins: {
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0
+          }
+        });
+
+        fs.writeFile(pdfPath, pdfBuffer, (error) => {
+          if (error) {
+            handleFailure('写入PDF', error);
+            return;
+          }
+
+          console.log(`PDF导出成功: ${pdfPath}`);
+          cleanup();
+          resolve(pdfPath);
+        });
+      } catch (error) {
+        handleFailure('PDF生成', error);
+      }
+    });
+
+    win.loadFile(htmlPath).catch((error) => handleFailure('加载HTML', error));
   });
 }
 

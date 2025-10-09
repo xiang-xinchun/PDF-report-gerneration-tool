@@ -53,6 +53,8 @@ body.is-exporting-pdf table {
     display: table !important;
     width: 100% !important;
     border-collapse: collapse !important;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
 }
 
 body.is-exporting-pdf tbody {
@@ -77,7 +79,7 @@ body.is-exporting-pdf .step {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    page-break-inside: avoid !important;
+    page-break-inside: auto !important;
 }
 
 /* 确保图片正确显示 */

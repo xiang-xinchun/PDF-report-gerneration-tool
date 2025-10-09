@@ -132,6 +132,9 @@ table {
     padding: 8px;
     text-align: center;
     font-size: 14px;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .category {
@@ -155,6 +158,9 @@ table {
     line-height: 1.6;
     background-color: var(--page-bg-color);
     cursor: text;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 /* 输入框样式 */
@@ -396,7 +402,8 @@ td.data-source [contenteditable="true"]:focus {
     /* 启用所有步骤的显示，确保所有内容打印 */
     .step {
         display: block !important;
-        page-break-before: always;
+        page-break-before: auto;
+        page-break-inside: auto;
         width: 100% !important;
         border: none !important;
     }
@@ -451,8 +458,12 @@ td.data-source [contenteditable="true"]:focus {
         display: none !important;
     }
     
-    /* 确保表格在打印时显示完整 */
-    table, tr, td, th {
+    /* 放开表格整体断页限制，仅避免单元格拆分 */
+    table {
+        break-inside: auto !important;
+    }
+
+    tr, td, th {
         break-inside: avoid;
     }
     
@@ -626,13 +637,10 @@ body.is-exporting-pdf .toolbar {
 
 body.is-exporting-pdf .step {
     display: block !important;
-    page-break-before: always;
+    page-break-before: auto;
+    page-break-inside: auto;
     visibility: visible !important;
     opacity: 1 !important;
-}
-
-body.is-exporting-pdf #step1 {
-    page-break-before: avoid;
 }
 
 body.is-exporting-pdf [contenteditable="true"],
