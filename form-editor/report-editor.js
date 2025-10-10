@@ -1,4 +1,4 @@
-// 操作历史记录栈，用于撤销功能
+﻿// 操作历史记录栈，用于撤销功能
 const operationHistory = [];
 const MAX_HISTORY = 50; // 最大历史记录数量
 
@@ -607,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 更新当前步骤索引
         currentStep = stepIndex;
         
-        // 更新按钮状态
+        // 更新按钮状态（CSS会自动处理禁用样式）
         prevBtn.disabled = currentStep === 0;
         nextBtn.disabled = currentStep === steps.length - 1;
     }

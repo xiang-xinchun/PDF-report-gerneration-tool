@@ -109,6 +109,13 @@ async function triggerExcelUpload() {
         // 2.3 填充数据到页面（原逻辑不变）
         const data = parseResult.data;
         fillDataToPage(data);
+        
+        // 2.4 显示成功提示
+        showNotification({
+            title: '上传成功',
+            message: '成绩表已成功上传并填充到表格中',
+            type: 'success'
+        });
 
     } catch (error) {
         console.error('处理Excel文件出错:', error);

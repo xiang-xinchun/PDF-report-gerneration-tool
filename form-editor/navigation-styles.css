@@ -28,7 +28,7 @@
     background-color: #0056b3;
 }
 
-#prevBtn:disabled {
+#prevBtn:disabled, #nextBtn:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
 }
