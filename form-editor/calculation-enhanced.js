@@ -95,30 +95,19 @@ function checkTable1Data() {
 
 // 检查表2数据是否完整
 function checkTable2Data() {
-    let hasValidData = true;
+    // 只检查是否有分数数据，权重可以为0
+    let hasValidScore = false;
     for (let i = 1; i <= 4; i++) {
         const scoreElement = document.getElementById(`score${i}`);
         if (scoreElement) {
             const score = safeParseFloat(scoreElement.textContent || scoreElement.value || '0');
-            if (score <= 0) {
-                hasValidData = false;
+            if (score > 0) {
+                hasValidScore = true;
                 break;
             }
         }
-        
-        for (let j = 1; j <= 4; j++) {
-            const weightElement = document.getElementById(`weight${i}-${j}`);
-            if (weightElement) {
-                const weight = parseWeight(weightElement.textContent || weightElement.value || '0');
-                if (weight <= 0) {
-                    hasValidData = false;
-                    break;
-                }
-            }
-        }
-        if (!hasValidData) break;
     }
-    return hasValidData;
+    return hasValidScore;
 }
 
 // 检查表4数据是否完整
@@ -286,6 +275,7 @@ function calculateTargetWeights() {
 // 课程分目标达成度计算
 function calculateTargetAchievements() {
     if (!checkTable2Data() || !checkTable4Data()) {
+        console.log('[Calc] 表2或表4数据不完整，跳过表5计算');
         return [];
     }
     
@@ -293,6 +283,7 @@ function calculateTargetAchievements() {
     let hasValidData = false;
     
     try {
+        // 获取考核方式数据
         for (let i = 1; i <= 4; i++) {
             const totalScoreElement = document.getElementById(`totalScore${i}`);
             const avgScoreElement = document.getElementById(`avgScore${i}`);
@@ -320,6 +311,7 @@ function calculateTargetAchievements() {
         }
         
         if (!hasValidData) {
+            console.log('[Calc] 没有有效的考核数据');
             return [];
         }
     } catch (error) {
@@ -328,62 +320,64 @@ function calculateTargetAchievements() {
     }
     
     const achievements = [];
-    let hasValidWeight = false;
     
     try {
+        // 计算每个目标的达成度
         for (let targetIndex = 1; targetIndex <= 4; targetIndex++) {
             let targetAchievement = 0;
-            let hasWeightForThisTarget = false;
+            let hasAnyData = false;
             
+            // 遍历所有考核方式
             for (let methodIndex = 1; methodIndex <= 4; methodIndex++) {
                 const weightElement = document.getElementById(`weight${methodIndex}-${targetIndex}`);
                 if (weightElement) {
                     let weightText = (weightElement.textContent || weightElement.value || '0').trim();
                     let weight = parseWeight(weightText);
                     
-                    if (weight > 0) {
-                        hasValidWeight = true;
-                        hasWeightForThisTarget = true;
+                    // 即使权重为0也继续计算（0% 是有效值）
+                    const examInfo = examData[methodIndex - 1];
+                    if (examInfo && examInfo.totalScore > 0) {
+                        hasAnyData = true;
+                        // 权重为0时，贡献也为0，这是正确的
+                        const contribution = weight * (examInfo.avgScore / examInfo.totalScore);
+                        targetAchievement += contribution;
                         
-                        const examInfo = examData[methodIndex - 1];
-                        if (examInfo && examInfo.totalScore > 0) {
-                            const contribution = weight * (examInfo.avgScore / examInfo.totalScore);
-                            targetAchievement += contribution;
+                        console.log(`[Calc] 目标${targetIndex}, 方式${methodIndex}: 权重=${(weight*100).toFixed(1)}%, 满分=${examInfo.totalScore}, 均分=${examInfo.avgScore}, 贡献=${contribution.toFixed(3)}`);
+                    }
+                }
+            }
+            
+            // 只要有数据就更新，即使结果为0
+            if (hasAnyData) {
+                achievements.push(targetAchievement);
+                
+                const achievementElement = document.getElementById(`targetAchieve${targetIndex}`);
+                if (achievementElement) {
+                    const achievementValue = targetAchievement.toFixed(3);
+                    if (achievementElement.tagName.toLowerCase() === 'input') {
+                        achievementElement.value = achievementValue;
+                    } else {
+                        achievementElement.textContent = achievementValue;
+                    }
+                    
+                    // 同步到显示区域
+                    const showAchieveElement = document.getElementById(`showAchieve${targetIndex}`);
+                    if (showAchieveElement) {
+                        if (showAchieveElement.tagName.toLowerCase() === 'input') {
+                            showAchieveElement.value = achievementValue;
+                        } else {
+                            showAchieveElement.textContent = achievementValue;
                         }
                     }
+                    
+                    console.log(`[Calc] 目标${targetIndex}达成度 = ${achievementValue}`);
                 }
-            }
-            
-            if (!hasWeightForThisTarget) {
-                // 不显示警告，因为可能有些目标确实没有权重
-            }
-            
-            achievements.push(targetAchievement);
-            
-            const achievementElement = document.getElementById(`targetAchieve${targetIndex}`);
-            if (achievementElement) {
-                const achievementValue = targetAchievement.toFixed(3);
-                if (achievementElement.tagName.toLowerCase() === 'input') {
-                    achievementElement.value = achievementValue;
-                } else {
-                    achievementElement.textContent = achievementValue;
-                }
-                
-                const showAchieveElement = document.getElementById(`showAchieve${targetIndex}`);
-                if (showAchieveElement) {
-                    if (showAchieveElement.tagName.toLowerCase() === 'input') {
-                        showAchieveElement.value = achievementValue;
-                    } else {
-                        showAchieveElement.textContent = achievementValue;
-                    }
-                }
+            } else {
+                achievements.push(0);
             }
         }
         
-        if (!hasValidWeight) {
-            return [];
-        }
-        
+        console.log('[Calc] 表5达成度计算完成');
         showCalculationNotice('达成度计算完成');
     } catch (error) {
         showCalculationNotice('计算达成度时出错: ' + error.message, true);
