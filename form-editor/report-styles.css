@@ -253,7 +253,7 @@ table {
 
 .input-def {
     display: inline-block;
-    min-width: 100px;
+    min-width: 14px;
 }
 
 [contenteditable="true"] {
@@ -280,6 +280,66 @@ table {
     color: #888;
     font-style: italic;
 }
+/* 修复复制粘贴时字体样式不一致的问题 */
+[contenteditable="true"],
+.input-field,
+.editable-text {
+    font-family: "SimSun", "宋体", serif !important;
+    font-size: 14px !important;
+    color: var(--primary-color) !important;
+    line-height: 1.6 !important;
+}
+[contenteditable="true"] * {
+    font-family: inherit !important;
+    font-size: inherit !important;
+    color: inherit !important;
+    line-height: inherit !important;
+    font-weight: normal !important;
+    text-decoration: none !important;
+}
+[contenteditable="true"]:focus {
+    font-family: "SimSun", "宋体", serif !important;
+    font-size: 14px !important;
+    color: var(--primary-color) !important;
+}
+td [contenteditable="true"],
+th [contenteditable="true"] {
+    font-family: "SimSun", "宋体", serif !important;
+    font-size: 14px !important;
+    color: var(--primary-color) !important;
+}
+.input-box {
+    font-family: "SimSun", "宋体", serif !important;
+    font-size: 14px !important;
+    color: var(--primary-color) !important;
+}
+.report-container h1 .input-def,
+.report-container h1 .input-def *,
+.report-container h1 .input-def [contenteditable="true"],
+.report-container h1 .input-def [contenteditable="true"] * {
+    font-family: "Source Han Sans SC Black", "Arial Black", sans-serif !important;
+    font-weight: black !important;
+    font-size: 18px !important;
+    color: var(--primary-color) !important;
+    line-height: 1.6 !important;
+    text-align: center !important;
+}
+.report-container h1 .input-def [contenteditable="true"]:focus,
+.report-container h1 .input-def [contenteditable="true"]:focus * {
+    font-family: "Source Han Sans SC Black", "Arial Black", sans-serif !important;
+    font-weight: black !important;
+    font-size: 18px !important;
+    color: var(--primary-color) !important;
+}
+.report-container h1 .input-def [contenteditable="true"][data-placeholder]:empty:before {
+    font-family: "Source Han Sans SC Black", "Arial Black", sans-serif !important;
+    font-weight: black !important;
+    font-size: 18px !important;
+    color: #999 !important;
+    font-style: italic;
+}
+
+
 
 /* 公式样式 */
 .formula {
@@ -577,6 +637,21 @@ td.data-source [contenteditable="true"]:focus {
     .no-print {
         display: none !important;
     }
+
+    [contenteditable="true"],
+    .input-field,
+    .editable-text,
+    .input-box {
+        font-family: "SimSun", "宋体", serif !important;
+        font-size: 10.5pt !important;
+        color: black !important;
+    }
+    .input-def{
+        font-family: "Source Han Sans SC Black", "Arial Black", sans-serif !important;
+        font-weight: black !important;
+        font-size: 13.5pt !important;
+        color: black !important;
+    }
 }
 
 /* 删除按钮样式 - 已隐藏 */
@@ -732,6 +807,20 @@ body.is-exporting-pdf select {
     margin: 0 !important;
     font-size: inherit !important;
     line-height: inherit !important;
+}
+body.is-exporting-pdf [contenteditable="true"],
+body.is-exporting-pdf .input-field,
+body.is-exporting-pdf .editable-text,
+body.is-exporting-pdf .input-box {
+    font-family: "SimSun", "宋体", serif !important;
+    font-size: 10.5pt !important;
+    color: black !important;
+}
+body.is-exporting-pdf .input-def{
+    font-family: "Source Han Sans SC Black", "Arial Black", sans-serif !important;
+    font-weight: black !important;
+    font-size: 13.5pt !important;
+    color: black !important;
 }
 
 body.is-exporting-pdf table {
