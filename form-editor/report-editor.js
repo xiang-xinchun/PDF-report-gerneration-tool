@@ -1,703 +1,839 @@
-﻿(() => {
-  const DEFAULT_LOADING_MESSAGE = '正在处理...';
+// 操作历史记录栈，用于撤销功能
+const operationHistory = [];
+const MAX_HISTORY = 50; // 最大历史记录数量
 
-  let steps = [];
-  let currentStep = 0;
-  let prevBtn = null;
-  let nextBtn = null;
-  let exportBtn = null;
-
-  document.addEventListener('DOMContentLoaded', () => {
-    showLoading('正在初始化编辑器...');
-    setTimeout(() => {
-      initializeEditor();
-      hideLoading();
-    }, 100);
-  });
-
-  function initializeEditor() {
-    console.log('[Init] 开始初始化编辑器...');
-    
-    collectCoreElements();
-    unlockEditableElements();
-    prepareEditableElements();
-    attachNavigationHandlers();
-    
-    // 初始化表2到表4的同步和表3的同步
-    initializeTableSync();
-    
-    currentStep = 0;
-    showStep(currentStep);
-    
-    // 确保按钮可用
-    if (prevBtn) {
-      prevBtn.removeAttribute('disabled');
-      prevBtn.disabled = false;
-      prevBtn.style.pointerEvents = '';
-      prevBtn.style.opacity = '';
-    }
-    if (nextBtn) {
-      nextBtn.removeAttribute('disabled');
-      nextBtn.disabled = false;
-      nextBtn.style.pointerEvents = '';
-      nextBtn.style.opacity = '';
-    }
-    
-    updateNavigationState();
-    dispatchInitializationEvent();
-    
-    console.log('[Init] 编辑器初始化完成');
-  }
-
-  function collectCoreElements() {
-    steps = Array.from(document.querySelectorAll('.step'));
-    prevBtn = document.getElementById('prevBtn');
-    nextBtn = document.getElementById('nextBtn');
-    exportBtn = document.getElementById('exportBtn');
-  }
-
-  function showStep(stepIndex) {
-    steps.forEach((step, index) => {
-      if (index === stepIndex) {
-        step.classList.add('active');
-        step.style.display = 'block';
-      } else {
-        step.classList.remove('active');
-        step.style.display = 'none';
-      }
-    });
-    currentStep = stepIndex;
-  }
-
-  function updateNavigationState() {
-    if (prevBtn) {
-      prevBtn.disabled = currentStep === 0;
-    }
-    if (nextBtn) {
-      nextBtn.disabled = currentStep >= steps.length - 1;
-    }
-  }
-
-  function attachNavigationHandlers() {
-    if (prevBtn) {
-      prevBtn.removeEventListener('click', handlePrevClick);
-      prevBtn.addEventListener('click', handlePrevClick);
-    }
-    if (nextBtn) {
-      nextBtn.removeEventListener('click', handleNextClick);
-      nextBtn.addEventListener('click', handleNextClick);
-    }
-    if (exportBtn) {
-      exportBtn.removeEventListener('click', handleExportClick);
-      exportBtn.addEventListener('click', handleExportClick);
-    }
-  }
-
-  function handlePrevClick() {
-    if (currentStep > 0) {
-      showStep(currentStep - 1);
-      updateNavigationState();
-    }
-  }
-
-  function handleNextClick() {
-    if (currentStep < steps.length - 1) {
-      showStep(currentStep + 1);
-      updateNavigationState();
-    }
-  }
-
-  async function handleExportClick() {
-    console.log('[Export] 开始导出PDF...');
-    
-    // 禁用按钮防止重复点击
-    if (exportBtn) {
-      exportBtn.disabled = true;
-      exportBtn.textContent = '正在导出...';
-    }
-    
-    try {
-      // 检查 electronAPI 是否存在
-      if (!window.electronAPI || !window.electronAPI.exportPDF) {
-        throw new Error('导出功能不可用，请确保应用程序正确启动');
-      }
-      
-      // 调用导出API
-      const result = await window.electronAPI.exportPDF();
-      
-      if (result.success) {
-        console.log('[Export] PDF导出成功:', result.filePath);
-        alert(`PDF报告已成功导出到:\n${result.filePath}`);
-      } else {
-        console.error('[Export] PDF导出失败:', result.message);
-        alert(`导出失败: ${result.message}`);
-      }
-    } catch (error) {
-      console.error('[Export] 导出过程出错:', error);
-      alert(`导出时发生错误: ${error.message}`);
-    } finally {
-      // 延迟执行清理，确保导出完成
-      setTimeout(() => {
-        forceCleanupAfterExport();
-      }, 500);
-      
-      // 恢复按钮状态
-      if (exportBtn) {
-        exportBtn.disabled = false;
-        exportBtn.textContent = '导出PDF报告';
-      }
-    }
-  }
-
-  function forceCleanupAfterExport() {
-    console.log('[Export] 强制清理导出状态...');
-    
-    try {
-      // 1. 移除所有导出相关的类
-      document.body.classList.remove('is-exporting', 'is-exporting-pdf', 'exporting');
-      console.log('[Export] ✓ 已移除导出类');
-      
-      // 2. 移除所有可能的导出样式表
-      const stylesheets = document.querySelectorAll('#export-styles, link[href*="export"]');
-      stylesheets.forEach(sheet => {
-        if (sheet.parentNode) {
-          sheet.parentNode.removeChild(sheet);
-          console.log('[Export] ✓ 已移除样式表:', sheet.id || sheet.href);
+// 删除可编辑项的功能
+function hideEditableItem(containerId) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        // 记录操作到历史记录中，以便撤销
+        recordOperation({
+            type: 'hideEditableItem',
+            containerId: containerId,
+            previousDisplay: container.style.display,
+            previousContainerHTML: container.outerHTML
+        });
+        
+        // 隐藏元素而不是完全移除，以便于在需要时恢复
+        container.style.display = 'none';
+        
+        // 保存状态到 localStorage
+        localStorage.setItem('hidden_' + containerId, 'true');
+        
+        // 保留元素的内容
+        const inputElement = container.querySelector('[contenteditable="true"]');
+        if (inputElement && inputElement.id) {
+            // 仍然保存内容，以便在恢复时使用
+            localStorage.setItem('report_' + inputElement.id, inputElement.textContent);
         }
-      });
-      
-      // 3. 恢复所有步骤的显示状态
-      document.querySelectorAll('.step').forEach((step, index) => {
-        // 移除内联样式
-        step.style.cssText = '';
-        // 只显示当前激活的步骤
-        if (index === currentStep) {
-          step.classList.add('active');
-          step.style.display = 'block';
+        
+        // 如果是目标项，则重排序后续的目标
+        if (containerId.startsWith('target') && containerId.endsWith('-container')) {
+            reorderTargets();
+        }
+    }
+}
+
+// 重新排序课程目标
+function reorderTargets() {
+    // 找出所有目标容器元素
+    const targetContainers = Array.from(document.querySelectorAll('[id^="target"][id$="-container"]'));
+    
+    // 找出所有目标的原始编号和顺序，包括隐藏的
+    const allTargetsInfo = targetContainers.map(container => {
+        const num = parseInt(container.id.match(/\d+/)[0]);
+        const isHidden = container.style.display === 'none' || 
+                         localStorage.getItem('hidden_' + container.id) === 'true';
+        return {
+            element: container,
+            number: num,
+            isHidden: isHidden
+        };
+    });
+    
+    // 过滤出可见的目标容器
+    const visibleTargets = allTargetsInfo.filter(info => !info.isHidden);
+    
+    // 排序可见容器，确保按照原始顺序
+    visibleTargets.sort((a, b) => a.number - b.number);
+    
+    // 记录目标重排映射（老编号 -> 新编号）
+    const targetMappings = {};
+    
+    // 更新目标文本和数据属性
+    visibleTargets.forEach((info, index) => {
+        const newTargetNumber = index + 1;
+        const oldTargetNumber = info.number;
+        
+        // 记录映射关系
+        targetMappings[oldTargetNumber] = newTargetNumber;
+        
+        const container = info.element;
+
+        // 更新目标标题文本
+        const labelElement = container.querySelector('.goal-label');
+        if (labelElement) {
+            labelElement.textContent = `目标${newTargetNumber}：`;
+            // 移除可能遗留的文本节点，防止重复显示
+            Array.from(container.childNodes).forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    node.nodeValue = '';
+                }
+            });
         } else {
-          step.classList.remove('active');
-          step.style.display = 'none';
-        }
-      });
-      console.log('[Export] ✓ 已恢复步骤显示状态');
-      
-      // 4. 强制恢复所有可编辑元素
-      const editableSelectors = [
-        '[contenteditable]',
-        '.input-box',
-        '.editable-text',
-        'input',
-        'textarea',
-        'select'
-      ];
-      
-      editableSelectors.forEach(selector => {
-        document.querySelectorAll(selector).forEach(element => {
-          // 移除所有内联样式
-          element.style.pointerEvents = '';
-          element.style.userSelect = '';
-          element.style.webkitUserSelect = '';
-          element.style.cursor = '';
-          element.style.opacity = '';
-          element.style.visibility = '';
-          
-          // 恢复可编辑属性
-          if (element.hasAttribute('contenteditable')) {
-            element.setAttribute('contenteditable', 'true');
-            element.contentEditable = 'true';
-          }
-          
-          // 移除禁用属性
-          element.removeAttribute('disabled');
-          element.removeAttribute('readonly');
-          if (element.tagName !== 'BUTTON' || element.id !== 'exportBtn') {
-            element.disabled = false;
-          }
-          element.readOnly = false;
-        });
-      });
-      console.log('[Export] ✓ 已恢复所有可编辑元素');
-      
-      // 5. 清除所有数据集属性
-      delete document.body.dataset.prevActiveStep;
-      delete document.body.dataset.prevActiveStepIndex;
-      document.querySelectorAll('.step').forEach(step => {
-        delete step.dataset.prevDisplay;
-      });
-      console.log('[Export] ✓ 已清除临时数据');
-      
-      // 6. 重新调用解锁函数
-      if (typeof unlockEditableElements === 'function') {
-        unlockEditableElements();
-        console.log('[Export] ✓ 已调用解锁函数');
-      }
-      
-      // 7. 重新初始化可编辑元素
-      if (typeof prepareEditableElements === 'function') {
-        prepareEditableElements();
-        console.log('[Export] ✓ 已重新初始化可编辑元素');
-      }
-      
-      // 8. 强制重绘
-      document.body.style.display = 'none';
-      document.body.offsetHeight; // 触发重排
-      document.body.style.display = '';
-      
-      console.log('[Export] ✅ 导出状态清理完成，编辑器已完全恢复');
-      console.log('[Export] 当前步骤:', currentStep);
-      console.log('[Export] body类列表:', document.body.className);
-      
-    } catch (cleanupError) {
-      console.error('[Export] ❌ 清理导出状态时出错:', cleanupError);
-      // 即使出错也尝试基本恢复
-      document.body.classList.remove('is-exporting', 'is-exporting-pdf');
-    }
-  }
-
-  function dispatchInitializationEvent() {
-    const event = new CustomEvent('editorInitialized');
-    document.dispatchEvent(event);
-  }
-
-  function unlockEditableElements() {
-    console.log('[Init] 解锁可编辑元素...');
-    
-    // 移除导出模式类
-    document.body.classList.remove('is-exporting', 'is-exporting-pdf');
-    
-    const elements = getEditableElements();
-    console.log(`[Init] 找到 ${elements.length} 个可编辑元素`);
-    
-    elements.forEach(element => {
-      // 设置 contenteditable
-      if (element.hasAttribute('contenteditable') || 
-          element.classList.contains('editable-text') || 
-          element.classList.contains('input-box')) {
-        element.setAttribute('contenteditable', 'true');
-        element.contentEditable = 'true';
-      }
-      
-      // 移除禁用属性
-      element.removeAttribute('disabled');
-      element.removeAttribute('readonly');
-      element.disabled = false;
-      element.readOnly = false;
-      
-      // 恢复交互样式
-      element.style.pointerEvents = '';
-      element.style.userSelect = '';
-      element.style.cursor = '';
-      element.style.opacity = '';
-    });
-    
-    // 确保加载遮罩不阻挡交互
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) {
-      overlay.style.pointerEvents = 'none';
-      overlay.style.display = 'none';
-    }
-    
-    console.log('[Init] 元素解锁完成');
-  }
-  
-  function prepareEditableElements() {
-    console.log('[Init] 准备可编辑元素...');
-    
-    const elements = getEditableElements();
-    console.log(`[Init] 准备 ${elements.length} 个元素`);
-    
-    elements.forEach(element => {
-      const id = element.id;
-      if (!id) {
-        return;
-      }
-
-      const storageKey = `report_${id}`;
-      const savedValue = localStorage.getItem(storageKey);
-      if (savedValue !== null) {
-        if (element.hasAttribute('contenteditable')) {
-          element.textContent = savedValue;
-        } else {
-          element.value = savedValue;
-        }
-        console.log(`[Init] 已加载 ${id}: ${savedValue.substring(0, 20)}...`);
-      }
-
-      // 移除旧的监听器，添加新的
-      element.removeEventListener('input', handleAutoSave);
-      element.addEventListener('input', handleAutoSave);
-    });
-    
-    console.log('[Init] 元素准备完成');
-  }
-
-  function handleAutoSave(event) {
-    const element = event.currentTarget;
-    const id = element.id;
-    if (!id) {
-      return;
-    }
-
-    const storageKey = `report_${id}`;
-    const value = element.hasAttribute('contenteditable') ? element.textContent : element.value;
-    localStorage.setItem(storageKey, value);
-  }
-
-  function getEditableElements() {
-    return Array.from(document.querySelectorAll('[contenteditable="true"], .editable-text, .input-box, input, textarea'));
-  }
-
-  function showLoading(message = DEFAULT_LOADING_MESSAGE) {
-    const overlay = ensureLoadingOverlay();
-    overlay.style.display = 'flex';
-    overlay.style.opacity = '1';
-    overlay.style.pointerEvents = 'auto';
-
-    const progress = overlay.querySelector('#loading-progress');
-    if (progress) {
-      progress.textContent = message;
-    }
-  }
-
-  function hideLoading() {
-    const overlay = document.getElementById('loading-overlay');
-    if (!overlay) {
-      return;
-    }
-
-    overlay.style.opacity = '0';
-    overlay.style.pointerEvents = 'none';
-    setTimeout(() => {
-      overlay.style.display = 'none';
-    }, 200);
-  }
-
-  function ensureLoadingOverlay() {
-    let overlay = document.getElementById('loading-overlay');
-    if (overlay) {
-      return overlay;
-    }
-
-    overlay = document.createElement('div');
-    overlay.id = 'loading-overlay';
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.backgroundColor = '#fff';
-    overlay.style.display = 'flex';
-    overlay.style.flexDirection = 'column';
-    overlay.style.justifyContent = 'center';
-    overlay.style.alignItems = 'center';
-    overlay.style.zIndex = '10000';
-    overlay.innerHTML = `
-      <div style="width: 60px; height: 60px; border: 8px solid #f3f3f3; border-top: 8px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-      <p style="margin-top: 15px; font-size: 18px; color: #333;">正在加载应用...</p>
-      <p id="loading-progress" data-loading-message style="margin-top: 8px; font-size: 14px; color: #666;">${DEFAULT_LOADING_MESSAGE}</p>
-    `;
-
-    const style = document.createElement('style');
-    style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-    overlay.appendChild(style);
-    document.body.appendChild(overlay);
-    return overlay;
-  }
-
-  // 表格同步功能（表2→表4，表3→公式3下的表）
-  function initializeTableSync() {
-    console.log('[Sync] 初始化表格同步...');
-    
-    // 首次加载时同步数据
-    syncTable2ToTable4();
-    syncTable3ToShowWeight();
-    
-    // 为表2中的考核方式和满分字段添加监听器
-    for (let i = 1; i <= 4; i++) {
-      const evaluationElement = document.getElementById(`evaluation${i}`);
-      const scoreElement = document.getElementById(`score${i}`);
-      
-      if (evaluationElement) {
-        evaluationElement.addEventListener('input', () => {
-          syncEvaluationName(i);
-        });
-      }
-      
-      if (scoreElement) {
-        scoreElement.addEventListener('input', () => {
-          syncTotalScore(i);
-          triggerTable5Calculation();
-        });
-      }
-      
-      // 为表2中的权重字段添加监听器，触发表5计算
-      for (let j = 1; j <= 4; j++) {
-        const weightElement = document.getElementById(`weight${i}-${j}`);
-        if (weightElement) {
-          weightElement.addEventListener('input', () => {
-            console.log(`[Sync] 权重 weight${i}-${j} 已变化`);
-            triggerTable5Calculation();
-          });
-        }
-      }
-      
-      // 为表4中的平均分字段添加监听器，触发表5计算
-      const avgScoreElement = document.getElementById(`avgScore${i}`);
-      if (avgScoreElement) {
-        // 添加 input 事件（用户手动输入）
-        avgScoreElement.addEventListener('input', () => {
-          console.log(`[Sync] 平均分 avgScore${i} 已变化（input）: ${avgScoreElement.textContent}`);
-          triggerTable5Calculation();
-        });
-        
-        // 使用 MutationObserver 监听内容变化（Excel上传等自动填充）
-        const observer = new MutationObserver(() => {
-          console.log(`[Sync] 平均分 avgScore${i} 已变化（mutation）: ${avgScoreElement.textContent}`);
-          triggerTable5Calculation();
-        });
-        
-        observer.observe(avgScoreElement, {
-          characterData: true,
-          childList: true,
-          subtree: true
-        });
-      }
-      
-      // 同样监听 totalScore 的变化
-      const totalScoreElement = document.getElementById(`totalScore${i}`);
-      if (totalScoreElement) {
-        const observer = new MutationObserver(() => {
-          console.log(`[Sync] 总分 totalScore${i} 已变化: ${totalScoreElement.textContent}`);
-          triggerTable5Calculation();
-        });
-        
-        observer.observe(totalScoreElement, {
-          characterData: true,
-          childList: true,
-          subtree: true
-        });
-      }
-      
-      // ===== 新增：监听表3的权重值变化 =====
-      const targetWeightElement = document.getElementById(`targetWeight${i}`);
-      if (targetWeightElement) {
-        // 使用 MutationObserver 监听 targetWeight 的变化
-        const weightObserver = new MutationObserver(() => {
-          const value = targetWeightElement.textContent.trim();
-          console.log(`[Sync] 表3权重值 targetWeight${i} 已变化: ${value}`);
-          syncTargetWeightToShow(i);
-        });
-        
-        weightObserver.observe(targetWeightElement, {
-          characterData: true,
-          childList: true,
-          subtree: true
-        });
-      }
-    }
-    
-    // 初始化完成后，立即触发一次计算（延迟以确保DOM完全加载）
-    setTimeout(() => {
-      console.log('[Sync] 初始化后触发首次计算');
-      triggerTable5Calculation();
-    }, 1000);
-    
-    console.log('[Sync] 表格同步初始化完成');
-  }
-  
-  function syncTable2ToTable4() {
-    console.log('[Sync] 同步表2数据到表4...');
-    
-    for (let i = 1; i <= 4; i++) {
-      syncEvaluationName(i);
-      syncTotalScore(i);
-    }
-  }
-  
-  function syncEvaluationName(index) {
-    const evaluationElement = document.getElementById(`evaluation${index}`);
-    const evaluationShowElement = document.getElementById(`evaluationShow${index}`);
-    
-    if (evaluationElement && evaluationShowElement) {
-      const value = evaluationElement.textContent.trim();
-      evaluationShowElement.textContent = value;
-      console.log(`[Sync] 已同步考核方式${index}: ${value}`);
-    }
-  }
-  
-  function syncTotalScore(index) {
-    const scoreElement = document.getElementById(`score${index}`);
-    const totalScoreElement = document.getElementById(`totalScore${index}`);
-    
-    if (scoreElement && totalScoreElement) {
-      const value = scoreElement.textContent.trim();
-      totalScoreElement.textContent = value;
-      console.log(`[Sync] 已同步满分${index}: ${value}`);
-    }
-  }
-  
-  // 同步表3的权重值到公式(3)下的表
-  function syncTable3ToShowWeight() {
-    console.log('[Sync] 同步表3权重值到显示表...');
-    
-    for (let i = 1; i <= 4; i++) {
-      syncTargetWeightToShow(i);
-    }
-  }
-  
-  function syncTargetWeightToShow(index) {
-    const targetWeightElement = document.getElementById(`targetWeight${index}`);
-    const showWeightElement = document.getElementById(`showWeight${index}`);
-    
-    if (targetWeightElement && showWeightElement) {
-      const value = targetWeightElement.textContent.trim();
-      showWeightElement.textContent = value;
-      console.log(`[Sync] 已同步权重值${index}: ${value} (targetWeight${index} → showWeight${index})`);
-    }
-  }
-  
-  // 触发表5（课程分目标达成度）的自动计算
-  function triggerTable5Calculation() {
-    console.log('[Calc] 触发表5达成度计算...');
-    
-    // 使用防抖，避免频繁计算
-    if (window.table5CalculationTimer) {
-      clearTimeout(window.table5CalculationTimer);
-    }
-    
-    window.table5CalculationTimer = setTimeout(() => {
-      calculateTable5Achievements();
-    }, 500);
-  }
-  
-  // 暴露给全局，让其他模块可以调用
-  window.triggerTable5Calculation = triggerTable5Calculation;
-  
-  // 计算表5的课程分目标达成度
-  function calculateTable5Achievements() {
-    console.log('[Calc] ========== 开始计算表5达成度 ==========');
-    
-    // 检查是否有计算模块
-    if (typeof window.calculationModule !== 'undefined' && 
-        typeof window.calculationModule.calculateWeights === 'function') {
-      console.log('[Calc] 使用计算模块进行计算');
-      window.calculationModule.calculateWeights();
-      return;
-    }
-    
-    // 如果没有计算模块，使用自定义计算
-    console.log('[Calc] 使用内置计算逻辑');
-    
-    try {
-      const achievements = [];
-      let hasValidData = false;
-      
-      // 对于每个课程目标（1-4）
-      for (let targetIndex = 1; targetIndex <= 4; targetIndex++) {
-        let targetAchievement = 0;
-        let contributionCount = 0;
-        
-        console.log(`[Calc] --- 计算课程目标${targetIndex} ---`);
-        
-        // 对于每种考核方式（1-4）
-        for (let methodIndex = 1; methodIndex <= 4; methodIndex++) {
-          // 获取权重 K_ij
-          const weightElement = document.getElementById(`weight${methodIndex}-${targetIndex}`);
-          if (!weightElement) {
-            console.log(`[Calc] 警告: 找不到元素 weight${methodIndex}-${targetIndex}`);
-            continue;
-          }
-          
-          const weightText = weightElement.textContent.trim();
-          if (!weightText) {
-            console.log(`[Calc] 方式${methodIndex}对目标${targetIndex}: 权重为空，跳过`);
-            continue;
-          }
-          
-          let weight = parseWeightValue(weightText);
-          
-          // 获取总分 Z_j
-          const totalScoreElement = document.getElementById(`totalScore${methodIndex}`);
-          if (!totalScoreElement) {
-            console.log(`[Calc] 警告: 找不到元素 totalScore${methodIndex}`);
-            continue;
-          }
-          
-          const totalScoreText = totalScoreElement.textContent.trim();
-          const totalScore = parseFloat(totalScoreText) || 0;
-          
-          // 获取平均分 Q_j
-          const avgScoreElement = document.getElementById(`avgScore${methodIndex}`);
-          if (!avgScoreElement) {
-            console.log(`[Calc] 警告: 找不到元素 avgScore${methodIndex}`);
-            continue;
-          }
-          
-          const avgScoreText = avgScoreElement.textContent.trim();
-          const avgScore = parseFloat(avgScoreText) || 0;
-          
-          console.log(`[Calc] 方式${methodIndex}: 权重="${weightText}"(${weight}), 总分="${totalScoreText}"(${totalScore}), 平均分="${avgScoreText}"(${avgScore})`);
-          
-          // 计算贡献值：K_ij × (Q_j / Z_j)
-          if (totalScore > 0 && weight > 0) {
-            const contribution = weight * (avgScore / totalScore);
-            targetAchievement += contribution;
-            contributionCount++;
-            hasValidData = true;
-            console.log(`[Calc]   ✓ 贡献值 = ${weight.toFixed(3)} × (${avgScore}/${totalScore}) = ${contribution.toFixed(4)}`);
-          } else {
-            if (totalScore <= 0) {
-              console.log(`[Calc]   ✗ 总分为0或负数，跳过`);
-            } else if (weight <= 0) {
-              console.log(`[Calc]   ✗ 权重为0，跳过`);
+            const textNode = Array.from(container.childNodes)
+                .find(node => node.nodeType === Node.TEXT_NODE);
+            if (textNode) {
+                textNode.nodeValue = `目标${newTargetNumber}：`;
             }
-          }
         }
-        
-        achievements.push(targetAchievement);
-        
-        // 更新表5中的达成度值
-        const achievementElement = document.getElementById(`targetAchieve${targetIndex}`);
-        if (achievementElement) {
-          const achievementValue = targetAchievement.toFixed(3);
-          achievementElement.textContent = achievementValue;
-          console.log(`[Calc] ✓✓✓ 课程目标${targetIndex}达成度 = ${achievementValue} (${contributionCount}项贡献)`);
-        } else {
-          console.log(`[Calc] 警告: 找不到元素 targetAchieve${targetIndex}`);
-        }
-      }
-      
-      if (!hasValidData) {
-        console.log('[Calc] ⚠️ 警告: 没有有效数据可计算');
-      }
-      
-      console.log('[Calc] ========== 表5计算完成 ==========');
-      console.log('[Calc] 结果:', achievements.map((v, i) => `目标${i+1}=${v.toFixed(3)}`).join(', '));
-      
-    } catch (error) {
-      console.error('[Calc] ❌ 计算表5时出错:', error);
-      console.error('[Calc] 错误堆栈:', error.stack);
-    }
-  }
-  
-  // 解析权重值（支持百分比和小数格式）
-  function parseWeightValue(value) {
-    if (!value) return 0;
+    });
     
-    const str = value.toString().trim();
+    // 更新所有表格中的课程目标标题和数据
+    updateTableHeaders(targetMappings);
     
-    // 处理百分比格式
-    if (str.includes('%')) {
-      const numStr = str.replace('%', '');
-      const num = parseFloat(numStr);
-      if (isNaN(num)) return 0;
-      return num / 100;
-    }
-    
-    // 处理纯数字格式
-    const num = parseFloat(str);
-    if (isNaN(num)) return 0;
-    return num > 1 ? num / 100 : num;
-  }
+    // 更新其他相关元素中的目标编号
+    updateOtherTargetReferences(targetMappings);
+}
 
-})();
+// 更新表格中的标题和列数据
+function updateTableHeaders(targetMappings) {
+    // 处理所有表格
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+        // 获取所有表头行
+        const headerRows = table.querySelectorAll('thead tr');
+        
+        headerRows.forEach(row => {
+            // 跳过操作列和前置列（如"指标点"列）
+            const headerCells = Array.from(row.querySelectorAll('th')).filter((cell, index) => {
+                // 排除第一列和最后一列（通常是标签列和操作列）
+                return index > 0 && index < row.querySelectorAll('th').length - 1;
+            });
+            
+            // 只处理包含"课程目标X"的表头
+            headerCells.forEach(cell => {
+                const match = cell.textContent.match(/课程目标(\d+)/);
+                if (match) {
+                    const oldTargetNumber = parseInt(match[1]);
+                    if (targetMappings[oldTargetNumber]) {
+                        cell.textContent = `课程目标${targetMappings[oldTargetNumber]}`;
+                    } else {
+                        // 如果这个目标被删除了，隐藏这一列
+                        const columnIndex = Array.from(cell.parentNode.children).indexOf(cell);
+                        hideTableColumn(table, columnIndex);
+                    }
+                }
+            });
+        });
+    });
+}
+
+// 隐藏表格中的某一列
+function hideTableColumn(table, columnIndex) {
+    const rows = table.querySelectorAll('tr');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td, th');
+        if (cells.length > columnIndex) {
+            cells[columnIndex].style.display = 'none';
+        }
+    });
+}
+
+// 记录操作到历史记录栈中
+function recordOperation(operation) {
+    // 限制历史记录大小
+    if (operationHistory.length >= MAX_HISTORY) {
+        operationHistory.shift(); // 移除最旧的记录
+    }
+    
+    // 添加时间戳
+    operation.timestamp = new Date().getTime();
+    
+    // 添加到历史记录
+    operationHistory.push(operation);
+    
+    // 更新撤销按钮状态
+    updateUndoButtonState();
+}
+
+// 更新其他涉及课程目标的引用
+function updateOtherTargetReferences(targetMappings = {}) {
+    // 找出所有包含"课程目标X"或"目标X"文本的元素
+    const allElements = document.querySelectorAll('*');
+    
+    allElements.forEach(element => {
+        // 跳过我们已经处理过的目标容器和表格标题
+        if (element.id && (element.id.startsWith('target') || element.tagName === 'TH')) {
+            return;
+        }
+        
+        // 检查元素中是否有课程目标相关的文本
+        for (const node of element.childNodes) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.nodeValue;
+                
+                // 匹配"课程目标X"或"目标X"的格式
+                const courseTargetMatch = text.match(/课程目标(\d+)/g);
+                const targetMatch = text.match(/目标(\d+)/g);
+                
+                if (courseTargetMatch || targetMatch) {
+                    let newText = text;
+                    
+                    // 处理"课程目标X"格式
+                    if (courseTargetMatch) {
+                        courseTargetMatch.forEach(match => {
+                            const num = parseInt(match.match(/\d+/)[0]);
+                            if (targetMappings[num]) {
+                                newText = newText.replace(
+                                    new RegExp(`课程目标${num}`, 'g'), 
+                                    `课程目标${targetMappings[num]}`
+                                );
+                            }
+                        });
+                    }
+                    
+                    // 处理"目标X"格式（不是目标容器内部）
+                    if (targetMatch && !element.closest('[id^="target"][id$="-container"]')) {
+                        targetMatch.forEach(match => {
+                            const num = parseInt(match.match(/\d+/)[0]);
+                            if (targetMappings[num]) {
+                                newText = newText.replace(
+                                    new RegExp(`目标${num}(?!-)`, 'g'), 
+                                    `目标${targetMappings[num]}`
+                                );
+                            }
+                        });
+                    }
+                    
+                    // 如果有更改，更新文本
+                    if (newText !== text) {
+                        node.nodeValue = newText;
+                    }
+                }
+            }
+        }
+    });
+    
+    // 更新data-placeholder属性中的目标编号
+    document.querySelectorAll('[data-placeholder^="请填写目标"]').forEach(element => {
+        const placeholder = element.getAttribute('data-placeholder');
+        const match = placeholder.match(/请填写目标(\d+)/);
+        if (match) {
+            const num = parseInt(match[1]);
+            if (targetMappings[num]) {
+                element.setAttribute('data-placeholder', `请填写目标${targetMappings[num]}`);
+            }
+        }
+    });
+}
+
+// 计算当前可见的目标数量
+function countVisibleTargets() {
+    const targetContainers = Array.from(document.querySelectorAll('[id^="target"][id$="-container"]'));
+    return targetContainers.filter(container => {
+        return container.style.display !== 'none' && 
+               localStorage.getItem('hidden_' + container.id) !== 'true';
+    }).length;
+}
+
+// 撤销上一次操作
+function undoLastOperation() {
+    if (operationHistory.length === 0) {
+        // 没有可撤销的操作
+        showNotification('提示', '没有可撤销的操作');
+        return;
+    }
+    
+    // 添加确认对话框
+    if (!confirm("确认撤销吗？")) {
+        return; // 用户取消了撤销操作
+    }
+    
+    const lastOperation = operationHistory.pop();
+    
+    // 根据操作类型执行相应的撤销
+    switch (lastOperation.type) {
+        case 'hideEditableItem':
+            // 恢复被隐藏的可编辑项
+            const container = document.getElementById(lastOperation.containerId);
+            if (container) {
+                container.style.display = lastOperation.previousDisplay || '';
+                localStorage.removeItem('hidden_' + lastOperation.containerId);
+                
+                // 如果是目标项，需要重排序
+                if (lastOperation.containerId.startsWith('target') && lastOperation.containerId.endsWith('-container')) {
+                    reorderTargets();
+                }
+            }
+            break;
+            
+        case 'hideTableRow':
+            // 恢复被隐藏的表格行
+            const row = document.getElementById(lastOperation.rowId);
+            if (row) {
+                row.style.display = lastOperation.previousDisplay || '';
+                localStorage.removeItem('hidden_row_' + lastOperation.rowId);
+            }
+            break;
+            
+        default:
+            console.warn('未知的操作类型:', lastOperation.type);
+    }
+    
+    // 更新撤销按钮状态
+    updateUndoButtonState();
+    
+    // 不再显示额外的成功通知，因为已经有了确认对话框
+}
+
+// 更新撤销按钮状态
+function updateUndoButtonState() {
+    const undoButton = document.getElementById('undo-button');
+    if (undoButton) {
+        undoButton.disabled = operationHistory.length === 0;
+    }
+}
+
+// 显示通知
+function showNotification(title, message) {
+    // 如果页面中有Toast组件，使用它
+    const toastTitle = document.getElementById('toast-title');
+    const toastMessage = document.getElementById('toast-message');
+    const toast = document.getElementById('notification-toast');
+    
+    if (toastTitle && toastMessage && toast) {
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+        
+        // 显示自定义Toast通知
+        toast.style.display = 'block';
+        
+        // 3秒后自动隐藏
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    } else {
+        // 否则使用简单的alert
+        console.log(`${title}: ${message}`);
+    }
+}
+
+// 恢复之前隐藏的可编辑项和表格行
+function restoreHiddenItems() {
+    // 查找所有具有ID并以-container结尾的元素
+    const containerElements = document.querySelectorAll('[id$="-container"]');
+    
+    containerElements.forEach(container => {
+        const containerId = container.id;
+        // 检查该元素是否已被隐藏
+        const isHidden = localStorage.getItem('hidden_' + containerId) === 'true';
+        
+        if (isHidden) {
+            // 如果元素之前被隐藏，则隐藏它
+            container.style.display = 'none';
+        }
+    });
+    
+    // 恢复所有已隐藏的表格行
+    const allTableRows = document.querySelectorAll('tr[id]');
+    allTableRows.forEach(row => {
+        const rowId = row.id;
+        if (rowId) {
+            const isHidden = localStorage.getItem('hidden_row_' + rowId) === 'true';
+            
+            if (isHidden) {
+                row.style.display = 'none';
+            }
+        }
+    });
+}
+
+// 重置所有内容到最初状态（恢复所有隐藏的项目）
+function resetAllContent() {
+    // 添加确认对话框
+    if (!confirm("确认恢复全部内容吗？")) {
+        return; // 用户取消了恢复操作
+    }
+    
+    // 清除所有隐藏状态
+    const keys = [];
+    
+    // 收集所有与隐藏状态相关的localStorage键
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('hidden_')) {
+            keys.push(key);
+        }
+        if (key.startsWith('report_')) {
+            keys.push(key);
+        }
+    }
+    
+    // 删除所有隐藏状态
+    keys.forEach(key => {
+        localStorage.removeItem(key);
+    });
+    
+    // 显示所有目标容器
+    document.querySelectorAll('[id^="target"][id$="-container"]').forEach(container => {
+        container.style.display = '';
+    });
+    
+    // 显示所有表格行
+    document.querySelectorAll('tr[id]').forEach(row => {
+        row.style.display = '';
+    });
+    
+    // 显示所有表格列
+    document.querySelectorAll('th, td').forEach(cell => {
+        cell.style.display = '';
+    });
+
+    // 清空所有可编辑文本和输入框
+    document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+        element.innerHTML = '';
+    });
+
+    document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(element => {
+        element.value = '';
+    });
+
+    // 清空自动计算与同步显示区域
+    const textSelectors = [
+        '[id^="courseNameShow"]',
+        '#supportMaterial',
+        '#totalWeight',
+        '#totalAchieve',
+        '#studentCount',
+        '#maxScoreShow',
+        '#minScoreShow',
+        '#avgTotalScoreShow',
+        '[id^="count"]',
+        '[id^="rate"]',
+        '[id^="targetWeight"]',
+        '[id^="targetAchieve"]',
+        '[id^="showWeight"]',
+        '[id^="showAchieve"]',
+        '[id^="evaluationShow"]',
+        '[id^="totalScore"]',
+        '[id^="avgScore"]'
+    ];
+
+    textSelectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach(element => {
+            element.textContent = '';
+        });
+    });
+
+    // 清空预览 iframe
+    const pdfPreview = document.getElementById('pdf-preview');
+    if (pdfPreview) {
+        pdfPreview.src = '';
+    }
+    
+    // 清空操作历史
+    while(operationHistory.length > 0) {
+        operationHistory.pop();
+    }
+    
+    // 更新撤销按钮状态
+    updateUndoButtonState();
+
+    if (window.calculationModule && typeof window.calculationModule.smartCalculate === 'function') {
+        window.calculationModule.smartCalculate();
+    }
+    
+    // 不再显示额外的成功通知，因为已经有了确认对话框
+}
+
+// 表格行删除功能
+function hideTableRow(rowId) {
+    const row = document.getElementById(rowId);
+    if (row) {
+        // 记录操作到历史记录中，以便撤销
+        recordOperation({
+            type: 'hideTableRow',
+            rowId: rowId,
+            previousDisplay: row.style.display
+        });
+        
+        // 隐藏表格行
+        row.style.display = 'none';
+        
+        // 保存状态到 localStorage
+        localStorage.setItem('hidden_row_' + rowId, 'true');
+        
+        // 保留表格行的内容
+        const editableElements = row.querySelectorAll('[contenteditable="true"]');
+        editableElements.forEach(element => {
+            if (element.id) {
+                localStorage.setItem('report_' + element.id, element.textContent);
+            }
+        });
+    }
+}
+
+// 页面加载后的初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取DOM元素
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const steps = document.querySelectorAll('.step');
+    
+    // 初始化撤销按钮状态
+    updateUndoButtonState();
+
+    // 全局变量
+    let currentStep = 0;
+    
+    // 加载MathJax脚本
+    loadMathJax();
+    
+    // 步骤导航
+    prevBtn.addEventListener('click', function() {
+        if (currentStep > 0) {
+            showStep(currentStep - 1);
+        }
+    });
+
+    nextBtn.addEventListener('click', function() {
+        if (currentStep < steps.length - 1) {
+            showStep(currentStep + 1);
+        }
+    });
+
+    // 初始化内容同步
+    setupContentSync();
+    
+    // 恢复之前隐藏的元素
+    restoreHiddenItems();
+    
+    // 重排序课程目标
+    reorderTargets();
+    
+    // 导出PDF按钮点击事件
+    exportBtn.addEventListener('click', function() {
+        // 在导出前准备报告内容
+        prepareForExport();
+        exportPDF();
+    });
+    
+    // 准备导出，处理所有可编辑区域，确保内容正确显示
+    function prepareForExport() {
+        try {
+            console.log('正在准备导出报告...');
+            
+            // 添加导出类以应用特殊标志
+            document.body.classList.add('is-exporting');
+            
+            // 隐藏所有删除按钮
+            document.querySelectorAll('.delete-button, .row-delete-button, .delete-cell').forEach(button => {
+                button.style.display = 'none';
+            });
+            
+            // 处理隐藏的元素，在PDF中完全移除
+            document.querySelectorAll('[id$="-container"]').forEach(container => {
+                if (container.style.display === 'none') {
+                    // 临时添加类以便在PDF中完全移除
+                    container.classList.add('pdf-hidden');
+                }
+            });
+            
+            // 处理隐藏的表格行
+            document.querySelectorAll('tr[id]').forEach(row => {
+                if (row.style.display === 'none') {
+                    // 临时添加类以便在PDF中完全移除
+                    row.classList.add('pdf-hidden');
+                }
+            });
+            
+            // 添加样式规则以隐藏这些元素
+            let style = document.createElement('style');
+            style.id = 'pdf-export-styles';
+            style.textContent = '.pdf-hidden { display: none !important; }';
+            document.head.appendChild(style);
+            
+            // 填充可编辑内容的基本操作
+            // 处理所有可编辑区域，确保内容被保留
+            document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                // 保存原始内容以便导出后恢复
+                element.dataset.exportOriginalContent = element.innerHTML;
+
+                // 如果元素为空，使用占位符内容或添加空格
+                if (element.textContent.trim() === '') {
+                    const placeholder = element.getAttribute('data-placeholder');
+                    if (placeholder) {
+                        element.textContent = placeholder;
+                        element.dataset.exportInsertedPlaceholder = 'true';
+                    } else {
+                        element.innerHTML = '&nbsp;';
+                        element.dataset.exportInsertedPlaceholder = 'true';
+                    }
+                }
+            });
+            
+            // 处理所有输入框
+            document.querySelectorAll('input.input-field').forEach(element => {
+                element.dataset.exportOriginalValue = element.value;
+
+                if (element.value.trim() === '') {
+                    const placeholder = element.getAttribute('placeholder');
+                    if (placeholder) {
+                        element.value = placeholder;
+                        element.dataset.exportInsertedPlaceholder = 'true';
+                    } else {
+                        element.value = ' ';
+                        element.dataset.exportInsertedPlaceholder = 'true';
+                    }
+                }
+            });
+            
+            console.log('报告准备完成，准备导出PDF');
+        } catch (error) {
+            console.error('准备导出报告时出错:', error);
+        }
+    }
+
+    // 显示特定步骤
+    function showStep(stepIndex) {
+        // 隐藏所有步骤
+        steps.forEach(step => step.classList.remove('active'));
+        
+        // 显示当前步骤
+        steps[stepIndex].classList.add('active');
+        
+        // 更新当前步骤索引
+        currentStep = stepIndex;
+        
+        // 更新按钮状态
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep === steps.length - 1;
+    }
+    
+    // 设置内容同步
+    function setupContentSync() {
+        // 课程名称同步
+        const courseName = document.getElementById('courseName');
+        const courseNameShows = [
+            document.getElementById('courseNameShow1'),
+            document.getElementById('courseNameShow2'),
+            document.getElementById('courseNameShow3'),
+            document.getElementById('courseNameShow4'),
+            document.getElementById('courseNameShow5')
+        ];
+        if (courseName) {
+            courseName.addEventListener('input', function() {
+                const value = this.textContent;
+                courseNameShows.forEach(element => {
+                    if(element) element.textContent = value;
+                });
+            });
+        }
+        // 获取表2中的数据到表4
+        const evaluations = ['evaluation1','evaluation2','evaluation3','evaluation4'];
+        const evaluationShows = ['evaluationShow1', 'evaluationShow2', 'evaluationShow3', 'evaluationShow4'];
+        evaluations.forEach((id, index) => { 
+            const evaluationName = document.getElementById(id);
+            const evaluationNameShow = document.getElementById(evaluationShows[index]);
+            if (evaluationName && evaluationNameShow) {
+                evaluationName.addEventListener('input', function() {
+                    evaluationNameShow.textContent = this.textContent;
+                });
+                evaluationNameShow.textContent = evaluationName.textContent;
+            }
+        });
+    
+        const supportMaterialElem = document.getElementById('supportMaterial');
+        // 定义更新支撑材料的函数
+        function updateSupportMaterial() {
+            if (!supportMaterialElem) return;
+            
+            const validEvaluations = evaluations
+                .map(id => document.getElementById(id)?.textContent?.trim())
+                .filter(content => content);
+            
+            const supportText = validEvaluations.join('、');
+            supportMaterialElem.textContent = supportText;
+        }
+        
+        // 为每个考核方式添加输入监听
+        evaluations.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', updateSupportMaterial);
+            }
+        });
+        updateSupportMaterial();
+
+
+        
+        const scores=['score1','score2','score3','score4'];
+        const scoreShows = ['totalScore1', 'totalScore2', 'totalScore3', 'totalScore4'];
+        scores.forEach((id, index) => { 
+            const score = document.getElementById(id);
+            const scoreShow = document.getElementById(scoreShows[index]);
+            if (score && scoreShow) {
+                score.addEventListener('input', function() {
+                    scoreShow.textContent = this.textContent;
+                });
+                scoreShow.textContent = score.textContent;
+            }
+        });
+        
+        // 确保所有可编辑元素都可以进行编辑
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.style.pointerEvents = 'auto';
+            el.style.userSelect = 'text';
+            el.style.cursor = 'text';
+            
+            // 修复空的contenteditable元素
+            if (!el.textContent.trim() && !el.innerHTML.trim()) {
+                el.innerHTML = ''; // 确保内容为空，而不是只包含空格或换行符
+            }
+        });
+        
+        // 其他输入元素的自动保存到localStorage
+        const inputElements = document.querySelectorAll('[contenteditable="true"], input');
+        inputElements.forEach(element => {
+            const id = element.id;
+            if (id) {
+                // 从localStorage加载数据
+                const savedValue = localStorage.getItem('report_' + id);
+                if (savedValue) {
+                    if (element.hasAttribute('contenteditable')) {
+                        element.textContent = savedValue;
+                    } else {
+                        element.value = savedValue;
+                    }
+                }
+                
+                // 保存输入数据到localStorage
+                element.addEventListener('input', function() {
+                    const value = element.hasAttribute('contenteditable') ? 
+                                 element.textContent : element.value;
+                    localStorage.setItem('report_' + id, value);
+                });
+            }
+        });
+    }
+    
+    // 加载MathJax脚本
+    function loadMathJax() {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
+        script.async = true;
+        document.head.appendChild(script);
+    }
+    
+    // 导出PDF功能
+    function exportPDF() {
+        try {
+            window.showDebug('准备导出PDF...');
+            
+            // 通知主进程开始生成PDF
+            window.electronAPI.exportPDF()
+                .then(result => {
+                    try {
+                        // 导出完成后，恢复页面状态
+                        document.body.classList.remove('is-exporting');
+                        
+                        // 删除临时添加的样式
+                        const tempStyle = document.getElementById('pdf-export-styles');
+                        if (tempStyle) {
+                            tempStyle.remove();
+                        }
+                        
+                        // 恢复删除按钮的显示
+                        document.querySelectorAll('.delete-button, .row-delete-button, .delete-cell').forEach(button => {
+                            button.style.display = '';
+                        });
+
+                        // 恢复导出时插入的占位内容
+                        document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                            if (element.dataset.exportInsertedPlaceholder === 'true') {
+                                element.innerHTML = '';
+                            }
+                            if (element.dataset.exportOriginalContent !== undefined) {
+                                element.innerHTML = element.dataset.exportOriginalContent;
+                                delete element.dataset.exportOriginalContent;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
+                        });
+
+                        document.querySelectorAll('input.input-field').forEach(element => {
+                            if (element.dataset.exportOriginalValue !== undefined) {
+                                element.value = element.dataset.exportOriginalValue;
+                                delete element.dataset.exportOriginalValue;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
+                        });
+
+                        // 移除临时标记类
+                        document.querySelectorAll('.pdf-hidden').forEach(element => {
+                            element.classList.remove('pdf-hidden');
+                        });
+
+                        // 恢复步骤显示状态 - 移除内联display并调用showStep确保状态一致
+                        steps.forEach(step => {
+                            step.style.removeProperty('display');
+                            if (step.dataset && step.dataset.prevDisplay !== undefined) {
+                                delete step.dataset.prevDisplay;
+                            }
+                        });
+                        showStep(currentStep);
+                        
+                        if (result.success) {
+                            window.showDebug('PDF导出成功：' + result.filePath);
+                        } else {
+                            window.showDebug('PDF导出失败：' + (result.message || '未知错误'));
+                        }
+                    } catch (cleanupErr) {
+                        console.error('导出后清理错误:', cleanupErr);
+                        window.showDebug('PDF导出后清理出现问题，但PDF可能已成功生成');
+                    }
+                })
+                .catch(err => {
+                    document.body.classList.remove('is-exporting');
+                    window.showDebug('PDF导出错误：' + err.message);
+                    
+                    // 确保恢复基本显示状态
+                    try {
+                        // 恢复导出时插入的占位内容
+                        document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                            if (element.dataset.exportInsertedPlaceholder === 'true') {
+                                element.innerHTML = '';
+                            }
+                            if (element.dataset.exportOriginalContent !== undefined) {
+                                element.innerHTML = element.dataset.exportOriginalContent;
+                                delete element.dataset.exportOriginalContent;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
+                        });
+
+                        document.querySelectorAll('input.input-field').forEach(element => {
+                            if (element.dataset.exportOriginalValue !== undefined) {
+                                element.value = element.dataset.exportOriginalValue;
+                                delete element.dataset.exportOriginalValue;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
+                        });
+
+                        steps.forEach(step => {
+                            step.style.removeProperty('display');
+                        });
+                        showStep(currentStep);
+                    } catch (displayErr) {
+                        console.error('恢复显示状态出错:', displayErr);
+                    }
+                });
+        } catch (error) {
+            console.error('exportPDF函数执行出错:', error);
+            window.showDebug('PDF导出初始化错误：' + error.message);
+        }
+    }
+    
+    // 初始化显示第一步
+    showStep(0);
+});

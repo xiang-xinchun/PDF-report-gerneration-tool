@@ -84,6 +84,26 @@ p {
     text-indent: 2em;
 }
 
+.target-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    text-indent: 0;
+    margin-left: 2em;
+}
+
+.target-item .goal-label {
+    white-space: nowrap;
+    line-height: 1.6;
+    flex: none;
+}
+
+.target-item .goal-text {
+    flex: 1;
+    min-width: 0;
+    text-indent: 0;
+}
+
 .editable-text {
     display: inline;
     min-width: 200px;
@@ -161,6 +181,59 @@ table {
     white-space: normal;
     word-break: break-word;
     overflow-wrap: anywhere;
+}
+
+.hml-select {
+    cursor: pointer;
+    min-height: 32px;
+    padding: 4px 8px;
+    line-height: 1.4;
+    border-radius: 4px;
+    text-align-last: center;
+}
+
+.hml-select:focus {
+    outline: none;
+    border-color: var(--primary-color, #4CAF50);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.report-container select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none;
+    padding-right: 0;
+}
+
+.report-container select::-ms-expand {
+    display: none;
+}
+
+#table1-container .goal-header,
+#table1-container .goal-cell {
+    min-width: 120px;
+    width: 120px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+#table1-container .goal-header-text {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+#table1-container .goal-cell .hml-select {
+    width: 100%;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: none;
+    padding-right: 0;
+}
+
+.hml-select::-ms-expand {
+    display: none;
 }
 
 /* 输入框样式 */

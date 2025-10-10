@@ -35,6 +35,32 @@ function safeParseFloat(value) {
     return parsed;
 }
 
+// 辅助函数：获取表1单元格中的H/M/L值
+function getTable1CellValue(cell) {
+    if (!cell) return '';
+
+    const select = cell.querySelector('select.hml-select');
+    if (select) {
+        return (select.value || '').trim().toUpperCase();
+    }
+
+    const inputBox = cell.querySelector('.input-box');
+    if (inputBox) {
+        if (inputBox.tagName === 'SELECT') {
+            return (inputBox.value || '').trim().toUpperCase();
+        }
+        if (inputBox.isContentEditable) {
+            return (inputBox.textContent || '').trim().toUpperCase();
+        }
+        if (typeof inputBox.value === 'string') {
+            return inputBox.value.trim().toUpperCase();
+        }
+        return (inputBox.textContent || '').trim().toUpperCase();
+    }
+
+    return (cell.textContent || '').trim().toUpperCase();
+}
+
 // 辅助函数：显示计算通知
 function showCalculationNotice(message, isError = false, forcePopup = false) {
     console.log(`${isError ? '错误' : '信息'}: ${message}`);
@@ -58,9 +84,8 @@ function checkTable1Data() {
         const row = tableRows[i];
         const cells = row.querySelectorAll('td');
         for (let cell of cells) {
-            const inputBox = cell.querySelector('.input-box');
-            const content = inputBox ? inputBox.textContent.trim() : cell.textContent.trim();
-            if (content && ['H', 'h', 'M', 'm', 'L', 'l'].some(c => content.includes(c))) {
+            const value = getTable1CellValue(cell);
+            if (value.startsWith('H') || value.startsWith('M') || value.startsWith('L')) {
                 return true;
             }
         }
@@ -164,20 +189,13 @@ function calculateTargetWeights() {
                 
                 if (cellIndex >= 0 && cells.length > cellIndex) {
                     const cell = cells[cellIndex];
-                    let cellContent = '';
-                    
-                    const inputBox = cell.querySelector('.input-box');
-                    if (inputBox) {
-                        cellContent = inputBox.textContent.trim();
-                    } else {
-                        cellContent = cell.textContent.trim();
-                    }
-                    
-                    if (cellContent === 'H' || cellContent === 'h' || cellContent.includes('H') || cellContent.includes('h')) {
+                    const cellValue = getTable1CellValue(cell);
+
+                    if (cellValue.startsWith('H')) {
                         hCount++;
-                    } else if (cellContent === 'M' || cellContent === 'm' || cellContent.includes('M') || cellContent.includes('m')) {
+                    } else if (cellValue.startsWith('M')) {
                         mCount++;
-                    } else if (cellContent === 'L' || cellContent === 'l' || cellContent.includes('L') || cellContent.includes('l')) {
+                    } else if (cellValue.startsWith('L')) {
                         lCount++;
                     }
                 }
@@ -488,6 +506,15 @@ function setupCalculationEvents() {
             debouncedCalculate();
         }
     });
+
+    document.addEventListener('change', function(event) {
+        const target = event.target;
+        if (!target) return;
+
+        if (target.tagName === 'SELECT' || (target.classList && target.classList.contains('hml-select'))) {
+            debouncedCalculate();
+        }
+    });
     
     // 专门绑定表2和表4的事件监听
     bindTable2And4Events();
@@ -545,6 +572,11 @@ function initCalculationModule() {
         const inputs = document.querySelectorAll('input');
         inputs.forEach(input => {
             input.value = '';
+        });
+
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.value = '';
         });
         
         const contentElements = document.querySelectorAll(

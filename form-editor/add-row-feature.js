@@ -16,38 +16,6 @@ const addRowFeature = {
         console.log('添加行按钮设置完成');
     },
 
-    // 应用HML选择器样式
-    applyHMLStyles: function(row) {
-        if (!row) return;
-        
-        // 查找所有HML选择器
-        const selectors = row.querySelectorAll('.hml-selector');
-        if (!selectors.length) return;
-        
-        selectors.forEach(selector => {
-            // 应用基本样式
-            selector.style.display = 'flex';
-            selector.style.justifyContent = 'center';
-            selector.style.alignItems = 'center';
-            selector.style.gap = '5px';
-            
-            // 应用选项样式
-            const options = selector.querySelectorAll('.hml-option');
-            options.forEach(option => {
-                option.style.cursor = 'pointer';
-                option.style.width = '26px';
-                option.style.height = '26px';
-                option.style.borderRadius = '50%';
-                option.style.display = 'flex';
-                option.style.justifyContent = 'center';
-                option.style.alignItems = 'center';
-                option.style.border = '1px solid #ccc';
-                option.style.fontWeight = 'bold';
-                option.style.margin = '0 3px';
-            });
-        });
-    },
-    
     // 添加子行
     addSubRow: function(parentRowId) {
         console.log('添加子行，父行ID:', parentRowId);
@@ -81,45 +49,24 @@ const addRowFeature = {
             newRow.dataset.parentRow = parentRowId;
             newRow.dataset.categoryName = categoryName; // 保存类别名称，以便删除时使用
             
-            // 添加特殊样式属性
-            if (parentRow.closest('.table-container').id === 'table1-container') {
-                newRow.classList.add('table1-subrow'); // 添加特殊类，用于表格1子行的样式
-            }
-            
             // 创建单元格内容
             let html = '';
-            
-            // 判断当前是否在表格1中
-            const isTable1 = parentRow.closest('.table-container').id === 'table1-container';
-            
-            if (isTable1) {
-                // 表格1的结构：子类别描述单元格 + 4个课程目标HML选择器
-                // 第一列为子类别描述
-                html += '<td class="table-td sub-category" style="border: 1px solid #000; padding: 8px; text-align: center;"><div contenteditable="true" class="input-box" style="text-align: center;"></div></td>';
-                
-                // 添加4个课程目标的HML选择器
-                for (let i = 1; i <= 4; i++) {
-                    const targetId = `target${i}-selector-${rowIdCounter}`;
-                    html += `<td class="table-td hml-cell" style="border: 1px solid #000; padding: 8px; text-align: center; vertical-align: middle;">
-                        <div class="hml-selector" id="${targetId}" style="display:flex; justify-content:center; align-items:center; gap:5px; width:100%; height:100%; padding:2px; margin:0 auto;">
-                            <span class="hml-option h-option" onclick="selectHML(this, 'H')" style="cursor:pointer; width:26px; height:26px; border-radius:50%; display:flex; justify-content:center; align-items:center; border:1px solid #ccc; font-weight:bold; margin:0 3px; font-size:14px;">H</span>
-                            <span class="hml-option m-option" onclick="selectHML(this, 'M')" style="cursor:pointer; width:26px; height:26px; border-radius:50%; display:flex; justify-content:center; align-items:center; border:1px solid #ccc; font-weight:bold; margin:0 3px; font-size:14px;">M</span>
-                            <span class="hml-option l-option" onclick="selectHML(this, 'L')" style="cursor:pointer; width:26px; height:26px; border-radius:50%; display:flex; justify-content:center; align-items:center; border:1px solid #ccc; font-weight:bold; margin:0 3px; font-size:14px;">L</span>
-                        </div>
-                    </td>`;
-                }
-            } else {
-                // 其他表格的结构：子类别描述单元格 + 5个可编辑单元格
-                html += '<td class="table-td sub-category" style="border: 1px solid #000; padding: 8px; text-align: center;"><div contenteditable="true" class="input-box" style="text-align: center;"></div></td>';
-                
-                // 添加5个可编辑单元格
-                for (let i = 0; i < 5; i++) {
-                    html += '<td class="table-td" style="border: 1px solid #000; padding: 8px; text-align: center;"><div contenteditable="true" class="input-box" style="text-align: center;"></div></td>';
-                }
+            // 第一列为子类别说明
+            html += '<td class="table-td sub-category"><div contenteditable="true" class="input-box indicator-input"></div></td>';
+
+            // 添加4列H/M/L选择器
+            const hmlSelectHtml = `\n                <select class="input-box hml-select" aria-label="支撑强度">
+                    <option value=""></option>
+                    <option value="H">H</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                </select>\n            `;
+            for (let i = 0; i < 4; i++) {
+                html += `<td class="table-td goal-cell">${hmlSelectHtml}</td>`;
             }
             
             // 添加删除按钮单元格
-            html += `<td class="table-td delete-cell" style="display:table-cell; border: 1px solid #000; padding: 8px; text-align: center;">
+            html += `<td class="table-td delete-cell" style="display:table-cell">
                 <button class="row-delete-button" title="删除此行" 
                 onclick="addRowFeature.removeSubRow('${newRowId}')" 
                 style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button>
@@ -130,21 +77,6 @@ const addRowFeature = {
             // 更新父行类别单元格的rowspan
             const currentRowspan = parseInt(categoryCell.getAttribute('rowspan') || 1);
             categoryCell.setAttribute('rowspan', currentRowspan + 1);
-            
-            // 为子行单元格添加明确的边框样式，确保表格线不会消失
-            newRow.style.border = '1px solid #000';
-            
-            // 确保所有子行使用标准样式
-            newRow.classList.add('standard-subrow');
-            
-            // 为每个单元格添加明确的边框样式，确保与原始行一致
-            setTimeout(() => {
-                const cells = newRow.querySelectorAll('td');
-                cells.forEach(cell => {
-                    cell.style.border = '1px solid #000';
-                    cell.style.borderCollapse = 'collapse';
-                });
-            }, 0);
             
             // 插入新行到父行之后
             const nextRow = parentRow.nextElementSibling;
@@ -172,9 +104,6 @@ const addRowFeature = {
                     categoryName: categoryName
                 });
             }
-            
-            // 应用HML样式到新行
-            this.applyHMLStyles(newRow);
             
             // 显示通知
             if (typeof window.showNotification === 'function') {
@@ -256,7 +185,13 @@ const addRowFeature = {
                                 const targetInput = targetCell.querySelector('.input-box');
                                 const sourceInput = sourceCell.querySelector('.input-box');
                                 if (targetInput && sourceInput) {
-                                    targetInput.innerHTML = sourceInput.innerHTML;
+                                    if (targetInput.tagName === 'SELECT' && sourceInput.tagName === 'SELECT') {
+                                        targetInput.value = sourceInput.value;
+                                    } else if (targetInput.isContentEditable && sourceInput.isContentEditable) {
+                                        targetInput.innerHTML = sourceInput.innerHTML;
+                                    } else {
+                                        targetInput.textContent = sourceInput.textContent;
+                                    }
                                 }
                             }
                         }
@@ -350,7 +285,17 @@ const addRowFeature = {
                 
                 // 用第二行的数据替换第一行的数据
                 for (let i = 0; i < inputBoxes.length && i < secondRowInputBoxes.length; i++) {
-                    inputBoxes[i].innerHTML = secondRowInputBoxes[i].innerHTML;
+                    const targetEl = inputBoxes[i];
+                    const sourceEl = secondRowInputBoxes[i];
+                    if (!targetEl || !sourceEl) continue;
+
+                    if (targetEl.tagName === 'SELECT' && sourceEl.tagName === 'SELECT') {
+                        targetEl.value = sourceEl.value;
+                    } else if (targetEl.isContentEditable && sourceEl.isContentEditable) {
+                        targetEl.innerHTML = sourceEl.innerHTML;
+                    } else {
+                        targetEl.textContent = sourceEl.textContent;
+                    }
                 }
                 
                 // 删除第二行

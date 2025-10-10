@@ -18,13 +18,6 @@
     <link rel="stylesheet" href="export-hide.css" media="print"><!-- 添加导出隐藏样式 -->
     <link rel="stylesheet" href="add-row-styles.css"><!-- 添加行按钮样式 -->
     <link rel="stylesheet" href="formula-styles.css"><!-- 添加公式样式 -->
-    <link rel="stylesheet" href="select-styles.css"><!-- 添加HML选择器样式 -->
-    <link rel="stylesheet" href="subrow-fix.css"><!-- 添加子行样式修复 -->
-    <link rel="stylesheet" href="hml-subrow-styles.css"><!-- 添加HML子行样式统一 -->
-    <link rel="stylesheet" href="unified-table-style.css"><!-- 添加统一表格线样式 -->
-    <link rel="stylesheet" href="unified-hml-styles.css"><!-- 添加统一HML选择器样式 -->
-    <link rel="stylesheet" href="table-border-fix.css"><!-- 添加表格边框修复样式 -->
-    <link rel="stylesheet" href="export-fixes.css"><!-- 添加导出表格修复样式 -->
     
     <!-- 资源加载优化脚本 -->
     <script>
@@ -137,6 +130,9 @@
         <button id="excel-upload-btn" class="reset-button" title="上传Excel成绩表">
             <i class="bi bi-file-earmark-spreadsheet"></i> 上传成绩表
         </button>
+        <button id="reset-button" class="reset-button" title="恢复所有内容到初始状态" onclick="resetAllContent()">
+            <i class="bi bi-arrow-repeat"></i> 恢复全部
+        </button>
         <button id="scan-table-button" class="reset-button" title="扫描表格内容并重新计算" onclick="scanTableAndCalculate()">
             <i class="bi bi-calculator"></i> 刷新计算
         </button>
@@ -154,17 +150,21 @@
             <div class="input-field" id="courseSubject" contenteditable="true" rows="1"></div>
             <h2>二、课程目标</h2>
             <p class="paragraph">通过本课程的教学，学生应该具备如下知识和能力：</p>
-            <div class="paragraph" id="target1-container">目标1：
-                <div contenteditable="true" class="editable-text" id="target1" data-placeholder="请填写目标1"></div>
+            <div class="paragraph target-item" id="target1-container">
+                <span class="goal-label">目标1：</span>
+                <div contenteditable="true" class="editable-text goal-text" id="target1" data-placeholder="请填写目标1"></div>
             </div>
-            <div class="paragraph" id="target2-container">目标2：
-                <div contenteditable="true" class="editable-text" id="target2" data-placeholder="请填写目标2"></div>
+            <div class="paragraph target-item" id="target2-container">
+                <span class="goal-label">目标2：</span>
+                <div contenteditable="true" class="editable-text goal-text" id="target2" data-placeholder="请填写目标2"></div>
             </div>
-            <div class="paragraph" id="target3-container">目标3：
-                <div contenteditable="true" class="editable-text" id="target3" data-placeholder="请填写目标3"></div>
+            <div class="paragraph target-item" id="target3-container">
+                <span class="goal-label">目标3：</span>
+                <div contenteditable="true" class="editable-text goal-text" id="target3" data-placeholder="请填写目标3"></div>
             </div>
-            <div class="paragraph" id="target4-container">目标4：
-                <div contenteditable="true" class="editable-text" id="target4" data-placeholder="请填写目标4"></div>
+            <div class="paragraph target-item" id="target4-container">
+                <span class="goal-label">目标4：</span>
+                <div contenteditable="true" class="editable-text goal-text" id="target4" data-placeholder="请填写目标4"></div>
             </div>
 
             <h2>三、课程目标对毕业要求指标点的支撑关系</h2>
@@ -175,10 +175,10 @@
                     <thead class="table-header">
                         <tr>
                             <th class="table-th" colspan="2"></th>
-                            <th class="table-th">课程目标1</th>
-                            <th class="table-th">课程目标2</th>
-                            <th class="table-th">课程目标3</th>
-                            <th class="table-th">课程目标4</th>
+                            <th class="table-th goal-header"><span class="goal-header-text">课程目标1</span></th>
+                            <th class="table-th goal-header"><span class="goal-header-text">课程目标2</span></th>
+                            <th class="table-th goal-header"><span class="goal-header-text">课程目标3</span></th>
+                            <th class="table-th goal-header"><span class="goal-header-text">课程目标4</span></th>
                             <th class="table-th delete-cell">操作</th>
                         </tr>
                     </thead>
@@ -188,34 +188,38 @@
                                 师德规范
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-1')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td">
-                                <div class="hml-selector" id="target1-selector-1">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                            <td class="table-td"><div contenteditable="true" class="input-box indicator-input"></div></td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
-                            <td class="table-td">
-                                <div class="hml-selector" id="target2-selector-1">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
-                            <td class="table-td">
-                                <div class="hml-selector" id="target3-selector-1">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
-                            <td class="table-td">
-                                <div class="hml-selector" id="target4-selector-1">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-1')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
@@ -224,34 +228,38 @@
                                 教育情怀
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-2')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
-                            <td class="table-td">
-                                <div class="hml-selector" id="target1-selector-2">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                            <td class="table-td"><div contenteditable="true" class="input-box indicator-input"></div></td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
-                            <td class="table-td">
-                                <div class="hml-selector" id="target2-selector-2">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
-                            <td class="table-td">
-                                <div class="hml-selector" id="target3-selector-2">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
-                            <td class="table-td">
-                                <div class="hml-selector" id="target4-selector-2">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-2')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
@@ -260,34 +268,38 @@
                                 学科素养
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-3')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box indicator-input"></div></td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target1-selector-3">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target2-selector-3">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target3-selector-3">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target4-selector-3">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-3')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
@@ -296,34 +308,38 @@
                                 教学能力
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-5')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box indicator-input"></div></td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target1-selector-5">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target2-selector-5">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target3-selector-5">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target4-selector-5">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-5')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
@@ -332,34 +348,38 @@
                                 班级指导
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-6')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box indicator-input"></div></td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target1-selector-6">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target2-selector-6">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target3-selector-6">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target4-selector-6">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-6')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
@@ -368,34 +388,38 @@
                                 综合育人
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-7')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box indicator-input"></div></td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target1-selector-7">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target2-selector-7">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target3-selector-7">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target4-selector-7">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-7')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
@@ -404,34 +428,38 @@
                                 学会反思
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-8')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box indicator-input"></div></td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target1-selector-8">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target2-selector-8">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target3-selector-8">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target4-selector-8">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-8')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
@@ -440,34 +468,38 @@
                                 沟通合作
                                 <button class="add-row-button" title="添加一行" onclick="addRowFeature.addSubRow('table-row-9')" style="position:absolute; right:5px; top:5px; display:inline-block; width:22px; height:22px; background-color:#4CAF50; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">+</button>
                             </td>
-                            <td class="table-td"><div contenteditable="true" class="input-box"></div></td>
+                            <td class="table-td"><div contenteditable="true" class="input-box indicator-input"></div></td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target1-selector-9">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target2-selector-9">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target3-selector-9">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td">
-                                <div class="hml-selector" id="target4-selector-9">
-                                    <span class="hml-option h-option" onclick="selectHML(this, 'H')">H</span>
-                                    <span class="hml-option m-option" onclick="selectHML(this, 'M')">M</span>
-                                    <span class="hml-option l-option" onclick="selectHML(this, 'L')">L</span>
-                                </div>
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
                             </td>
                             <td class="table-td delete-cell" style="display:table-cell"><button class="row-delete-button" title="删除此行" onclick="addRowFeature.removeSubRow('table-row-9')" style="display:inline-block; width:22px; height:22px; background-color:#f44336; color:white; border-radius:50%; font-weight:bold; text-align:center; border:none;">×</button></td>
                         </tr>
@@ -551,10 +583,10 @@
                     <div class="formula-number">公式（1）</div>
                 </div>
             </div>
-            <div class="paragraph">通过权加可以计算出单个课程目标标对应的权值，以及总权值为<div contenteditable="true" class="editable-text" id="totalWeight" data-placeholder="此处生成总权值"></div>。《<span id="courseNameShow3"></span>》课程4个分目标对应的权重值计算如下：</div>
+            <div class="paragraph">通过累加可以计算出单个课程目标对应的权值，以及总权值为<div contenteditable="true" class="editable-text" id="totalWeight" data-placeholder="此处生成总权值"></div>。《<span id="courseNameShow3"></span>》课程4个分目标对应的权重值计算如下：</div>
             <p class="table-name">表3.课程目标的权重值</p>
             <div class="table-container" id="table3-container">
-                <table id="weight-table">
+                <table>
                     <thead class="table-header">
                         <tr>
                             <th></th>
@@ -563,6 +595,7 @@
                             <th>课程目标3</th>
                             <th>课程目标4</th>
                             <th class="delete-cell">操作</th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -610,10 +643,10 @@
                         </tr>
                         <tr id="score-row-2">
                             <td>平均分</td>
-                            <td><div contenteditable="true" class="input-box" id="avgScore1"></div></td>
-                            <td><div contenteditable="true" class="input-box" id="avgScore2"></div></td>
-                            <td><div contenteditable="true" class="input-box" id="avgScore3"></div></td>
-                            <td><div contenteditable="true" class="input-box" id="avgScore4"></div></td>
+                            <td><div id="avgScore1"></div></td>
+                            <td><div id="avgScore2"></div></td>
+                            <td><div id="avgScore3"></div></td>
+                            <td><div id="avgScore4"></div></td>
                             <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('score-row-2')">×</button></td>
                         </tr>
                     </tbody>
@@ -855,8 +888,6 @@
     <script src="report-editor.js"></script>
     <script src="excelUpload.js"></script>
     <script src="calculation-enhanced.js"></script>
-    <!-- 调试工具（开发时使用） -->
-    <script src="debug-table5.js"></script>
     <script>
         // 辅助函数：重新计算所有数据
         function recalculateAllData() {
@@ -1152,22 +1183,6 @@
     </script>
     <!-- 添加表格操作控制脚本 -->
     <script src="table-operation-control.js"></script>
-    <!-- 添加HML选择器脚本 -->
-    <script src="hml-selector.js"></script>
-    <!-- 添加子行样式增强脚本 -->
-    <script src="subrow-enhancer.js"></script>
-    <!-- 添加HML子行选择器增强脚本 -->
-    <script src="hml-subrow-enhancer.js"></script>
-    <!-- 添加表格边框统一处理脚本 -->
-    <script src="table-border-unifier.js"></script>
-    <!-- 添加表格边框修复器 -->
-    <script src="table-border-fixer.js"></script>
-    <!-- 添加通知处理脚本 -->
-    <script src="notification-handler.js"></script>
-    <!-- 添加权重计算修复脚本 -->
-    <script src="weight-calculator-fix.js"></script>
-    <!-- 添加HML选择器样式增强脚本 -->
-    <script src="hml-style-enhancer.js"></script>
 </body>
 
 </html>

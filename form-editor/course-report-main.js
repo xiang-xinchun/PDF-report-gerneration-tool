@@ -423,35 +423,84 @@ ipcMain.handle('export-pdf', async () => {
             landscape: false
         });
         
-        // 移除导出PDF的类并恢复界面状态（简化版本，详细清理由渲染进程处理）
+        // 移除导出PDF的类并恢复界面状态
         try {
             await mainWindow.webContents.executeJavaScript(`
                 try {
-                    console.log('[Main] 开始主进程清理...');
-                    
                     // 移除导出样式表
-                    const exportStylesheets = document.querySelectorAll('#export-styles, link[href*="export-styles"]');
-                    exportStylesheets.forEach(sheet => {
-                        if (sheet && sheet.parentNode) {
-                            sheet.parentNode.removeChild(sheet);
-                        }
-                    });
+                    const exportStylesheet = document.getElementById('export-styles');
+                    if (exportStylesheet) {
+                        exportStylesheet.parentNode.removeChild(exportStylesheet);
+                    }
                     
                     // 移除导出类
-                    document.body.classList.remove('is-exporting-pdf', 'is-exporting', 'exporting');
+                    document.body.classList.remove('is-exporting-pdf');
                     
-                    // 清理临时数据属性
-                    delete document.body.dataset.prevActiveStep;
-                    delete document.body.dataset.prevActiveStepIndex;
-                    
-                    // 清理步骤的临时显示数据
+                    // 恢复步骤显示状态
                     document.querySelectorAll('.step').forEach(step => {
-                        delete step.dataset.prevDisplay;
+                        if (step.dataset.prevDisplay !== undefined) {
+                            if (step.dataset.prevDisplay) {
+                                step.style.display = step.dataset.prevDisplay;
+                            } else {
+                                step.style.removeProperty('display');
+                            }
+                            delete step.dataset.prevDisplay;
+                        } else {
+                            step.style.removeProperty('display');
+                        }
+                    });
+
+                    const prevActiveStepId = document.body.dataset.prevActiveStep;
+                    const prevActiveStepIndex = document.body.dataset.prevActiveStepIndex;
+                    if (prevActiveStepId) {
+                        document.querySelectorAll('.step').forEach(step => {
+                            if (step.id === prevActiveStepId) {
+                                step.classList.add('active');
+                            } else {
+                                step.classList.remove('active');
+                            }
+                        });
+                        delete document.body.dataset.prevActiveStep;
+                        delete document.body.dataset.prevActiveStepIndex;
+                    } else {
+                        // 如果没有记录，确保至少第一步为激活状态
+                        const firstStep = document.querySelector('.step');
+                        if (firstStep) {
+                            document.querySelectorAll('.step').forEach((step, index) => {
+                                step.classList.toggle('active', index === 0);
+                            });
+                            document.body.dataset.prevActiveStepIndex = '1';
+                        }
+                    }
+
+                    if (prevActiveStepIndex) {
+                        const stepIndexNum = parseInt(prevActiveStepIndex, 10);
+                        if (!Number.isNaN(stepIndexNum)) {
+                            window.currentStep = stepIndexNum;
+                        }
+                        delete document.body.dataset.prevActiveStepIndex;
+                    } else if (typeof window.currentStep !== 'number' || Number.isNaN(window.currentStep)) {
+                        window.currentStep = 1;
+                    }
+
+                    if (typeof window.renderCurrentStep === 'function') {
+                        window.renderCurrentStep();
+                    }
+                    if (typeof window.updateStepIndicator === 'function') {
+                        window.updateStepIndicator();
+                    }
+                    if (typeof window.updateButtonStates === 'function') {
+                        window.updateButtonStates();
+                    }
+
+                    console.log('导出后状态恢复:', {
+                        currentStep: window.currentStep,
+                        activeStepId: document.querySelector('.step.active')?.id
                     });
                     
-                    console.log('[Main] 主进程清理完成');
+                    console.log('PDF导出后清理完成');
                 } catch (err) {
-                    console.error('[Main] 主进程清理出错:', err);
+                    console.error('PDF导出后清理出错:', err);
                 }
             `);
         } catch (error) {
