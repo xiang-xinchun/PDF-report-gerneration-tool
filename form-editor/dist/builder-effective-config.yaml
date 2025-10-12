@@ -1,0 +1,29 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.electron.course-report-generator
+productName: 课程目标达成情况评价报告生成工具
+files:
+  - filter:
+      - '**/*'
+      - node_modules/
+      - package.json
+      - icudtl.dat
+extraResources:
+  - filter:
+      - node_modules/xlsx/**/*
+      - icudtl.dat
+asar:
+  smartUnpack: true
+win:
+  target:
+    - nsis
+  artifactName: ${productName}-${version}-Setup.${ext}
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: 课程目标达成情况评价报告生成工具
+electronVersion: 38.2.1

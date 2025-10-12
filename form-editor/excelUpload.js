@@ -45,7 +45,7 @@ function showExcelExampleModal() {
 
     // 说明文字
     const descText = document.createElement('p');
-    descText.textContent = '请确保上传的Excel文件符合以下格式：包含序号、班级名称、学号、姓名、4种考核方式成绩及总成绩，示例如下：';
+    descText.textContent = '请确保上传的Excel文件符合以下格式：包含序号、学号、姓名、4种考核方式成绩及总成绩，示例如下：';
     descText.style.cssText = `
         margin: 0 0 15px 0; color: #333; line-height: 1.5;
         font-size: 14px; font-family: "Source Han Sans SC Black", "Arial Black", sans-serif; font-weight: bolder;

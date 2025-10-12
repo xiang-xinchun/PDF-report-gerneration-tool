@@ -240,11 +240,11 @@ function createWindow() {
         }
 
         // 获取考核方式
-        const assessmentTitles = [4, 5, 6, 7];
+        const assessmentTitles = [3, 4, 5, 6];
         const assessmentScores = assessmentTitles.map(() => []);
         const scores = []
         for (let i = 1; i < excelData.length; i++) {
-            if (excelData[i] && excelData[i].length > 8) {
+            if (excelData[i] && excelData[i].length > 7) {
                 // 收集各个考核方式的成绩
                 assessmentTitles.forEach((colIndex, idx) => {
                     const scoreValue = excelData[i][colIndex];
@@ -254,7 +254,7 @@ function createWindow() {
                     }
                 });
 
-                const scoreValue = excelData[i][8]; // 总成绩在第9列（索引8）
+                const scoreValue = excelData[i][7]; // 总成绩在第8列（索引7）
                 const scoreNum = Number(scoreValue);
                 if (!isNaN(scoreNum) && scoreNum >= 0) {
                     scores.push(scoreNum);
