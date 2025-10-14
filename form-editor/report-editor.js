@@ -390,9 +390,15 @@ function resetAllContent() {
         cell.style.display = '';
     });
 
-    // 清空所有可编辑文本和输入框
+    // 清空所有可编辑文本和输入框（但保留表1中的分目标内容）
     document.querySelectorAll('[contenteditable="true"]').forEach(element => {
-        element.innerHTML = '';
+        // 检查是否是表1中的分目标输入框
+        const isTable1SubTarget = element.classList.contains('indicator-input') && 
+                                 element.closest('#table1-container');
+        
+        if (!isTable1SubTarget) {
+            element.innerHTML = '';
+        }
     });
 
     document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(element => {
@@ -836,4 +842,68 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 初始化显示第一步
     showStep(0);
+    
+    // 静默修复表1分目标内容
+    fixTable1SubTargetsQuietly();
 });
+
+// 表1分目标内容数据
+const subTargetData = {
+    'table-row-1-1': '思想信念',
+    'table-row-1-2': '立德树人', 
+    'table-row-1-3': '职业道德',
+    'table-row-2-1': '爱岗从教',
+    'table-row-2-2': '关爱学生',
+    'table-row-2-3': '自身修养',
+    'table-row-3-1': '整合能力',
+    'table-row-3-2': '学科知识',
+    'table-row-3-3': '实验技能',
+    'table-row-4-1': '教学理解',
+    'table-row-4-2': '教学技能',
+    'table-row-4-3': '教学评价',
+    'table-row-5-1': '信息技术',
+    'table-row-5-2': '化学工具',
+    'table-row-5-3': '数字素养',
+    'table-row-6-1': '德育素养',
+    'table-row-6-2': '组织管理',
+    'table-row-6-3': '心理辅导',
+    'table-row-7-1': '课程育人',
+    'table-row-7-2': '活动育人',
+    'table-row-7-3': '文化育人',
+    'table-row-8-1': '终身学习',
+    'table-row-8-2': '职业规划',
+    'table-row-9-1': '全球视野',
+    'table-row-9-2': '改革创新',
+    'table-row-10-1': '批判思维',
+    'table-row-10-2': '反思改进',
+    'table-row-11-1': '沟通技能',
+    'table-row-11-2': '协作发展'
+};
+
+// 静默修复表1分目标内容的函数
+function fixTable1SubTargetsQuietly() {
+    let fixedCount = 0;
+    
+    // 遍历所有行ID，恢复对应的分目标内容
+    Object.keys(subTargetData).forEach(rowId => {
+        const row = document.getElementById(rowId);
+        if (row) {
+            // 查找该行中的indicator-input元素
+            const indicatorInput = row.querySelector('.indicator-input');
+            if (indicatorInput) {
+                const currentContent = indicatorInput.textContent.trim();
+                const expectedContent = subTargetData[rowId];
+                
+                // 如果内容为空或不正确，则恢复正确的内容
+                if (!currentContent || currentContent !== expectedContent) {
+                    indicatorInput.textContent = expectedContent;
+                    fixedCount++;
+                }
+            }
+        }
+    });
+    
+    if (fixedCount > 0) {
+        console.log(`已静默修复表1中的 ${fixedCount} 个分目标内容`);
+    }
+}
