@@ -1,0 +1,109 @@
+/**
+ * 课程目标管理器样式
+ */
+
+/* 目标控制按钮容器 - 简洁样式 */
+#goal-control-buttons {
+    margin: 10px 0;
+    padding: 8px 0;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* 添加目标按钮 - 简洁样式 */
+#add-goal-button {
+    padding: 6px 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+#add-goal-button:hover {
+    background-color: #45a049;
+}
+
+#add-goal-button:active {
+    background-color: #3d8b40;
+}
+
+/* 删除目标按钮 - 简洁样式 */
+#remove-goal-button {
+    padding: 6px 12px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+#remove-goal-button:hover {
+    background-color: #da190b;
+}
+
+#remove-goal-button:active {
+    background-color: #c41500;
+}
+
+#remove-goal-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* 目标数量标签 - 简洁样式 */
+#goal-count-label {
+    margin-left: 10px;
+    font-size: 13px;
+    color: #666;
+}
+
+/* 课程目标项保持基础排版 */
+.target-item {
+    padding: 0;
+    margin: 10px 0;
+    background: none;
+    border: none;
+}
+
+.target-item .goal-label {
+    font-weight: normal;
+    color: inherit;
+    margin-right: 6px;
+}
+
+.target-item .goal-text {
+    display: inline-block;
+    min-height: 20px;
+    flex: 1;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    #goal-control-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #add-goal-button,
+    #remove-goal-button {
+        width: 100%;
+    }
+    
+    #goal-count-label {
+        margin-left: 0;
+        text-align: center;
+    }
+}
+
+/* 打印时隐藏控制按钮 */
+@media print {
+    #goal-control-buttons {
+        display: none !important;
+    }
+}

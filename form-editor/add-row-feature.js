@@ -54,14 +54,19 @@ const addRowFeature = {
             // 第一列为子类别说明
             html += '<td class="table-td sub-category"><div contenteditable="true" class="input-box indicator-input"></div></td>';
 
-            // 添加4列H/M/L选择器
+            // 动态获取当前课程目标列数
+            const table1 = document.querySelector('#table1-container table');
+            const goalCount = table1 ? table1.querySelectorAll('thead .goal-header').length : 4;
+            console.log('当前课程目标数量:', goalCount);
+
+            // 添加对应数量的H/M/L选择器
             const hmlSelectHtml = `\n                <select class="input-box hml-select" aria-label="支撑强度">
                     <option value=""></option>
                     <option value="H">H</option>
                     <option value="M">M</option>
                     <option value="L">L</option>
                 </select>\n            `;
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < goalCount; i++) {
                 html += `<td class="table-td goal-cell">${hmlSelectHtml}</td>`;
             }
             
