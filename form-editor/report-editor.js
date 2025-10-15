@@ -651,27 +651,27 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     
-        const supportMaterialElem = document.getElementById('supportMaterial');
-        // 定义更新支撑材料的函数
-        function updateSupportMaterial() {
-            if (!supportMaterialElem) return;
+        // const supportMaterialElem = document.getElementById('supportMaterial');
+        // // 定义更新支撑材料的函数
+        // function updateSupportMaterial() {
+        //     if (!supportMaterialElem) return;
             
-            const validEvaluations = evaluations
-                .map(id => document.getElementById(id)?.textContent?.trim())
-                .filter(content => content);
+        //     const validEvaluations = evaluations
+        //         .map(id => document.getElementById(id)?.textContent?.trim())
+        //         .filter(content => content);
             
-            const supportText = validEvaluations.join('、');
-            supportMaterialElem.textContent = supportText;
-        }
+        //     const supportText = validEvaluations.join('、');
+        //     supportMaterialElem.textContent = supportText;
+        // }
         
-        // 为每个考核方式添加输入监听
-        evaluations.forEach(id => {
-            const input = document.getElementById(id);
-            if (input) {
-                input.addEventListener('input', updateSupportMaterial);
-            }
-        });
-        updateSupportMaterial();
+        // // 为每个考核方式添加输入监听
+        // evaluations.forEach(id => {
+        //     const input = document.getElementById(id);
+        //     if (input) {
+        //         input.addEventListener('input', updateSupportMaterial);
+        //     }
+        // });
+        // updateSupportMaterial();
 
 
         

@@ -1,3 +1,179 @@
+// 在页面加载完成后应用样式
+document.addEventListener('DOMContentLoaded', function() {
+    const addEvalBtn = document.querySelector('.add-evaluation-button');
+    const removeEvalBtn = document.querySelector('.remove-evaluation-button');
+    
+    if (addEvalBtn) {
+        addEvalBtn.style.cssText = `
+            padding: 6px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+            margin: 0 5px;
+        `;
+    }
+    
+    if (removeEvalBtn) {
+        removeEvalBtn.style.cssText = `
+            padding: 6px 12px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+            margin: 0 5px;
+        `;
+    }
+
+    // 初始化数量显示
+    updateEvaluationCount();
+    // 为现有行设置输入监听
+    const existingRows = document.querySelectorAll('#table2-container tbody tr');
+    existingRows.forEach(row => {
+        addInputListeners(row);
+    });
+    syncEvaluationHeaders();
+});
+// 更新考核方式数量显示的函数
+function updateEvaluationCount() {
+    const table = document.querySelector('#table2-container table tbody');
+    const currentCount = table.rows.length;
+    const countLabel = document.getElementById('evaluation-count-label');
+    
+    if (countLabel) {
+        countLabel.textContent = `当前考核方式数量: ${currentCount}`;
+    }
+}
+function getCurrentGoalCount() {
+    const countLabel = document.getElementById('goal-count-label');
+    if (countLabel) {
+        // 从文本中提取数字，例如："当前目标数量: 4" -> 4
+        const match = countLabel.textContent.match(/\d+/);
+        return match ? parseInt(match[0]) : 4;
+    }
+    return 4; // 默认值
+}
+function addExamRow() {
+    const table = document.querySelector('#table2-container table tbody');
+    const rowCount = table.rows.length + 1;
+    const goalCount = getCurrentGoalCount();
+
+    // 创建新行
+    const newRow = table.insertRow();
+    newRow.id = `exam-row-${rowCount}`;
+    
+    // 创建考核方式单元格
+    const evalCell = newRow.insertCell();
+    evalCell.innerHTML = `<div contenteditable="true" class="input-box" id="evaluation${rowCount}"></div>`;
+    
+    // 创建满分单元格
+    const scoreCell = newRow.insertCell();
+    scoreCell.innerHTML = `<div contenteditable="true" class="input-box" id="score${rowCount}"></div>`;
+    
+    // 创建权重单元格（4个课程目标）
+    for (let i = 1; i <= goalCount; i++) {
+        const weightCell = newRow.insertCell();
+        weightCell.innerHTML = `<div contenteditable="true" class="input-box" id="weight${rowCount}-${i}"></div>`;
+    }
+    
+    // 更新数量显示
+    updateEvaluationCount();
+    // 添加输入事件监听
+    addInputListeners(newRow);
+    // 同步表头
+    syncEvaluationHeaders();
+}
+
+// 删除考核方式的最后一行
+function deleteLastRow() {
+    const table = document.querySelector('#table2-container table tbody');
+    if (table.rows.length <= 1) {
+        alert("至少需要保留一行考核方式");
+        return;
+    }
+    table.deleteRow(table.rows.length - 1);
+
+    // 更新数量显示
+    updateEvaluationCount();
+    syncEvaluationHeaders();
+}
+// 同步表头显示 - 动态创建列
+function syncEvaluationHeaders() {
+    const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
+    const table4 = document.querySelector('#table4-container table');
+    
+    // 清空表4的表头（保留第一个空列）
+    const theadRow = table4.querySelector('thead tr');
+    theadRow.innerHTML = '<th></th>';
+    
+    // 清空表4的数据行（保留第一列的标题）
+    const totalScoreRow = table4.querySelector('#score-row-1');
+    const avgScoreRow = table4.querySelector('#score-row-2');
+    totalScoreRow.innerHTML = '<td>总分</td>';
+    avgScoreRow.innerHTML = '<td>平均分</td>';
+
+    // 收集有效的考核方式名称用于支撑材料
+    const validEvaluations = [];
+    
+    // 根据表2的考核方式数量动态创建列
+    for (let i = 1; i <= evaluationCount; i++) {
+        const evaluationCell = document.getElementById(`evaluation${i}`);
+        const scoreCell = document.getElementById(`score${i}`);
+        
+        if (evaluationCell && scoreCell) {
+            const evaluationText = evaluationCell.textContent || '';
+            const scoreText = scoreCell.textContent || '';
+
+            // 收集考核方式名称
+            if (evaluationText.trim()) {
+                validEvaluations.push(evaluationText.trim());
+            }
+            
+            // 创建表头列
+            const headerTh = document.createElement('th');
+            const headerDiv = document.createElement('div');
+            headerDiv.id = `evaluationShow${i}`;
+            headerDiv.textContent = `${evaluationText}${scoreText ? ` (${scoreText}分)` : ''}`;
+            headerTh.appendChild(headerDiv);
+            theadRow.appendChild(headerTh);
+            
+            // 创建总分列
+            const totalScoreTd = document.createElement('td');
+            const totalScoreDiv = document.createElement('div');
+            totalScoreDiv.id = `totalScore${i}`;
+            totalScoreTd.appendChild(totalScoreDiv);
+            totalScoreRow.appendChild(totalScoreTd);
+            
+            // 创建平均分列
+            const avgScoreTd = document.createElement('td');
+            const avgScoreDiv = document.createElement('div');
+            avgScoreDiv.id = `avgScore${i}`;
+            avgScoreTd.appendChild(avgScoreDiv);
+            avgScoreRow.appendChild(avgScoreTd);
+        }
+    }
+    // 同步支撑材料
+    const supportMaterialElem = document.getElementById('supportMaterial');
+    if (supportMaterialElem) {
+        const supportText = validEvaluations.join('、');
+        supportMaterialElem.textContent = supportText;
+    }
+}
+// 为表格行添加输入事件监听
+function addInputListeners(row) {
+    const inputs = row.querySelectorAll('.input-box');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            // 当考核方式或分数变化时，重新同步表头
+            syncEvaluationHeaders();
+        });
+    });
+}
+
 // 初始化 Excel 上传功能
 function initExcelUpload() {
     // 获取页面上的上传按钮
@@ -174,6 +350,7 @@ function extractValidScores(excelData) {
 }
 
 function fillDataToPage(data) {
+    syncEvaluationHeaders();
     // 填充考核方式平均分
     if (data.assessmentAverages && Array.isArray(data.assessmentAverages)) {
         data.assessmentAverages.forEach((item, index) => {

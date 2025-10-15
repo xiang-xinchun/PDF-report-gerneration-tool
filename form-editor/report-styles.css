@@ -733,9 +733,13 @@ td.data-source [contenteditable="true"]:focus {
     padding: 2px !important;
 }
 
-/* 打印时隐藏删除按钮 */
+/* 打印时隐藏按钮 */
 @media print {
     .delete-cell, .row-delete-button {
+        display: none !important;
+    }
+
+    .button-group {
         display: none !important;
     }
 }

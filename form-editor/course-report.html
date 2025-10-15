@@ -1272,13 +1272,17 @@
             <div class="paragraph">本课程目标达成度评价采用直接评价方式进行。直接评价采用"考试成绩分析法"，数据源自抽取样本学生的课程考核成绩，对应的支撑材料为<span id="supportMaterial"></span>等成绩，其对应的各个课程目标考核方式与权重关系见下表2。</div>            
             <p style="font-size: 12px;" class="table-name">表2.课程考核方式对课程目标的权重关系矩阵</p>
             <div class="table-container" id="table2-container">
+                <div class="button-group">
+                    <button type="button" class="add-evaluation-button" onclick="addExamRow()">+ 添加考核方式</button>
+                    <button type="button" class="remove-evaluation-button" onclick="deleteLastRow()">- 删除最后一行</button>
+                    <span class="count-label" id="evaluation-count-label" >当前考核方式数量: 1</span>
+                </div>
                 <table>
                     <thead class="table-header">
                         <tr>
                             <th rowspan="2">考核方式</th>
                             <th rowspan="2">满分</th>
                             <th colspan="4">权重</th>
-                            <th rowspan="2" class="delete-cell">操作</th>
                         </tr>
                         <tr>
                             <th>课程目标1</th>
@@ -1295,16 +1299,14 @@
                             <td><div contenteditable="true" class="input-box" id="weight1-2"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight1-3"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight1-4"></div></td>
-                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('exam-row-1')">×</button></td>
                         </tr>
-                        <tr id="exam-row-2">
+                        <!-- <tr id="exam-row-2">
                             <td><div contenteditable="true" class="input-box" id="evaluation2"></div></td>
                             <td><div contenteditable="true" class="input-box" id="score2"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight2-1"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight2-2"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight2-3"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight2-4"></div></td>
-                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('exam-row-2')">×</button></td>
                         </tr>
                         <tr id="exam-row-3">
                             <td><div contenteditable="true" class="input-box" id="evaluation3"></div></td>
@@ -1313,7 +1315,6 @@
                             <td><div contenteditable="true" class="input-box" id="weight3-2"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight3-3"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight3-4"></div></td>
-                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('exam-row-3')">×</button></td>
                         </tr>
                         <tr id="exam-row-4">
                             <td><div contenteditable="true" class="input-box" id="evaluation4"></div></td>
@@ -1322,8 +1323,7 @@
                             <td><div contenteditable="true" class="input-box" id="weight4-2"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight4-3"></div></td>
                             <td><div contenteditable="true" class="input-box" id="weight4-4"></div></td>
-                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('exam-row-4')">×</button></td>
-                        </tr>
+                        </tr> -->
                     </tbody>
                 </table>
             </div>
@@ -1387,7 +1387,6 @@
                             <th> <div id="evaluationShow2"></div></th>
                             <th><div id="evaluationShow3"></div></th>
                             <th><div id="evaluationShow4"></div></th>
-                            <th class="delete-cell">操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1397,7 +1396,6 @@
                             <td><div id="totalScore2"></div></td>
                             <td><div id="totalScore3"></div></td>
                             <td><div id="totalScore4"></div></td>
-                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('score-row-1')">×</button></td>
                         </tr>
                         <tr id="score-row-2">
                             <td>平均分</td>
@@ -1405,7 +1403,6 @@
                             <td><div id="avgScore2"></div></td>
                             <td><div id="avgScore3"></div></td>
                             <td><div id="avgScore4"></div></td>
-                            <td class="delete-cell"><button class="row-delete-button" title="删除此行" onclick="hideTableRow('score-row-2')">×</button></td>
                         </tr>
                     </tbody>
                 </table>
