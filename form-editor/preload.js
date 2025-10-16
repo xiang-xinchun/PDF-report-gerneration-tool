@@ -4,7 +4,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
     // Excel文件操作
     openExcelFile: () => ipcRenderer.invoke('open-excel-file'),
-    parseExcelFile: (filePath) => ipcRenderer.invoke('parse-excel-file', filePath),
+    parseExcelFile: (filePath,evaluationCount) => ipcRenderer.invoke('parse-excel-file', filePath,evaluationCount),
     // 导出PDF方法
     exportPDF: async () => {
         try {

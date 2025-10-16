@@ -57,6 +57,15 @@ function getCurrentGoalCount() {
     }
     return 4; // 默认值
 }
+function getCurrentEvaluationCount() {
+    const countLabel = document.getElementById('evaluation-count-label');
+    if (countLabel) {
+        // 从文本中提取数字，例如："当前考核方式数量: 3" -> 3
+        const match = countLabel.textContent.match(/\d+/);
+        return match ? parseInt(match[0]) : 1;
+    }
+    return 1; // 默认值
+}
 function addExamRow() {
     const table = document.querySelector('#table2-container table tbody');
     const rowCount = table.rows.length + 1;
@@ -113,8 +122,12 @@ function syncEvaluationHeaders() {
     // 清空表4的数据行（保留第一列的标题）
     const totalScoreRow = table4.querySelector('#score-row-1');
     const avgScoreRow = table4.querySelector('#score-row-2');
-    totalScoreRow.innerHTML = '<td>总分</td>';
-    avgScoreRow.innerHTML = '<td>平均分</td>';
+    if (totalScoreRow.children.length === 0) {
+        totalScoreRow.innerHTML = '<td>总分</td>';
+    }
+    if (avgScoreRow.children.length === 0) {
+        avgScoreRow.innerHTML = '<td>平均分</td>';
+    }
 
     // 收集有效的考核方式名称用于支撑材料
     const validEvaluations = [];
@@ -137,23 +150,37 @@ function syncEvaluationHeaders() {
             const headerTh = document.createElement('th');
             const headerDiv = document.createElement('div');
             headerDiv.id = `evaluationShow${i}`;
-            headerDiv.textContent = `${evaluationText}${scoreText ? ` (${scoreText}分)` : ''}`;
+            headerDiv.textContent = `${evaluationText}`;
             headerTh.appendChild(headerDiv);
             theadRow.appendChild(headerTh);
             
             // 创建总分列
-            const totalScoreTd = document.createElement('td');
-            const totalScoreDiv = document.createElement('div');
-            totalScoreDiv.id = `totalScore${i}`;
-            totalScoreTd.appendChild(totalScoreDiv);
-            totalScoreRow.appendChild(totalScoreTd);
+            let totalScoreTd = totalScoreRow.querySelector(`td:nth-child(${i + 1})`);
+            if (!totalScoreTd) {
+                totalScoreTd = document.createElement('td');
+                totalScoreRow.appendChild(totalScoreTd);
+            }
+            let totalScoreDiv = document.getElementById(`totalScore${i}`);
+            if (!totalScoreDiv) {
+                totalScoreDiv = document.createElement('div');
+                totalScoreDiv.id = `totalScore${i}`;
+                totalScoreTd.appendChild(totalScoreDiv);
+            }
+            totalScoreDiv.textContent = scoreText;
             
             // 创建平均分列
-            const avgScoreTd = document.createElement('td');
-            const avgScoreDiv = document.createElement('div');
-            avgScoreDiv.id = `avgScore${i}`;
-            avgScoreTd.appendChild(avgScoreDiv);
-            avgScoreRow.appendChild(avgScoreTd);
+            let avgScoreTd = avgScoreRow.querySelector(`td:nth-child(${i + 1})`);
+            if (!avgScoreTd) {
+                avgScoreTd = document.createElement('td');
+                avgScoreRow.appendChild(avgScoreTd);
+            }
+            // 只更新平均分div，保留已填充的数据
+            let avgScoreDiv = document.getElementById(`avgScore${i}`);
+            if (!avgScoreDiv) {
+                avgScoreDiv = document.createElement('div');
+                avgScoreDiv.id = `avgScore${i}`;
+                avgScoreTd.appendChild(avgScoreDiv);
+            }
         }
     }
     // 同步支撑材料
@@ -221,10 +248,10 @@ function showExcelExampleModal() {
 
     // 说明文字
     const descText = document.createElement('p');
-    descText.textContent = '请确保上传的Excel文件符合以下格式：包含序号、学号、姓名、4种考核方式成绩及总成绩，示例如下：';
+    descText.textContent = '请确保上传的Excel文件符合以下格式：包含序号、学号、姓名、考核方式成绩及总成绩，示例如下：';
     descText.style.cssText = `
         margin: 0 0 15px 0; color: #333; line-height: 1.5;
-        font-size: 14px; font-family: "Source Han Sans SC Black", "Arial Black", sans-serif; font-weight: bolder;
+        font-size: 17px; font-family: "Source Han Sans SC Black", "Arial Black", sans-serif; font-weight: bolder;
     `;
 
     // 按钮组（确认上传/取消）
@@ -264,6 +291,7 @@ function showExcelExampleModal() {
 
 async function triggerExcelUpload() {
     try {
+        const evaluationCount = getCurrentEvaluationCount();
         // 2.1 调用Electron的文件选择对话框
         const result = await window.electronAPI.openExcelFile();
         if (result.canceled) return; // 用户取消选择
@@ -272,7 +300,7 @@ async function triggerExcelUpload() {
         if (!filePath) return;
 
         // 2.2 解析Excel文件（原逻辑不变）
-        const parseResult = await window.electronAPI.parseExcelFile(filePath);
+        const parseResult = await window.electronAPI.parseExcelFile(filePath,evaluationCount);
         if (!parseResult.success) {
             showNotification({
                 title: '解析失败',

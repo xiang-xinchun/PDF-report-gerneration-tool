@@ -191,9 +191,10 @@ function createWindow() {
     });
     
     // 生产环境不打开开发者工具
-    if (process.env.NODE_ENV === 'development') {
-        mainWindow.webContents.openDevTools();
-    }
+    // if (process.env.NODE_ENV === 'development') {
+    //     mainWindow.webContents.openDevTools();
+    // }
+    mainWindow.webContents.openDevTools();
 
     // 当window被关闭时，触发以下事件
     mainWindow.on('closed', function () {
@@ -222,7 +223,7 @@ function createWindow() {
         }
     });
 
-    ipcMain.handle('parse-excel-file', async (event, filePath) => {
+    ipcMain.handle('parse-excel-file', async (event, filePath,evaluationCount) => {
     try {
         if (!filePath) {
             return { success: false, message: '文件路径为空' };
@@ -237,14 +238,16 @@ function createWindow() {
 
         if (excelData.length === 0) {
             return { success: false, message: 'Excel文件中没有数据' };
-        }
 
-        // 获取考核方式
-        const assessmentTitles = [3, 4, 5, 6];
+        }
+        const assessmentTitles = [];
+        for (let i = 0; i < evaluationCount; i++) { 
+            assessmentTitles.push(3+i);
+        }
         const assessmentScores = assessmentTitles.map(() => []);
         const scores = []
         for (let i = 1; i < excelData.length; i++) {
-            if (excelData[i] && excelData[i].length > 7) {
+            if (excelData[i] && excelData[i].length > 3 + evaluationCount) {
                 // 收集各个考核方式的成绩
                 assessmentTitles.forEach((colIndex, idx) => {
                     const scoreValue = excelData[i][colIndex];
@@ -254,7 +257,8 @@ function createWindow() {
                     }
                 });
 
-                const scoreValue = excelData[i][7]; // 总成绩在第8列（索引7）
+                const totalScoreColIndex = 3 + evaluationCount;
+                const scoreValue = excelData[i][totalScoreColIndex];
                 const scoreNum = Number(scoreValue);
                 if (!isNaN(scoreNum) && scoreNum >= 0) {
                     scores.push(scoreNum);
