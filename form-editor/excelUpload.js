@@ -93,7 +93,18 @@ function addExamRow() {
     updateEvaluationCount();
     // 添加输入事件监听
     addInputListeners(newRow);
-    // 同步表头
+    
+    // 为表2中的新输入框添加监听，当考核方式名称或满分变化时，同步表4
+    const newEvalInput = newRow.querySelector('#evaluation' + rowCount);
+    const newScoreInput = newRow.querySelector('#score' + rowCount);
+    if (newEvalInput) {
+        newEvalInput.addEventListener('input', syncEvaluationHeaders);
+    }
+    if (newScoreInput) {
+        newScoreInput.addEventListener('input', syncEvaluationHeaders);
+    }
+    
+    // 同步表4
     syncEvaluationHeaders();
 }
 
@@ -110,24 +121,22 @@ function deleteLastRow() {
     updateEvaluationCount();
     syncEvaluationHeaders();
 }
-// 同步表头显示 - 动态创建列
+// 同步表头显示 - 动态创建/删除列
 function syncEvaluationHeaders() {
     const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
     const table4 = document.querySelector('#table4-container table');
     
-    // 清空表4的表头（保留第一个空列）
+    // 获取表4的表头行
     const theadRow = table4.querySelector('thead tr');
-    theadRow.innerHTML = '<th></th>';
-    
-    // 清空表4的数据行（保留第一列的标题）
     const totalScoreRow = table4.querySelector('#score-row-1');
     const avgScoreRow = table4.querySelector('#score-row-2');
-    if (totalScoreRow.children.length === 0) {
-        totalScoreRow.innerHTML = '<td>总分</td>';
-    }
-    if (avgScoreRow.children.length === 0) {
-        avgScoreRow.innerHTML = '<td>平均分</td>';
-    }
+    
+    // 重建表4表头 - 保留第一个标题列
+    theadRow.innerHTML = '<th>考核方式</th>';
+    
+    // 重建表4数据行 - 保留第一列的标题
+    totalScoreRow.innerHTML = '<td>总分 (Zij)</td>';
+    avgScoreRow.innerHTML = '<td>平均分 (Qij)</td>';
 
     // 收集有效的考核方式名称用于支撑材料
     const validEvaluations = [];
@@ -150,39 +159,47 @@ function syncEvaluationHeaders() {
             const headerTh = document.createElement('th');
             const headerDiv = document.createElement('div');
             headerDiv.id = `evaluationShow${i}`;
-            headerDiv.textContent = `${evaluationText}`;
+            headerDiv.className = 'evaluation-name';
+            headerDiv.textContent = evaluationText;
             headerTh.appendChild(headerDiv);
             theadRow.appendChild(headerTh);
             
             // 创建总分列
-            let totalScoreTd = totalScoreRow.querySelector(`td:nth-child(${i + 1})`);
-            if (!totalScoreTd) {
-                totalScoreTd = document.createElement('td');
-                totalScoreRow.appendChild(totalScoreTd);
-            }
-            let totalScoreDiv = document.getElementById(`totalScore${i}`);
-            if (!totalScoreDiv) {
-                totalScoreDiv = document.createElement('div');
-                totalScoreDiv.id = `totalScore${i}`;
-                totalScoreTd.appendChild(totalScoreDiv);
-            }
+            const totalScoreTd = document.createElement('td');
+            const totalScoreDiv = document.createElement('div');
+            totalScoreDiv.id = `totalScore${i}`;
+            totalScoreDiv.className = 'score-cell';
+            totalScoreDiv.contentEditable = 'true';
             totalScoreDiv.textContent = scoreText;
+            totalScoreTd.appendChild(totalScoreDiv);
+            totalScoreRow.appendChild(totalScoreTd);
             
             // 创建平均分列
-            let avgScoreTd = avgScoreRow.querySelector(`td:nth-child(${i + 1})`);
-            if (!avgScoreTd) {
-                avgScoreTd = document.createElement('td');
-                avgScoreRow.appendChild(avgScoreTd);
+            const avgScoreTd = document.createElement('td');
+            const avgScoreDiv = document.createElement('div');
+            avgScoreDiv.id = `avgScore${i}`;
+            avgScoreDiv.className = 'score-cell';
+            avgScoreDiv.contentEditable = 'true';
+            // 保留已有的平均分数据（如果存在的话从原位置复制）
+            const existingAvgDiv = document.getElementById(`avgScore${i}`);
+            if (existingAvgDiv) {
+                avgScoreDiv.textContent = existingAvgDiv.textContent;
             }
-            // 只更新平均分div，保留已填充的数据
-            let avgScoreDiv = document.getElementById(`avgScore${i}`);
-            if (!avgScoreDiv) {
-                avgScoreDiv = document.createElement('div');
-                avgScoreDiv.id = `avgScore${i}`;
-                avgScoreTd.appendChild(avgScoreDiv);
-            }
+            avgScoreTd.appendChild(avgScoreDiv);
+            avgScoreRow.appendChild(avgScoreTd);
+            
+            // 为新创建的元素添加监听
+            totalScoreDiv.addEventListener('input', function() {
+                syncEvaluationHeaders();
+            });
+            avgScoreDiv.addEventListener('input', function() {
+                if (window.recalculateTable5) {
+                    window.recalculateTable5();
+                }
+            });
         }
     }
+    
     // 同步支撑材料
     const supportMaterialElem = document.getElementById('supportMaterial');
     if (supportMaterialElem) {
