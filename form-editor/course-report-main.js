@@ -190,11 +190,11 @@ function createWindow() {
         }
     });
     
-    // 生产环境不打开开发者工具
-    // if (process.env.NODE_ENV === 'development') {
-    //     mainWindow.webContents.openDevTools();
-    // }
-    mainWindow.webContents.openDevTools();
+    //生产环境不打开开发者工具
+    if (process.env.NODE_ENV === 'development') {
+        mainWindow.webContents.openDevTools();
+    }
+    //mainWindow.webContents.openDevTools();
 
     // 当window被关闭时，触发以下事件
     mainWindow.on('closed', function () {

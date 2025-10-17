@@ -290,6 +290,7 @@ table {
     line-height: 1.6 !important;
 }
 [contenteditable="true"] * {
+    all: unset !important;
     font-family: inherit !important;
     font-size: inherit !important;
     color: inherit !important;
