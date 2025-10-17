@@ -214,6 +214,10 @@ function addInputListeners(row) {
         input.addEventListener('input', function() {
             // 当考核方式或分数变化时，重新同步表头
             syncEvaluationHeaders();
+            // 触发表5计算
+            if (window.recalculateTable5) {
+                window.recalculateTable5();
+            }
         });
     });
 }

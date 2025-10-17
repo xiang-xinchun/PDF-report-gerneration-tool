@@ -95,9 +95,12 @@ function checkTable1Data() {
 
 // 检查表2数据是否完整
 function checkTable2Data() {
+    // 动态获取表2的考核方式数量
+    const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
+    
     // 只检查是否有分数数据，权重可以为0
     let hasValidScore = false;
-    for (let i = 1; i <= 4; i++) {
+    for (let i = 1; i <= evaluationCount; i++) {
         const scoreElement = document.getElementById(`score${i}`);
         if (scoreElement) {
             const score = safeParseFloat(scoreElement.textContent || scoreElement.value || '0');
@@ -128,6 +131,34 @@ function checkTable4Data() {
         if (totalScore <= 0 || avgScore <= 0) {
             hasValidData = false;
             break;
+        }
+    }
+    return hasValidData;
+}
+
+// 动态检查表4数据是否完整（根据表2的实际行数）
+function checkTable4DataDynamic(evaluationCount) {
+    let hasValidData = true;
+    
+    // 根据实际的考核方式数量检查表4
+    for (let i = 1; i <= evaluationCount; i++) {
+        const totalScoreElement = document.getElementById(`totalScore${i}`);
+        const avgScoreElement = document.getElementById(`avgScore${i}`);
+        
+        if (!totalScoreElement || !avgScoreElement) {
+            hasValidData = false;
+            console.log(`[Calc] 找不到第${i}个考核方式的成绩元素`);
+            continue;
+        }
+        
+        const totalScore = safeParseFloat(totalScoreElement.textContent || totalScoreElement.value || '0');
+        const avgScore = safeParseFloat(avgScoreElement.textContent || avgScoreElement.value || '0');
+        
+        console.log(`[Calc] 考核方式${i}: 总分=${totalScore}, 平均分=${avgScore}`);
+        
+        if (totalScore <= 0) {
+            hasValidData = false;
+            console.log(`[Calc] 考核方式${i}的总分无效`);
         }
     }
     return hasValidData;
@@ -275,8 +306,11 @@ function calculateTargetWeights() {
 // 从表2更新表4的考核方式信息
 function updateTable4FromTable2() {
     try {
+        // 动态获取表2中的考核方式数量
+        const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
+        
         // 获取表2中的考核方式
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= evaluationCount; i++) {
             // 获取考核方式名称
             const evaluationElement = document.getElementById(`evaluation${i}`);
             const scoreElement = document.getElementById(`score${i}`);
@@ -309,7 +343,11 @@ function updateTable4FromTable2() {
 
 // 课程分目标达成度计算
 function calculateTargetAchievements() {
-    if (!checkTable2Data() || !checkTable4Data()) {
+    // 动态获取表2的考核方式数量
+    const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
+    console.log(`[Calc] 动态检测到${evaluationCount}个考核方式`);
+    
+    if (!checkTable2Data() || !checkTable4DataDynamic(evaluationCount)) {
         console.log('[Calc] 表2或表4数据不完整，跳过表5计算');
         return [];
     }
@@ -318,8 +356,8 @@ function calculateTargetAchievements() {
     let hasValidData = false;
     
     try {
-        // 获取考核方式数据
-        for (let i = 1; i <= 4; i++) {
+        // 获取考核方式数据 - 动态根据表2的行数
+        for (let i = 1; i <= evaluationCount; i++) {
             const totalScoreElement = document.getElementById(`totalScore${i}`);
             const avgScoreElement = document.getElementById(`avgScore${i}`);
             
@@ -362,8 +400,8 @@ function calculateTargetAchievements() {
             let targetAchievement = 0;
             let hasAnyData = false;
             
-            // 遍历所有考核方式
-            for (let methodIndex = 1; methodIndex <= 4; methodIndex++) {
+            // 遍历所有考核方式 - 动态根据表2的行数
+            for (let methodIndex = 1; methodIndex <= evaluationCount; methodIndex++) {
                 const weightElement = document.getElementById(`weight${methodIndex}-${targetIndex}`);
                 if (weightElement) {
                     let weightText = (weightElement.textContent || weightElement.value || '0').trim();
@@ -378,6 +416,7 @@ function calculateTargetAchievements() {
                         targetAchievement += contribution;
                         
                         console.log(`[Calc] 目标${targetIndex}, 方式${methodIndex}: 权重=${(weight*100).toFixed(1)}%, 满分=${examInfo.totalScore}, 均分=${examInfo.avgScore}, 贡献=${contribution.toFixed(3)}`);
+
                     }
                 }
             }
@@ -497,9 +536,12 @@ function calculateTotalAchievement() {
 function smartCalculate() {
     const table1Complete = checkTable1Data();
     const table2Complete = checkTable2Data();
-    const table4Complete = checkTable4Data();
     
-    console.log(`数据状态: 表1=${table1Complete}, 表2=${table2Complete}, 表4=${table4Complete}`);
+    // 动态获取表2的考核方式数量
+    const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
+    const table4Complete = checkTable4DataDynamic(evaluationCount);
+    
+    console.log(`数据状态: 表1=${table1Complete}, 表2=${table2Complete}, 表4=${table4Complete}, 考核方式数=${evaluationCount}`);
     
     // 表1完成就计算权重
     if (table1Complete) {
@@ -557,8 +599,11 @@ function bindTable2And4Events() {
     const debouncedCalculate = debounce(smartCalculate, 300);
     const debouncedUpdateTable4 = debounce(updateTable4FromTable2, 100);
     
+    // 动态获取表2中的考核方式数量
+    const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
+    
     // 绑定表2（考核方式权重）的所有输入框
-    for (let i = 1; i <= 4; i++) {
+    for (let i = 1; i <= evaluationCount; i++) {
         // 监听考核方式名称变化
         const evaluationElement = document.getElementById(`evaluation${i}`);
         if (evaluationElement) {
@@ -583,7 +628,7 @@ function bindTable2And4Events() {
     }
     
     // 绑定表4（考核成绩）的所有输入框
-    for (let i = 1; i <= 4; i++) {
+    for (let i = 1; i <= evaluationCount; i++) {
         const totalScoreElement = document.getElementById(`totalScore${i}`);
         if (totalScoreElement) {
             totalScoreElement.addEventListener('input', debouncedCalculate);
@@ -662,3 +707,9 @@ function initCalculationModule() {
 
 // 初始化模块
 initCalculationModule();
+
+// 全局回调函数：用于表4数据输入时触发表5计算
+window.recalculateTable5 = function() {
+    console.log('[Table5] 触发表5自动计算');
+    smartCalculate();
+};
