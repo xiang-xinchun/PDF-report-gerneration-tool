@@ -272,6 +272,41 @@ function calculateTargetWeights() {
     return weights;
 }
 
+// 从表2更新表4的考核方式信息
+function updateTable4FromTable2() {
+    try {
+        // 获取表2中的考核方式
+        for (let i = 1; i <= 4; i++) {
+            // 获取考核方式名称
+            const evaluationElement = document.getElementById(`evaluation${i}`);
+            const scoreElement = document.getElementById(`score${i}`);
+            
+            if (evaluationElement || scoreElement) {
+                // 更新表4的表头（考核方式名称）
+                const evaluationShowElement = document.getElementById(`evaluationShow${i}`);
+                if (evaluationShowElement && evaluationElement) {
+                    evaluationShowElement.textContent = (evaluationElement.textContent || evaluationElement.value || '').trim();
+                }
+                
+                // 更新表4的总分行
+                const totalScoreElement = document.getElementById(`totalScore${i}`);
+                if (totalScoreElement && scoreElement) {
+                    const scoreValue = (scoreElement.textContent || scoreElement.value || '').trim();
+                    totalScoreElement.textContent = scoreValue;
+                }
+                
+                // 初始化平均分为空（等待用户输入）
+                const avgScoreElement = document.getElementById(`avgScore${i}`);
+                if (avgScoreElement && !avgScoreElement.textContent) {
+                    avgScoreElement.textContent = '';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('更新表4时出错:', error);
+    }
+}
+
 // 课程分目标达成度计算
 function calculateTargetAchievements() {
     if (!checkTable2Data() || !checkTable4Data()) {
@@ -512,17 +547,31 @@ function setupCalculationEvents() {
     
     // 专门绑定表2和表4的事件监听
     bindTable2And4Events();
+    
+    // 初始化时更新表4
+    updateTable4FromTable2();
 }
 
 // 专门绑定表2和表4的事件监听
 function bindTable2And4Events() {
     const debouncedCalculate = debounce(smartCalculate, 300);
+    const debouncedUpdateTable4 = debounce(updateTable4FromTable2, 100);
     
     // 绑定表2（考核方式权重）的所有输入框
     for (let i = 1; i <= 4; i++) {
+        // 监听考核方式名称变化
+        const evaluationElement = document.getElementById(`evaluation${i}`);
+        if (evaluationElement) {
+            evaluationElement.addEventListener('input', debouncedUpdateTable4);
+        }
+        
+        // 监听满分/总分变化
         const scoreElement = document.getElementById(`score${i}`);
         if (scoreElement) {
-            scoreElement.addEventListener('input', debouncedCalculate);
+            scoreElement.addEventListener('input', function() {
+                debouncedUpdateTable4();
+                debouncedCalculate();
+            });
         }
         
         for (let j = 1; j <= 4; j++) {
