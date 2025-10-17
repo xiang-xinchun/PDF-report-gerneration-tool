@@ -1,6 +1,6 @@
 /* 添加行按钮样式 */
 .add-row-button {
-    display: inline-block;
+    display: none !important;
     align-items: center;
     justify-content: center;
     width: 22px;

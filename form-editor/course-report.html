@@ -1885,11 +1885,11 @@
                 console.log('添加行功能已加载');
                 updateLoadingProgress('行操作功能已加载');
                 
-                // 加载次要JS
-                loadScript('direct-table-buttons.js', function() {
-                    console.log('表格按钮功能已加载');
-                    updateLoadingProgress('UI组件初始化完成');
-                });
+                // 加载次要JS - 注释掉以删除表1的添加按钮
+                // loadScript('direct-table-buttons.js', function() {
+                //     console.log('表格按钮功能已加载');
+                //     updateLoadingProgress('UI组件初始化完成');
+                // });
             });
             
             // 记录加载耗时
