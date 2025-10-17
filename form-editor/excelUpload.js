@@ -451,7 +451,7 @@ function fillDataToPage(data) {
     if (hasError) {
         showNotification({
             title: '数据错误',
-            message: errorMessage + '，请检查数据！',
+            message: errorMessage + '请检查数据！',
             type: 'error'
         });
         return { success: false, message: errorMessage };
