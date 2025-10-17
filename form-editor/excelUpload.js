@@ -131,6 +131,17 @@ function syncEvaluationHeaders() {
     const totalScoreRow = table4.querySelector('#score-row-1');
     const avgScoreRow = table4.querySelector('#score-row-2');
     
+    // 【关键修复】在修改表4前，先保存所有现有的平均分数据
+    const savedAvgScores = {};
+    const oldAvgScoreCells = avgScoreRow.querySelectorAll('[id^="avgScore"]');
+    oldAvgScoreCells.forEach(cell => {
+        const match = cell.id.match(/avgScore(\d+)/);
+        if (match) {
+            const index = match[1];
+            savedAvgScores[index] = cell.textContent || '';
+        }
+    });
+    
     // 重建表4表头 - 保留第一个标题列
     theadRow.innerHTML = '<th>考核方式</th>';
     
@@ -180,10 +191,9 @@ function syncEvaluationHeaders() {
             avgScoreDiv.id = `avgScore${i}`;
             avgScoreDiv.className = 'score-cell';
             avgScoreDiv.contentEditable = 'true';
-            // 保留已有的平均分数据（如果存在的话从原位置复制）
-            const existingAvgDiv = document.getElementById(`avgScore${i}`);
-            if (existingAvgDiv) {
-                avgScoreDiv.textContent = existingAvgDiv.textContent;
+            // 【关键修复】从保存的数据中恢复平均分，而不是从已清空的DOM中读取
+            if (savedAvgScores[i]) {
+                avgScoreDiv.textContent = savedAvgScores[i];
             }
             avgScoreTd.appendChild(avgScoreDiv);
             avgScoreRow.appendChild(avgScoreTd);
