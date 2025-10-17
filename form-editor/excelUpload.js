@@ -343,14 +343,16 @@ async function triggerExcelUpload() {
 
         // 2.3 填充数据到页面（原逻辑不变）
         const data = parseResult.data;
-        fillDataToPage(data);
+        const fillResult = fillDataToPage(data);
         
         // 2.4 显示成功提示
-        showNotification({
-            title: '上传成功',
-            message: '成绩表已成功上传并填充到表格中',
-            type: 'success'
-        });
+        if (fillResult && fillResult.success) {
+            showNotification({
+                title: '上传成功',
+                message: '成绩表已成功上传并填充到表格中',
+                type: 'success'
+            });
+        }
 
     } catch (error) {
         console.error('处理Excel文件出错:', error);
@@ -410,17 +412,58 @@ function extractValidScores(excelData) {
 
 function fillDataToPage(data) {
     syncEvaluationHeaders();
+
+    // 先验证所有平均分数据
+    let hasError = false;
+    let errorMessage = '';
+    const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
     // 填充考核方式平均分
     if (data.assessmentAverages && Array.isArray(data.assessmentAverages)) {
         data.assessmentAverages.forEach((item, index) => {
-            // 只处理前4个输入框
-            if (index >= 4) return;
+            if (index >= evaluationCount) return;
+            
+            const totalScoreElement = document.getElementById(`totalScore${index + 1}`);
+            if (item && typeof item.average === 'number' && totalScoreElement) {
+                const averageScore = item.average;
+                const totalScore = parseFloat(totalScoreElement.textContent) || 0;
+                
+                // 验证平均分是否大于总分
+                if (averageScore > totalScore) {
+                    hasError = true;
+                    errorMessage = `第${index + 1}项考核方式的平均分(${averageScore.toFixed(2)})大于总分(${totalScore})`;
+                    return; // 发现错误就停止
+                }
+            }
+        });
+    }
+    let totalSum = 0;
+    for (let i = 1; i <= evaluationCount; i++) {
+        const totalScoreElement = document.getElementById(`totalScore${i}`);
+        if (totalScoreElement) {
+            const score = parseFloat(totalScoreElement.textContent) || 0;
+            totalSum += score;
+        }
+    }
+    if (Math.abs(totalSum - 100) > 0.1) {
+        hasError = true;
+        errorMessage = `各项考核方式的总分之和为${totalSum}，不等于100！请检查输入。`;
+    }
+    if (hasError) {
+        showNotification({
+            title: '数据错误',
+            message: errorMessage + '，请检查数据！',
+            type: 'error'
+        });
+        return { success: false, message: errorMessage };
+    }
+    if (data.assessmentAverages && Array.isArray(data.assessmentAverages)) {
+        data.assessmentAverages.forEach((item, index) => {
+            if (index >= evaluationCount) return;
             const inputElement = document.getElementById(`avgScore${index + 1}`);
-            // 确保item和average都存在且是数值
             if (inputElement && item && typeof item.average === 'number') {
-                inputElement.textContent = item.average.toFixed(2); 
+                inputElement.textContent = item.average.toFixed(2);
             } else if (inputElement) {
-                inputElement.textContent = '0.00'; 
+                inputElement.textContent = '0.00';
             }
         });
     }
@@ -450,6 +493,7 @@ function fillDataToPage(data) {
     if (window.calculationModule && typeof window.calculationModule.smartCalculate === 'function') {
         window.calculationModule.smartCalculate();
     }
+    return { success: true };
 }
 
 // 工具函数2：计算成绩统计指标
