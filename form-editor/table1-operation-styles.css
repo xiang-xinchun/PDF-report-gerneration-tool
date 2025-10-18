@@ -1,0 +1,112 @@
+/**
+ * 表1操作按钮样式
+ * 用于添加指标、删除指标、添加分行和删除行等按钮的样式
+ */
+
+/* 顶部添加指标按钮 */
+.table1-add-indicator-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.table1-add-indicator-btn:hover {
+    background-color: #45a049;
+}
+
+/* 删除指标按钮 */
+.delete-indicator-btn {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 18px;
+    height: 18px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    transition: background-color 0.2s;
+}
+
+.delete-indicator-btn:hover {
+    background-color: #d32f2f;
+}
+
+/* 删除行按钮 */
+.delete-row-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 18px;
+    height: 18px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    transition: background-color 0.2s;
+}
+
+.delete-row-btn:hover {
+    background-color: #d32f2f;
+}
+
+/* 添加分行按钮 */
+.add-subrow-btn {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 18px;
+    height: 18px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+    transition: background-color 0.2s;
+}
+
+.add-subrow-btn:hover {
+    background-color: #0b7dda;
+}
+
+/* 让单元格有相对定位，方便放置按钮 */
+.table-td {
+    position: relative;
+}
+
+/* 打印时隐藏所有按钮 */
+@media print {
+    .delete-indicator-btn,
+    .delete-row-btn,
+    .add-subrow-btn,
+    .table1-add-indicator-btn,
+    .table1-operation-container {
+        display: none !important;
+    }
+}
