@@ -5,6 +5,9 @@
 
 (function() {
     'use strict';
+    
+    // 监听表格变化的MutationObserver
+    let tableObserver = null;
 
     // 初始化表1操作按钮
     function initTable1OperationButtons() {
@@ -22,7 +25,80 @@
         // 添加打印样式，隐藏操作按钮
         addPrintStyles();
         
+        // 设置表格列变化监听
+        setupTableObserver();
+        
         console.log('表1操作按钮初始化完成');
+    }
+    
+    /**
+     * 设置表格观察器，监听列变化
+     */
+    function setupTableObserver() {
+        const table = document.querySelector('#table1-container table');
+        if (!table) return;
+        
+        // 如果已有观察器，先断开连接
+        if (tableObserver) {
+            tableObserver.disconnect();
+        }
+        
+        // 创建新的观察器
+        tableObserver = new MutationObserver((mutations) => {
+            let columnChanged = false;
+            
+            for (const mutation of mutations) {
+                // 检查是否添加或删除了列
+                if (mutation.type === 'childList' && 
+                    (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)) {
+                    // 检查添加或删除的是否是列（th或td）
+                    const addedTh = Array.from(mutation.addedNodes).some(node => 
+                        node.nodeName === 'TH' || node.nodeName === 'TD');
+                    const removedTh = Array.from(mutation.removedNodes).some(node => 
+                        node.nodeName === 'TH' || node.nodeName === 'TD');
+                    
+                    if (addedTh || removedTh) {
+                        columnChanged = true;
+                        break;
+                    }
+                }
+            }
+            
+            // 如果列发生变化，重新应用删除按钮
+            if (columnChanged) {
+                console.log('检测到表1列变化，重新应用删除按钮');
+                // 先移除所有现有的删除按钮
+                removeAllDeleteButtons();
+                // 再添加新的删除按钮
+                addIndicatorDeleteButtons();
+                addSubrowButtons();
+            }
+        });
+        
+        // 开始观察表格变化
+        tableObserver.observe(table, { 
+            childList: true, 
+            subtree: true 
+        });
+        
+        console.log('表格观察器已设置');
+    }
+    
+    /**
+     * 移除所有删除按钮
+     */
+    function removeAllDeleteButtons() {
+        // 移除所有指标删除按钮
+        const indicatorDeleteButtons = document.querySelectorAll('.delete-indicator-btn');
+        indicatorDeleteButtons.forEach(button => button.remove());
+        
+        // 移除所有行删除按钮
+        const rowDeleteButtons = document.querySelectorAll('.delete-row-btn');
+        rowDeleteButtons.forEach(button => button.remove());
+        
+        // 移除所有添加分行按钮
+        const addSubrowButtons = document.querySelectorAll('.add-subrow-btn');
+        addSubrowButtons.forEach(button => button.remove());
     }
 
     /**
@@ -93,8 +169,12 @@
             // 如果已经有删除按钮，则不再添加
             if (row.querySelector('.delete-row-btn')) return;
             
-            // 获取最后一个单元格
-            const lastCell = row.cells[row.cells.length - 1];
+            // 获取最后一个单元格（确保是课程目标单元格）
+            const goalCells = row.querySelectorAll('.goal-cell');
+            if (goalCells.length === 0) return;
+            
+            // 使用最后一个课程目标单元格
+            const lastCell = goalCells[goalCells.length - 1];
             
             // 创建删除行按钮
             const deleteRowButton = document.createElement('button');
@@ -105,7 +185,7 @@
                 deleteRow(this.closest('tr'));
             };
             
-            // 将按钮添加到最后一个单元格
+            // 将按钮添加到最后一个课程目标单元格
             lastCell.appendChild(deleteRowButton);
         });
     }
@@ -253,15 +333,18 @@
         }
         
         // 创建删除行按钮
-        const lastCell = newRow.cells[newRow.cells.length - 1];
-        const deleteRowButton = document.createElement('button');
-        deleteRowButton.className = 'delete-row-btn';
-        deleteRowButton.innerHTML = '×';
-        deleteRowButton.title = '删除该分行';
-        deleteRowButton.onclick = function() {
-            deleteRow(this.closest('tr'));
-        };
-        lastCell.appendChild(deleteRowButton);
+        const goalCells = newRow.querySelectorAll('.goal-cell');
+        if (goalCells.length > 0) {
+            const lastGoalCell = goalCells[goalCells.length - 1];
+            const deleteRowButton = document.createElement('button');
+            deleteRowButton.className = 'delete-row-btn';
+            deleteRowButton.innerHTML = '×';
+            deleteRowButton.title = '删除该分行';
+            deleteRowButton.onclick = function() {
+                deleteRow(this.closest('tr'));
+            };
+            lastGoalCell.appendChild(deleteRowButton);
+        }
         
         // 将新行添加到表格
         tbody.appendChild(newRow);
@@ -462,15 +545,18 @@
         }
         
         // 创建删除行按钮
-        const lastCell = newRow.cells[newRow.cells.length - 1];
-        const deleteRowButton = document.createElement('button');
-        deleteRowButton.className = 'delete-row-btn';
-        deleteRowButton.innerHTML = '×';
-        deleteRowButton.title = '删除该分行';
-        deleteRowButton.onclick = function() {
-            deleteRow(this.closest('tr'));
-        };
-        lastCell.appendChild(deleteRowButton);
+        const goalCells = newRow.querySelectorAll('.goal-cell');
+        if (goalCells.length > 0) {
+            const lastGoalCell = goalCells[goalCells.length - 1];
+            const deleteRowButton = document.createElement('button');
+            deleteRowButton.className = 'delete-row-btn';
+            deleteRowButton.innerHTML = '×';
+            deleteRowButton.title = '删除该分行';
+            deleteRowButton.onclick = function() {
+                deleteRow(this.closest('tr'));
+            };
+            lastGoalCell.appendChild(deleteRowButton);
+        }
         
         // 确定插入位置：在当前行的后面插入
         const insertBeforeRow = row.nextElementSibling;
@@ -484,6 +570,21 @@
         }
     }
 
+    /**
+     * 重新应用表1按钮
+     * 在表格结构变化后调用此函数来重新应用所有按钮
+     */
+    function refreshTable1Buttons() {
+        // 移除所有现有按钮
+        removeAllDeleteButtons();
+        
+        // 重新添加所有按钮
+        addIndicatorDeleteButtons();
+        addSubrowButtons();
+        
+        console.log('表1操作按钮已刷新');
+    }
+    
     // 页面加载完成后初始化
     document.addEventListener('DOMContentLoaded', initTable1OperationButtons);
     
@@ -491,4 +592,9 @@
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
         initTable1OperationButtons();
     }
+    
+    // 暴露公共接口
+    window.table1OperationButtons = {
+        refresh: refreshTable1Buttons
+    };
 })();

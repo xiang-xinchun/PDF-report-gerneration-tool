@@ -216,6 +216,13 @@
             }, 100);
         }
         
+        // 刷新表1操作按钮
+        if (window.table1OperationButtons && window.table1OperationButtons.refresh) {
+            setTimeout(() => {
+                window.table1OperationButtons.refresh();
+            }, 200);
+        }
+        
         console.log(`已添加课程目标${newGoalNumber}`);
         showNotice(`成功添加课程目标${newGoalNumber}`);
     }
@@ -262,6 +269,13 @@
             setTimeout(() => {
                 window.calculationModule.smartCalculate();
             }, 100);
+        }
+        
+        // 刷新表1操作按钮
+        if (window.table1OperationButtons && window.table1OperationButtons.refresh) {
+            setTimeout(() => {
+                window.table1OperationButtons.refresh();
+            }, 200);
         }
         
         console.log(`已删除课程目标${goalToRemove}`);

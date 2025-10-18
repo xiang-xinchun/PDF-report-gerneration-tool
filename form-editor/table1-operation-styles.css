@@ -64,10 +64,16 @@
     line-height: 1;
     padding: 0;
     transition: background-color 0.2s;
+    z-index: 10; /* 确保按钮在最上层 */
 }
 
 .delete-row-btn:hover {
     background-color: #d32f2f;
+}
+
+/* 确保课程目标单元格是相对定位，方便放置删除按钮 */
+.goal-cell {
+    position: relative;
 }
 
 /* 添加分行按钮 */
