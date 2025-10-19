@@ -187,12 +187,13 @@ function calculateTargetWeights() {
     if (!checkTable1Data()) {
         return [];
     }
+    const goalCount = document.querySelectorAll('[id^="targetWeight"]').length;
     
     const targetStrengthValues = [];
     let hasValidData = false;
     
     try {
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= goalCount; i++) {
             let strengthValue = 0;
             let hCount = 0;
             let mCount = 0;
@@ -345,6 +346,8 @@ function updateTable4FromTable2() {
 function calculateTargetAchievements() {
     // 动态获取表2的考核方式数量
     const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
+    // 动态获取课程目标数量
+    const goalCount = document.querySelectorAll('[id^="targetWeight"]').length;
     console.log(`[Calc] 动态检测到${evaluationCount}个考核方式`);
     
     if (!checkTable2Data() || !checkTable4DataDynamic(evaluationCount)) {
@@ -396,7 +399,7 @@ function calculateTargetAchievements() {
     
     try {
         // 计算每个目标的达成度
-        for (let targetIndex = 1; targetIndex <= 4; targetIndex++) {
+        for (let targetIndex = 1; targetIndex <= goalCount; targetIndex++) {
             let targetAchievement = 0;
             let hasAnyData = false;
             
@@ -470,9 +473,11 @@ function calculateTotalAchievement() {
     const weights = [];
     const achievements = [];
     let hasValidData = false;
+    // 动态获取课程目标数量
+    const goalCount = document.querySelectorAll('[id^="showWeight"]').length;
     
     try {
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= goalCount; i++) {
             const weightElement = document.getElementById(`showWeight${i}`);
             const achievementElement = document.getElementById(`showAchieve${i}`);
             
@@ -601,7 +606,8 @@ function bindTable2And4Events() {
     
     // 动态获取表2中的考核方式数量
     const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
-    
+    // 动态获取课程目标数量
+    const goalCount = document.querySelectorAll('[id^="targetWeight"]').length;
     // 绑定表2（考核方式权重）的所有输入框
     for (let i = 1; i <= evaluationCount; i++) {
         // 监听考核方式名称变化
@@ -619,7 +625,7 @@ function bindTable2And4Events() {
             });
         }
         
-        for (let j = 1; j <= 4; j++) {
+        for (let j = 1; j <= goalCount; j++) {
             const weightElement = document.getElementById(`weight${i}-${j}`);
             if (weightElement) {
                 weightElement.addEventListener('input', debouncedCalculate);

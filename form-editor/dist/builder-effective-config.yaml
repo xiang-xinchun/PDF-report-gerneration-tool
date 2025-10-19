@@ -26,4 +26,4 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: 课程目标达成情况评价报告生成工具
-electronVersion: 38.2.1
+electronVersion: 38.3.0

@@ -12,12 +12,14 @@
     function getCurrentGoalCount() {
         // 从表1的表头获取目标数量
         const table1Headers = document.querySelectorAll('#table1-container table thead .goal-header');
+        console.log(`[动态计算] 获取课程目标数量: ${table1Headers.length}`);
         if (table1Headers.length > 0) {
             return table1Headers.length;
         }
         
         // 从第二部分获取目标数量
         const goalContainers = document.querySelectorAll('[id^="target"][id$="-container"]');
+        console.log(`[动态计算] 获取课程目标数量: ${goalContainers.length}`);
         if (goalContainers.length > 0) {
             return goalContainers.length;
         }

@@ -22,8 +22,8 @@ x64:
     - icudtl.dat
 nsis:
   script: |-
-    !include "C:\Users\24454\Desktop\化院项目\form-editor\node_modules\.store\app-builder-lib@26.0.12\node_modules\app-builder-lib\templates\nsis\include\StdUtils.nsh"
-    !addincludedir "C:\Users\24454\Desktop\化院项目\form-editor\node_modules\.store\app-builder-lib@26.0.12\node_modules\app-builder-lib\templates\nsis\include"
+    !include "C:\Users\24454\Desktop\html\化院项目\form-editor\node_modules\.store\app-builder-lib@26.0.12\node_modules\app-builder-lib\templates\nsis\include\StdUtils.nsh"
+    !addincludedir "C:\Users\24454\Desktop\html\化院项目\form-editor\node_modules\.store\app-builder-lib@26.0.12\node_modules\app-builder-lib\templates\nsis\include"
     !macro _isUpdated _a _b _t _f
       ${StdUtils.TestParameter} $R9 "updated"
       StrCmp "$R9" "true" `${_t}` `${_f}`
@@ -95,8 +95,8 @@ nsis:
       !insertmacro MUI_LANGUAGE "Vietnamese"
     !macroend
 
-    !include "C:\Users\24454\AppData\Local\Temp\t-vGZL9L\2-messages.nsh"
-    !include "C:\Users\24454\AppData\Local\Temp\t-vGZL9L\3-messages.nsh"
+    !include "C:\Users\24454\AppData\Local\Temp\t-w4n4w1\2-messages.nsh"
+    !include "C:\Users\24454\AppData\Local\Temp\t-w4n4w1\3-messages.nsh"
     !addplugindir /x86-unicode "C:\Users\24454\AppData\Local\electron-builder\Cache\nsis\nsis-resources-3.4.1\plugins\x86-unicode"
 
     Var newStartMenuLink

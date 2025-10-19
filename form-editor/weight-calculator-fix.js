@@ -102,6 +102,12 @@ const weightCalculator = {
             observer.observe(table1Container, config);
         }
     },
+    // 动态获取课程目标数量
+    getTargetCount: function() {
+        // 通过表头中的课程目标列来获取数量
+        const goalHeaders = document.querySelectorAll('.goal-header');
+        return goalHeaders.length;
+    },
     
     // 计算权重 - 根据公式1
     calculateWeights: function() {
@@ -109,8 +115,10 @@ const weightCalculator = {
             // 获取表1中所有行的HML选择情况
             const rows = document.querySelectorAll('#table1-container table tbody tr');
             
+            // 动态获取课程目标数量
+            const targetCount = this.getTargetCount();
             // 初始化各目标的权重值Vi和总权重V总
-            let targetValues = [0, 0, 0, 0]; // 各课程目标的Vi值
+            let targetValues = new Array(targetCount).fill(0);
             let totalValue = 0;              // V总值
             let hasSelections = false;       // 标记是否有选择
             
@@ -119,7 +127,7 @@ const weightCalculator = {
                 if (!row.querySelectorAll('.hml-selector').length) return;
                 
                 // 获取每个目标的选择值，计算Vi
-                for (let i = 1; i <= 4; i++) {
+                for (let i = 1; i <= targetCount; i++) {
                     const selector = row.querySelector(`[id^="target${i}-selector"]`);
                     if (!selector) continue;
                     
@@ -155,7 +163,7 @@ const weightCalculator = {
             
             // 计算权重比例Wi = Vi / V总
             let weightRatios = targetValues.map(value => 
-                totalValue > 0 ? value / totalValue : 0.25
+                totalValue > 0 ? value / totalValue : 1 / targetCount
             );
             
             // 更新权重表格
@@ -172,10 +180,11 @@ const weightCalculator = {
     },
     
     // 更新权重表格显示
-    updateTargetWeightTable: function(targetValues = [0, 0, 0, 0], totalValue = 0, weightRatios = [0.25, 0.25, 0.25, 0.25]) {
+    updateTargetWeightTable: function(targetValues = [], totalValue = 0, weightRatios = []) {
         try {
+            const targetCount = targetValues.length;
             // 直接更新四个显示权重的元素（更可靠）
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < targetCount; i++) {
                 const targetWeightElement = document.getElementById(`targetWeight${i+1}`);
                 if (targetWeightElement) {
                     const weightRatio = (totalValue > 0 ? weightRatios[i] : 0).toFixed(3);
@@ -188,7 +197,7 @@ const weightCalculator = {
             if (row) {
                 const cells = row.querySelectorAll('td');
                 // cells[0] 是“权重值”标题，1..4是四个权重，最后是操作列
-                for (let i = 1; i <= 4; i++) {
+                for (let i = 1; i <= targetCount; i++) {
                     const div = cells[i] && cells[i].querySelector('div');
                     if (div) {
                         const weightRatio = (totalValue > 0 ? weightRatios[i-1] : 0).toFixed(3);
@@ -216,10 +225,12 @@ const weightCalculator = {
     // 清空权重表格
     clearWeightTable: function() {
         try {
+            // 动态获取课程目标数量
+            const targetCount = this.getTargetCount();
             // 清空表3的权重值
             const weightElements = document.querySelectorAll('table[id^="weight-table"] td:not(:first-child)');
-            if (weightElements.length === 4) {
-                for (let i = 0; i < 4; i++) {
+            if (weightElements.length === targetCount) {
+                for (let i = 0; i < targetCount; i++) {
                     const targetWeightElement = document.getElementById(`targetWeight${i+1}`);
                     if (targetWeightElement) {
                         targetWeightElement.textContent = '';
