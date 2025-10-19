@@ -582,6 +582,11 @@
         addIndicatorDeleteButtons();
         addSubrowButtons();
         
+        // 刷新表1指标分隔线加粗
+        if (window.table1DividerBold && window.table1DividerBold.enhance) {
+            window.table1DividerBold.enhance();
+        }
+        
         console.log('表1操作按钮已刷新');
     }
     
