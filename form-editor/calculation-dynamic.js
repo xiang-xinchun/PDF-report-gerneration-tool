@@ -326,9 +326,10 @@
     /**
      * 检查表2数据是否完整（动态版本）
      */
-    function checkTable2DataDynamic(goalCount) {
+    function checkTable2DataDynamic() {
+        const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
         let hasValidScore = false;
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= evaluationCount; i++) {
             const scoreElement = document.getElementById(`score${i}`);
             if (scoreElement) {
                 const score = safeParseFloat(scoreElement.textContent || scoreElement.value || '0');
@@ -344,9 +345,11 @@
     /**
      * 检查表4数据是否完整（动态版本）
      */
-    function checkTable4DataDynamic(goalCount) {
+    function checkTable4DataDynamic() {
         let hasValidData = true;
-        for (let i = 1; i <= 4; i++) {
+        const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
+        console.log(`[Calc] 检查表4数据，考核方式数量: ${evaluationCount}`);
+        for (let i = 1; i <= evaluationCount; i++) {
             const totalScoreElement = document.getElementById(`totalScore${i}`);
             const avgScoreElement = document.getElementById(`avgScore${i}`);
             
