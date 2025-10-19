@@ -216,6 +216,11 @@ function syncEvaluationHeaders() {
         const supportText = validEvaluations.join('、');
         supportMaterialElem.textContent = supportText;
     }
+    if (window.calculationModule && typeof window.calculationModule.smartCalculate === 'function') {
+        setTimeout(() => {
+            window.calculationModule.smartCalculate();
+        }, 200);
+    }
 }
 // 为表格行添加输入事件监听
 function addInputListeners(row) {
@@ -490,9 +495,11 @@ function fillDataToPage(data) {
     document.getElementById('rate4Show').textContent = data.rates?.rate4 || '0%';
     document.getElementById('rate5Show').textContent = data.rates?.rate5 || '0%';
 
-    if (window.calculationModule && typeof window.calculationModule.smartCalculate === 'function') {
-        window.calculationModule.smartCalculate();
-    }
+    setTimeout(() => {
+        if (window.calculationModule && typeof window.calculationModule.smartCalculate === 'function') {
+            window.calculationModule.smartCalculate();
+        }
+    }, 300);
     return { success: true };
 }
 

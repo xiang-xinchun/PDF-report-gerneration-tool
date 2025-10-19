@@ -466,72 +466,32 @@ function calculateTargetAchievements() {
 
 // 课程总达成度计算
 function calculateTotalAchievement() {
-    if (!checkTable1Data() || !checkTable2Data() || !checkTable4Data()) {
-        return 0;
-    }
-    
-    const weights = [];
-    const achievements = [];
+    let totalAchievement = 0;
+    let totalWeight = 0;
     let hasValidData = false;
-    // 动态获取课程目标数量
     const goalCount = document.querySelectorAll('[id^="showWeight"]').length;
     
-    try {
-        for (let i = 1; i <= goalCount; i++) {
-            const weightElement = document.getElementById(`showWeight${i}`);
-            const achievementElement = document.getElementById(`showAchieve${i}`);
-            
-            if (weightElement && achievementElement) {
-                const weight = safeParseFloat(weightElement.textContent || weightElement.value || '0');
-                const achievement = safeParseFloat(achievementElement.textContent || achievementElement.value || '0');
-                
-                if (weight > 0 && achievement >= 0) {
-                    hasValidData = true;
-                }
-                
-                weights.push(weight);
-                achievements.push(achievement);
-            } else {
-                weights.push(0);
-                achievements.push(0);
-            }
-        }
+    console.log(`[总达成度] 开始计算${goalCount}个目标的总达成度`);
+    
+    for (let i = 1; i <= goalCount; i++) {
+        const weight = safeParseFloat(document.getElementById(`showWeight${i}`)?.textContent || '0');
+        const achievement = safeParseFloat(document.getElementById(`showAchieve${i}`)?.textContent || '0');
         
-        if (!hasValidData) {
-            const totalAchieveElement = document.getElementById('totalAchieve');
-            if (totalAchieveElement) {
-                if (totalAchieveElement.tagName.toLowerCase() === 'input') {
-                    totalAchieveElement.value = '0.00';
-                } else {
-                    totalAchieveElement.textContent = '0.00';
-                }
-            }
-            return 0;
+        console.log(`[总达成度] 目标${i}: 权重=${weight}, 达成度=${achievement}`);
+        
+        if (weight > 0) {
+            totalAchievement += weight * achievement;
+            totalWeight += weight;
+            hasValidData = true;
         }
-    } catch (error) {
-        showCalculationNotice('读取权重和达成度数据时出错: ' + error.message, true);
-        return 0;
     }
     
-    let totalAchievement = 0;
-    for (let i = 0; i < weights.length; i++) {
-        totalAchievement += weights[i] * achievements[i];
-    }
-    
-    try {
-        const totalAchieveElement = document.getElementById('totalAchieve');
-        if (totalAchieveElement) {
-            const finalValue = totalAchievement.toFixed(3);
-            if (totalAchieveElement.tagName.toLowerCase() === 'input') {
-                totalAchieveElement.value = finalValue;
-            } else {
-                totalAchieveElement.textContent = finalValue;
-            }
-        }
-        
-        showCalculationNotice(`总达成度计算完成: ${totalAchievement.toFixed(3)}`);
-    } catch (error) {
-        showCalculationNotice('更新总达成度时出错: ' + error.message, true);
+    if (hasValidData) {
+        const finalValue = totalAchievement.toFixed(3);
+        document.getElementById('totalAchieve').textContent = finalValue;
+        console.log(`[总达成度] 计算完成: ${finalValue}`);
+    } else {
+        document.getElementById('totalAchieve').textContent = '0.000';
     }
     
     return totalAchievement;
@@ -541,27 +501,16 @@ function calculateTotalAchievement() {
 function smartCalculate() {
     const table1Complete = checkTable1Data();
     const table2Complete = checkTable2Data();
-    
-    // 动态获取表2的考核方式数量
     const evaluationCount = document.querySelectorAll('#table2-container tbody tr').length;
     const table4Complete = checkTable4DataDynamic(evaluationCount);
     
-    console.log(`数据状态: 表1=${table1Complete}, 表2=${table2Complete}, 表4=${table4Complete}, 考核方式数=${evaluationCount}`);
+    console.log(`数据状态: 表1=${table1Complete}, 表2=${table2Complete}, 表4=${table4Complete}`);
     
-    // 表1完成就计算权重
-    if (table1Complete) {
-        calculateTargetWeights();
-    }
+    // 并行计算，不依赖顺序
+    if (table1Complete) calculateTargetWeights();
+    if (table2Complete && table4Complete) calculateTargetAchievements();
     
-    // 表2和表4完成就计算达成度
-    if (table2Complete && table4Complete) {
-        calculateTargetAchievements();
-    }
-    
-    // 所有表都完成就计算总达成度
-    if (table1Complete && table2Complete && table4Complete) {
-        calculateTotalAchievement();
-    }
+    calculateTotalAchievement();
 }
 
 // 绑定计算事件（使用防抖）
