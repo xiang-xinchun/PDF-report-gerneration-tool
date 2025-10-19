@@ -8,52 +8,13 @@
 
     /**
      * 为表1指标分隔线添加加粗样式
+     * 注：样式现在由CSS处理，此函数为兼容性保留
      */
     function enhanceTable1DividerBold() {
         const table = document.querySelector('#table1-container table');
         if (!table) return;
 
-        const tbody = table.querySelector('tbody');
-        if (!tbody) return;
-
-        // 遍历所有行
-        const rows = Array.from(tbody.rows);
-        for (let i = 0; i < rows.length; i++) {
-            const currentRow = rows[i];
-            const cells = currentRow.cells;
-
-            // 检查当前行是否包含category单元格
-            const categoryCell = Array.from(cells).find(cell => cell.classList.contains('category'));
-
-            if (categoryCell) {
-                // 当前行是指标的第一行
-                const rowspan = parseInt(categoryCell.getAttribute('rowspan') || '1');
-
-                // 为该指标的最后一行底部添加加粗边框
-                if (rowspan > 0 && i + rowspan - 1 < rows.length) {
-                    const lastRow = rows[i + rowspan - 1];
-                    if (lastRow) {
-                        Array.from(lastRow.cells).forEach(cell => {
-                            cell.style.borderBottom = '1.5px solid #bbb';
-                        });
-                    }
-                }
-
-                // 为category单元格的左右边框加粗
-                categoryCell.style.borderLeft = '1.5px solid #bbb';
-                categoryCell.style.borderRight = '1.5px solid #bbb';
-            }
-        }
-
-        // 为最后一行底部加粗
-        const lastRow = rows[rows.length - 1];
-        if (lastRow) {
-            Array.from(lastRow.cells).forEach(cell => {
-                cell.style.borderBottom = '1.5px solid #bbb';
-            });
-        }
-
-        console.log('表1指标分隔线已调整');
+        console.log('表1指标分隔线样式已由CSS统一处理');
     }
 
     /**

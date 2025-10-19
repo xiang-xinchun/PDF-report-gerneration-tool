@@ -1,6 +1,7 @@
 /* 
  * 统一表格线样式
  * 确保原始行和动态添加的行有一致的边框样式
+ * 注：表1的样式由 table1-unified-border.css 统一处理
  */
 
 /* 基础表格样式 */
@@ -10,38 +11,39 @@ table {
     width: 100%;
 }
 
-/* 所有表格单元格基础边框 */
-table td, table th {
+/* 所有表格单元格基础边框（除表1外） */
+table:not(#table1-container table) td, 
+table:not(#table1-container table) th {
     border: 1px solid #000 !important;
     padding: 8px !important;
 }
 
-/* 表格行统一边框 */
-tr {
+/* 表格行统一边框（除表1外） */
+table:not(#table1-container table) tr {
     border: 1px solid #000 !important;
 }
 
-/* 确保所有子行与原始行保持一致 */
-tr.subrow {
+/* 确保所有子行与原始行保持一致（表1由其专用样式处理） */
+table:not(#table1-container table) tr.subrow {
     display: table-row !important;
     border: 1px solid #000 !important;
 }
 
-tr.subrow td {
+table:not(#table1-container table) tr.subrow td {
     border: 1px solid #000 !important;
     border-collapse: collapse !important;
     padding: 8px !important;
     vertical-align: middle !important;
 }
 
-/* 标准子行样式 */
-tr.standard-subrow {
+/* 标准子行样式（表1由其专用样式处理） */
+table:not(#table1-container table) tr.standard-subrow {
     border-style: solid !important;
     border-width: 1px !important;
     border-color: #000 !important;
 }
 
-tr.standard-subrow td {
+table:not(#table1-container table) tr.standard-subrow td {
     border: 1px solid #000 !important;
     border-collapse: collapse !important;
 }

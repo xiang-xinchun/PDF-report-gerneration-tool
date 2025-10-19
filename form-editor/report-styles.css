@@ -160,25 +160,9 @@ table {
 .category {
     font-weight: bold;
     background-color: var(--page-bg-color);
-    border-bottom: 1px solid #ccc !important;
 }
 
-/* 表1指标分隔线 */
-#table1-container td.category {
-    border-bottom-width: 1px !important;
-    border-bottom-color: #ccc !important;
-    border-bottom-style: solid !important;
-}
-
-/* 表1行分隔 */
-#table1-container tbody tr {
-    border-bottom: 1px solid var(--border-color) !important;
-}
-
-/* 表1指标之间的分隔线 */
-#table1-container tbody tr:last-of-type td {
-    border-bottom: 1px solid #ccc !important;
-}
+/* 表1样式由table1-unified-border.css统一处理 */
 
 .table-name {
     text-align: center;
