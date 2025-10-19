@@ -48,7 +48,8 @@ h1 {
     font-weight: black;
     text-align: center;
     margin-bottom: 20px;
-    letter-spacing: 0; /* 减少字间距 */
+    letter-spacing: 0;
+    /* 减少字间距 */
 }
 
 h1 .title-wrapper {
@@ -147,7 +148,10 @@ table {
     background-color: var(--page-bg-color);
 }
 
-.table-th, .table-td, th, td {
+.table-th,
+.table-td,
+th,
+td {
     border: 1px solid var(--border-color);
     padding: 8px;
     text-align: center;
@@ -160,9 +164,25 @@ table {
 .category {
     font-weight: bold;
     background-color: var(--page-bg-color);
+    border-bottom: 1px solid #ccc !important;
 }
 
-/* 表1样式由table1-unified-border.css统一处理 */
+/* 表1指标分隔线 */
+#table1-container td.category {
+    border-bottom-width: 1px !important;
+    border-bottom-color: #ccc !important;
+    border-bottom-style: solid !important;
+}
+
+/* 表1行分隔 */
+#table1-container tbody tr {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* 表1指标之间的分隔线 */
+#table1-container tbody tr:last-of-type td {
+    border-bottom: 1px solid #ccc !important;
+}
 
 .table-name {
     text-align: center;
@@ -239,7 +259,8 @@ table {
 }
 
 /* 输入框样式 */
-.input-field, .input-def {
+.input-field,
+.input-def {
     border: 1px solid var(--border-color);
     width: 100%;
     box-sizing: border-box;
@@ -282,6 +303,7 @@ table {
     color: #888;
     font-style: italic;
 }
+
 /* 修复复制粘贴时字体样式不一致的问题 */
 [contenteditable="true"],
 .input-field,
@@ -291,6 +313,7 @@ table {
     color: var(--primary-color) !important;
     line-height: 1.6 !important;
 }
+
 [contenteditable="true"] * {
     all: unset !important;
     font-family: inherit !important;
@@ -300,22 +323,26 @@ table {
     font-weight: normal !important;
     text-decoration: none !important;
 }
+
 [contenteditable="true"]:focus {
     font-family: "SimSun", "宋体", serif !important;
     font-size: 14px !important;
     color: var(--primary-color) !important;
 }
+
 td [contenteditable="true"],
 th [contenteditable="true"] {
     font-family: "SimSun", "宋体", serif !important;
     font-size: 14px !important;
     color: var(--primary-color) !important;
 }
+
 .input-box {
     font-family: "SimSun", "宋体", serif !important;
     font-size: 14px !important;
     color: var(--primary-color) !important;
 }
+
 .report-container h1 .input-def,
 .report-container h1 .input-def *,
 .report-container h1 .input-def [contenteditable="true"],
@@ -327,6 +354,7 @@ th [contenteditable="true"] {
     line-height: 1.6 !important;
     text-align: center !important;
 }
+
 .report-container h1 .input-def [contenteditable="true"]:focus,
 .report-container h1 .input-def [contenteditable="true"]:focus * {
     font-family: "Source Han Sans SC Black", "Arial Black", sans-serif !important;
@@ -334,6 +362,7 @@ th [contenteditable="true"] {
     font-size: 18px !important;
     color: var(--primary-color) !important;
 }
+
 .report-container h1 .input-def [contenteditable="true"][data-placeholder]:empty:before {
     font-family: "Source Han Sans SC Black", "Arial Black", sans-serif !important;
     font-weight: black !important;
@@ -374,8 +403,10 @@ th [contenteditable="true"] {
 .formula-img {
     display: block;
     margin: 10px auto;
-    max-width: 50%;  /* 从80%减小到50% */
-    width: 300px;    /* 固定宽度为300px */
+    max-width: 50%;
+    /* 从80%减小到50% */
+    width: 300px;
+    /* 固定宽度为300px */
     height: auto;
 }
 
@@ -384,7 +415,8 @@ th [contenteditable="true"] {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 15px 0;  /* 减小上下边距 */
+    margin: 15px 0;
+    /* 减小上下边距 */
     width: 100%;
     text-indent: 0;
 }
@@ -393,6 +425,7 @@ td.data-source {
     text-align: left;
     padding: 15px 12px;
 }
+
 td.data-source p {
     text-indent: 2em;
     text-align: left;
@@ -402,16 +435,19 @@ td.data-source p {
     font-size: 14px;
     color: var(--primary-color);
 }
+
 td.data-source [contenteditable="true"] {
     outline: none;
     background: transparent;
     cursor: text;
     line-height: 1;
 }
+
 td.data-source [contenteditable="true"]:hover {
     background-color: #f5f9ff;
     border-radius: 2px;
 }
+
 td.data-source [contenteditable="true"]:focus {
     background-color: #ebf5ff;
     border-radius: 2px;
@@ -496,7 +532,7 @@ td.data-source [contenteditable="true"]:focus {
         size: A4;
         margin: 1.5cm;
     }
-    
+
     body {
         width: 100%;
         margin: 0;
@@ -504,23 +540,33 @@ td.data-source [contenteditable="true"]:focus {
         background-color: white;
         font-size: 12pt;
     }
-    
+
     .report-container {
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
     }
-    
+
     /* 隐藏编辑界面的按钮和导航元素 */
-    .action-buttons, .step-nav, #debug-info, button,
-    .editor-toolbar, .control-panel, .step-navigation,
-    .editor-buttons, .edit-controls, .toolbar {
+    .action-buttons,
+    .step-nav,
+    #debug-info,
+    button,
+    .editor-toolbar,
+    .control-panel,
+    .step-navigation,
+    .editor-buttons,
+    .edit-controls,
+    .toolbar {
         display: none !important;
     }
-    
+
     /* 显示内容元素，但删除编辑边框和背景 */
-    .input-def, [contenteditable="true"], input, .input-field {
+    .input-def,
+    [contenteditable="true"],
+    input,
+    .input-field {
         border: none !important;
         background: transparent !important;
         padding: 0 !important;
@@ -534,7 +580,7 @@ td.data-source [contenteditable="true"]:focus {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
-    
+
     /* 启用所有步骤的显示，确保所有内容打印 */
     .step {
         display: block !important;
@@ -543,91 +589,98 @@ td.data-source [contenteditable="true"]:focus {
         width: 100% !important;
         border: none !important;
     }
-    
+
     /* 表格在打印时不会被截断 */
     .table-container {
         overflow: visible !important;
         width: 100% !important;
         page-break-inside: auto;
     }
-    
+
     table {
         page-break-inside: auto;
         width: 100% !important;
         border-collapse: collapse !important;
         display: table !important;
     }
-    
+
     thead {
         display: table-header-group !important;
     }
-    
+
     tbody {
         display: table-row-group !important;
     }
-    
+
     tr {
         page-break-inside: avoid;
         page-break-after: auto;
         display: table-row !important;
     }
-    
-    th, td {
+
+    th,
+    td {
         display: table-cell !important;
         color: black !important;
         border: 1px solid #000 !important;
     }
-    
+
     /* 确保第一页不是空白页 */
     #step1 {
         page-break-before: avoid !important;
     }
-    
+
     /* 确保页眉在每页显示 */
-    h1, h2, h3 {
+    h1,
+    h2,
+    h3 {
         page-break-after: avoid;
         color: black !important;
     }
-    
+
     /* 隐藏调试信息 */
     #debug-info {
         display: none !important;
     }
-    
+
     /* 放开表格整体断页限制，仅避免单元格拆分 */
     table {
         break-inside: auto !important;
     }
 
-    tr, td, th {
+    tr,
+    td,
+    th {
         break-inside: avoid;
     }
-    
+
     /* 修改公式打印样式 */
     .formula {
         display: block;
         page-break-inside: avoid;
     }
-    
+
     /* 让表格在打印时正常显示 */
     .table-container {
         width: 100% !important;
         overflow: visible !important;
     }
-    
+
     /* 确保占位符内容可见 */
     [data-placeholder]:empty:before {
         content: attr(data-placeholder);
         color: black !important;
         font-style: normal;
     }
-    
+
     /* 确保所有文本元素可见 */
-    p, span, div {
+    p,
+    span,
+    div {
         color: black !important;
         visibility: visible !important;
     }
-    
+
     /* 确保图片可见 */
     img {
         display: block !important;
@@ -635,7 +688,7 @@ td.data-source [contenteditable="true"]:focus {
         height: auto !important;
         visibility: visible !important;
     }
-    
+
     /* 不打印类 */
     .no-print {
         display: none !important;
@@ -649,7 +702,8 @@ td.data-source [contenteditable="true"]:focus {
         font-size: 10.5pt !important;
         color: black !important;
     }
-    .input-def{
+
+    .input-def {
         font-family: "Source Han Sans SC Black", "Arial Black", sans-serif !important;
         font-weight: black !important;
         font-size: 13.5pt !important;
@@ -668,7 +722,8 @@ td.data-source [contenteditable="true"]:focus {
     line-height: 20px;
     font-size: 16px;
     cursor: pointer;
-    display: none; /* 始终隐藏所有删除按钮 */
+    display: none;
+    /* 始终隐藏所有删除按钮 */
     text-align: center;
     vertical-align: middle;
     transition: background-color 0.2s;
@@ -690,14 +745,14 @@ td.data-source [contenteditable="true"]:focus {
     font-weight: bold;
     font-size: 14px;
     transition: all 0.2s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     margin-left: 5px;
 }
 
 .undo-button:hover {
     background-color: #f57c00;
     transform: translateY(-1px);
-    box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 }
 
 .undo-button:disabled {
@@ -719,13 +774,13 @@ td.data-source [contenteditable="true"]:focus {
     font-weight: bold;
     font-size: 14px;
     transition: all 0.2s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .reset-button:hover {
     background-color: #0d8bf2;
     transform: translateY(-1px);
-    box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
 }
 
 .delete-cell {
@@ -738,7 +793,9 @@ td.data-source [contenteditable="true"]:focus {
 
 /* 打印时隐藏按钮 */
 @media print {
-    .delete-cell, .row-delete-button {
+
+    .delete-cell,
+    .row-delete-button {
         display: none !important;
     }
 
@@ -815,6 +872,7 @@ body.is-exporting-pdf select {
     font-size: inherit !important;
     line-height: inherit !important;
 }
+
 body.is-exporting-pdf [contenteditable="true"],
 body.is-exporting-pdf .input-field,
 body.is-exporting-pdf .editable-text,
@@ -823,7 +881,8 @@ body.is-exporting-pdf .input-box {
     font-size: 10.5pt !important;
     color: black !important;
 }
-body.is-exporting-pdf .input-def{
+
+body.is-exporting-pdf .input-def {
     font-family: "Source Han Sans SC Black", "Arial Black", sans-serif !important;
     font-weight: black !important;
     font-size: 13.5pt !important;
@@ -853,7 +912,7 @@ body.is-exporting-pdf tr {
     opacity: 1 !important;
 }
 
-body.is-exporting-pdf th, 
+body.is-exporting-pdf th,
 body.is-exporting-pdf td {
     display: table-cell !important;
     color: black !important;
@@ -863,11 +922,11 @@ body.is-exporting-pdf td {
     padding: 4px 8px !important;
 }
 
-body.is-exporting-pdf p, 
-body.is-exporting-pdf h1, 
-body.is-exporting-pdf h2, 
+body.is-exporting-pdf p,
+body.is-exporting-pdf h1,
+body.is-exporting-pdf h2,
 body.is-exporting-pdf h3,
-body.is-exporting-pdf span, 
+body.is-exporting-pdf span,
 body.is-exporting-pdf div,
 body.is-exporting-pdf label {
     color: black !important;

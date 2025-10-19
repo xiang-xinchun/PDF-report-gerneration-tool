@@ -284,10 +284,10 @@ function showExcelExampleModal() {
 
     // 说明文字
     const descText = document.createElement('p');
-    descText.textContent = '请确保上传的Excel文件符合以下格式：包含序号、学号、姓名、考核方式成绩及总成绩，示例如下：';
+    descText.textContent = '请确保上传的Excel文件符合以下格式：包含序号、学号、姓名、考核方式成绩（确保数量和顺序均与输入内容一致）及总成绩，示例如下：';
     descText.style.cssText = `
-        margin: 0 0 15px 0; color: #333; line-height: 1.5;
-        font-size: 17px; font-family: "Source Han Sans SC Black", "Arial Black", sans-serif; font-weight: bolder;
+        margin: 0 0 15px 0; color: #fb0303ff; line-height: 1.5;
+        font-size: 16px; font-family: "Source Han Sans SC Black", "Arial Black", sans-serif; font-weight: bolder;
     `;
 
     // 按钮组（确认上传/取消）
