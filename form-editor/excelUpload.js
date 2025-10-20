@@ -146,8 +146,8 @@ function syncEvaluationHeaders() {
     theadRow.innerHTML = '<th>考核方式</th>';
     
     // 重建表4数据行 - 保留第一列的标题
-    totalScoreRow.innerHTML = '<td>总分 (Zij)</td>';
-    avgScoreRow.innerHTML = '<td>平均分 (Qij)</td>';
+    totalScoreRow.innerHTML = '<td>总分</td>';
+    avgScoreRow.innerHTML = '<td>平均分</td>';
 
     // 收集有效的考核方式名称用于支撑材料
     const validEvaluations = [];
