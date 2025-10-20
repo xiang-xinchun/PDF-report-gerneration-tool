@@ -7,8 +7,8 @@
 }
 
 .formula-img {
-    max-width: 350px;
-    width: 50%;
+    max-width: 500px;
+    width: 80%;
     height: auto;
     margin: 0 auto;
 }
@@ -21,11 +21,16 @@
     align-items: center;
 }
 
+/* 紧凑型公式容器样式 */
+.formula-compact {
+    margin: 5px 0;
+}
+
 /* 水平布局公式和公式编号 */
 .formula-wrapper {
     display: flex;
-    width: 90%;
-    max-width: 600px;
+    width: 95%;
+    max-width: 800px;
     margin: 0 auto;
     align-items: center;
     justify-content: space-between;
@@ -40,4 +45,18 @@
     width: 80px;
     text-align: right;
     font-size: 15px;
+}
+
+/* 为公式2和公式3图片添加特定样式 */
+.formula-img-larger {
+    max-width: 550px !important;
+    width: 85% !important;
+}
+
+/* 为公式1图片添加特定样式，进一步减小尺寸 */
+.formula-img-normal {
+    max-width: 300px !important;
+    width: 40% !important;
+    margin-top: 5px !important;
+    margin-bottom: 5px !important;
 }
