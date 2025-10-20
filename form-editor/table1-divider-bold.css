@@ -1,56 +1,71 @@
 /**
  * 表1指标分隔线加粗样式
- * 用于加粗表1中指标之间的分隔线，提高可读性
- * 采用与右侧表格线颜色一致的灰色，避免割裂感
+ * 增强边框在PDF缩小时的可见性
  */
 
-/* 表1所有单元格的基础边框 */
+/* 增强所有单元格的基础边框 */
+#table1-container table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+}
+
 #table1-container table td,
 #table1-container table th {
     border: 1px solid #000000 !important;
 }
 
-/* 表1指标类别单元格（第一列带有rowspan的单元格）的底部边框加粗 */
+/* 表头单元格边框加粗 */
+#table1-container table th {
+    border-width: 1px !important;
+}
+
+/* 指标类别单元格边框加粗 */
 #table1-container td.category {
-    border-right: 1.5px solid #000000 !important;
-    border-left: 1.5px solid #000000 !important;
+    border-right: 1px solid #000000 !important;
+    border-left: 1px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
 }
 
-/* 指标类别单元格下方的行也要加粗底部边框 */
+/* 指标分组之间的分隔线加粗 */
 #table1-container tbody tr[id$="-3"] td,
-#table1-container tbody tr[id$="-4"] td,
-#table1-container tbody tr[id$="-5"] td,
-#table1-container tbody tr[id$="-6"] td {
-    border-bottom: 1.5px solid #000000 !important;
+#table1-container tbody tr[id$="-2"] td:not(.category) {
+    border-bottom: 1px solid #000000 !important;
 }
 
-/* 指标最后一行的底部边框加粗 */
-#table1-container tbody tr:has(td.category)+tr+tr td {
-    border-bottom: 1.5px solid #000000 !important;
-}
-
-#table1-container tbody tr:has(td.category)+tr+tr+tr td {
-    border-bottom: 1.5px solid #000000 !important;
-}
-
-/* 保证指标分隔线的颜色始终是灰色 */
-#table1-container tbody tr td {
-    border-color: #000000 !important;
-}
-
-/* 最后一行的底部加粗 */
+/* 最后一行底部边框加粗 */
 #table1-container tbody tr:last-child td {
-    border-bottom: 1.5px solid #000000 !important;
+    border-bottom: 1px solid #000000 !important;
 }
 
-/* 打印时保持效果 */
+/* 打印时使用更粗的边框和pt单位 */
 @media print {
+
+    #table1-container table td,
+    #table1-container table th {
+        border: 1pt solid #000000 !important;
+    }
+
+    #table1-container table th {
+        border-width: 1pt !important;
+    }
+
     #table1-container td.category {
-        border-right: 1.5px solid #000000 !important;
-        border-left: 1.5px solid #000000 !important;
+        border-right: 1pt solid #000000 !important;
+        border-left: 1pt solid #000000 !important;
+        border-bottom: 1pt solid #000000 !important;
+    }
+
+    #table1-container tbody tr[id$="-3"] td,
+    #table1-container tbody tr[id$="-2"] td:not(.category) {
+        border-bottom: 1pt solid #000000 !important;
     }
 
     #table1-container tbody tr:last-child td {
-        border-bottom: 1.5px solid #000000 !important;
+        border-bottom: 1pt solid #000000 !important;
+    }
+
+    /* 确保打印时背景色不会影响边框 */
+    #table1-container td.category {
+        background-color: transparent !important;
     }
 }
