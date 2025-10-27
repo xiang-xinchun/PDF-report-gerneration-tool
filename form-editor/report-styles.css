@@ -709,6 +709,14 @@ td.data-source [contenteditable="true"]:focus {
         font-size: 13.5pt !important;
         color: black !important;
     }
+    td[colspan="6"] {
+        width: 600px !important;
+        max-width: 600px !important;
+    }
+    td:not([colspan="6"]) {
+        width: auto !important;
+        min-width: 80px !important;
+    }
 }
 
 /* 删除按钮样式 - 已隐藏 */
@@ -949,4 +957,8 @@ body.is-exporting-pdf [data-placeholder]:empty:before {
     font-style: normal;
     visibility: visible !important;
     opacity: 1 !important;
+}
+body.is-exporting-pdf .limit-width {
+    width: 600px !important;
+    word-break: break-all;
 }
