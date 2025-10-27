@@ -270,7 +270,14 @@
         categoryCell.className = 'table-td category';
         categoryCell.setAttribute('rowspan', '1');
         categoryCell.style.cssText = 'position:relative; vertical-align: middle;';
-        categoryCell.textContent = '新指标类别';
+        
+        // 创建可编辑的类别名称
+        const categoryInput = document.createElement('div');
+        categoryInput.contentEditable = 'true';
+        categoryInput.className = 'input-box indicator-input';
+        categoryInput.style.cssText = 'width: 100%; min-width: 60px;';
+        categoryInput.textContent = '';
+        categoryCell.appendChild(categoryInput);
         
         // 添加删除指标按钮
         const deleteButton = document.createElement('button');
@@ -293,7 +300,7 @@
         const indicatorInput = document.createElement('div');
         indicatorInput.contentEditable = 'true';
         indicatorInput.className = 'input-box indicator-input';
-        indicatorInput.textContent = '新指标';
+        indicatorInput.textContent = '';
         indicatorCell.appendChild(indicatorInput);
         
         // 添加添加分行按钮
@@ -413,7 +420,16 @@
                     newCategoryCell.className = 'table-td category';
                     newCategoryCell.setAttribute('rowspan', (rowspan - 1).toString());
                     newCategoryCell.style.cssText = 'position:relative; vertical-align: middle;';
-                    newCategoryCell.textContent = categoryCell.textContent.replace('×', '').trim(); // 复制文本，不包含删除按钮
+                    
+                    // 创建可编辑的类别名称
+                    const categoryInput = document.createElement('div');
+                    categoryInput.contentEditable = 'true';
+                    categoryInput.className = 'input-box indicator-input';
+                    categoryInput.style.cssText = 'width: 100%; min-width: 60px;';
+                    // 从原类别单元格中提取文本内容（去掉删除按钮）
+                    const originalText = categoryCell.textContent.replace('×', '').trim();
+                    categoryInput.textContent = originalText;
+                    newCategoryCell.appendChild(categoryInput);
                     
                     // 添加删除指标按钮
                     const deleteButton = document.createElement('button');
@@ -505,7 +521,7 @@
         const indicatorInput = document.createElement('div');
         indicatorInput.contentEditable = 'true';
         indicatorInput.className = 'input-box indicator-input';
-        indicatorInput.textContent = '新分行';
+        indicatorInput.textContent = '';
         indicatorCell.appendChild(indicatorInput);
         
         // 添加添加分行按钮
