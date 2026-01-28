@@ -8,12 +8,25 @@
     
     // 监听表格变化的MutationObserver
     let tableObserver = null;
+    // 指标切换状态：true-完整指标(11个)，false-基本指标(8个)
+    let isFullIndicator = true;
+    // 基本指标列表（8个常用）
+    const basicIndicators = [
+        '师德规范', 
+        '教育情怀', 
+        '知识整合', 
+        '教学能力', 
+        '班级指导', 
+        '综合育人', 
+        '反思研究', 
+        '交流合作'
+    ];
 
     // 初始化表1操作按钮
     function initTable1OperationButtons() {
         console.log('正在初始化表1操作按钮...');
         
-        // 添加表1顶部的添加指标按钮
+        // 添加表1顶部的添加指标按钮和切换按钮
         addTable1AddIndicatorButton();
         
         // 添加各指标删除按钮和行删除按钮
@@ -102,7 +115,53 @@
     }
 
     /**
-     * 添加表1顶部的添加指标按钮
+     * 切换指标显示状态（完整/基本）
+     */
+    function toggleIndicatorMode() {
+        isFullIndicator = !isFullIndicator;
+        const toggleBtn = document.getElementById('table1-toggle-indicator-btn');
+        const table = document.querySelector('#table1-container table');
+        const tbody = table.querySelector('tbody');
+        const categoryCells = tbody.querySelectorAll('td.category');
+        
+        // 更新按钮文本
+        toggleBtn.textContent = isFullIndicator ? '切换为基本指标' : '切换为完整指标';
+        
+        // 遍历所有指标类别单元格，控制对应行的显示/隐藏 + 添加打印类
+        categoryCells.forEach(cell => {
+            const indicatorName = cell.textContent.trim().replace('×', '').trim();
+            const rowspan = parseInt(cell.getAttribute('rowspan') || '1');
+            const currentRow = cell.closest('tr');
+            const rowIndex = Array.from(tbody.rows).indexOf(currentRow);
+            
+            // 判断是否为基本指标
+            const isBasic = basicIndicators.includes(indicatorName);
+            
+            // 确定是否显示：完整模式显示所有；基本模式只显示基本指标
+            const shouldShow = isFullIndicator ? true : isBasic;
+            
+            // 控制当前指标的所有行显示/隐藏 + 添加/移除打印隐藏类
+            for (let i = 0; i < rowspan; i++) {
+                const targetRow = tbody.rows[rowIndex + i];
+                if (targetRow) {
+                    // 屏幕显示控制
+                    targetRow.style.display = shouldShow ? '' : 'none';
+                    // 添加/移除打印隐藏类（关键：为打印样式提供标识）
+                    if (shouldShow) {
+                        targetRow.classList.remove('non-basic-indicator');
+                    } else {
+                        targetRow.classList.add('non-basic-indicator');
+                    }
+                }
+            }
+        });
+        
+        // 重新渲染按钮（确保显示的行有按钮，隐藏的行按钮被移除）
+        refreshTable1Buttons();
+    }
+
+    /**
+     * 添加表1顶部的添加指标按钮和切换按钮
      */
     function addTable1AddIndicatorButton() {
         const table1Container = document.getElementById('table1-container');
@@ -118,7 +177,9 @@
         buttonContainer.className = 'table1-operation-container';
         buttonContainer.style.cssText = `
             display: flex;
+            gap: 10px;
             margin-bottom: 10px;
+            align-items: center;
         `;
         
         // 创建添加指标按钮
@@ -128,8 +189,16 @@
         addButton.className = 'table1-add-indicator-btn';
         addButton.onclick = addNewIndicator;
         
+        // 创建指标切换按钮
+        const toggleButton = document.createElement('button');
+        toggleButton.id = 'table1-toggle-indicator-btn';
+        toggleButton.textContent = '切换为基本指标';
+        toggleButton.className = 'table1-toggle-indicator-btn';
+        toggleButton.onclick = toggleIndicatorMode;
+        
         // 将按钮添加到容器
         buttonContainer.appendChild(addButton);
+        buttonContainer.appendChild(toggleButton);
         
         // 插入到表格之前
         table1Container.insertBefore(buttonContainer, table1Container.firstChild);
@@ -145,8 +214,12 @@
         // 获取所有类别单元格（第一列）
         const categoryCells = table1.querySelectorAll('td.category');
         
-        // 为每个类别单元格添加删除按钮
+        // 为每个类别单元格添加删除按钮（仅显示的行）
         categoryCells.forEach(cell => {
+            const row = cell.closest('tr');
+            // 跳过隐藏的行
+            if (row.style.display === 'none') return;
+            
             // 如果已经有删除按钮，则不再添加
             if (cell.querySelector('.delete-indicator-btn')) return;
             
@@ -163,9 +236,12 @@
             cell.appendChild(deleteButton);
         });
         
-        // 为所有行添加删除按钮（不包括表头）
+        // 为所有显示的行添加删除按钮（不包括表头）
         const rows = table1.querySelectorAll('tbody tr');
         rows.forEach(row => {
+            // 跳过隐藏的行
+            if (row.style.display === 'none') return;
+            
             // 如果已经有删除按钮，则不再添加
             if (row.querySelector('.delete-row-btn')) return;
             
@@ -200,9 +276,13 @@
         // 获取所有指标单元格（第二列）
         const indicatorCells = table1.querySelectorAll('td .indicator-input');
         
-        // 为每个指标单元格的父元素添加添加分行按钮
+        // 为每个显示的指标单元格的父元素添加添加分行按钮
         indicatorCells.forEach(input => {
             const cell = input.parentElement;
+            const row = cell.closest('tr');
+            
+            // 跳过隐藏的行
+            if (row.style.display === 'none') return;
             
             // 如果已经有添加分行按钮，则不再添加
             if (cell.querySelector('.add-subrow-btn')) return;
@@ -236,6 +316,7 @@
                 .delete-row-btn,
                 .add-subrow-btn,
                 .table1-add-indicator-btn,
+                .table1-toggle-indicator-btn,
                 .table1-operation-container {
                     display: none !important;
                 }
@@ -264,6 +345,8 @@
         // 创建新指标的行
         const newRow = document.createElement('tr');
         newRow.id = `table-row-${tbody.rows.length + 1}-1`;
+        // 新添加的指标默认显示（无论当前是完整/基本模式）
+        newRow.style.display = '';
         
         // 创建指标类别单元格
         const categoryCell = document.createElement('td');
@@ -386,6 +469,9 @@
             // 每次都删除相同索引的行，因为删除一行后，后面的行会自动前移
             tbody.deleteRow(rowIndex - 1); // rowIndex是从1开始的，而deleteRow从0开始
         }
+        
+        // 删除后刷新按钮状态
+        refreshTable1Buttons();
     }
 
     /**
@@ -467,6 +553,9 @@
         
         // 删除行
         tbody.deleteRow(row.rowIndex - 1); // rowIndex从1开始，deleteRow从0开始
+        
+        // 删除后刷新按钮状态
+        refreshTable1Buttons();
     }
 
     /**
@@ -509,6 +598,8 @@
         // 创建新行
         const newRow = document.createElement('tr');
         newRow.id = `table-row-${categoryRowIndex + 1}-${rowspan + 1}`;
+        // 新分行继承当前指标行的显示状态
+        newRow.style.display = row.style.display;
         
         // 获取课程目标数量
         const goalCount = table.querySelectorAll('thead .goal-header').length;
@@ -594,7 +685,7 @@
         // 移除所有现有按钮
         removeAllDeleteButtons();
         
-        // 重新添加所有按钮
+        // 重新添加所有按钮（仅显示的行）
         addIndicatorDeleteButtons();
         addSubrowButtons();
         
@@ -616,6 +707,7 @@
     
     // 暴露公共接口
     window.table1OperationButtons = {
-        refresh: refreshTable1Buttons
+        refresh: refreshTable1Buttons,
+        toggleIndicatorMode: toggleIndicatorMode // 暴露切换方法（可选）
     };
 })();

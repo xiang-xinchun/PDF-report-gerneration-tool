@@ -352,30 +352,40 @@ function restoreHiddenItems() {
 // 重置所有内容到最初状态（恢复所有隐藏的项目）
 function resetAllContent() {
     // 添加确认对话框
-    if (!confirm("确认恢复全部内容吗？")) {
+    if (!confirm("确认恢复全部内容吗？这将会清空所有数据。")) {
         return; // 用户取消了恢复操作
     }
     
-    // 清除所有隐藏状态
-    const keys = [];
+    // 如果是Electron环境，使用更激进的重启策略来解决DOM残留问题
+    const isElectron = window.electronAPI && typeof window.electronAPI.relaunchApp === 'function';
     
-    // 收集所有与隐藏状态相关的localStorage键
+    // 强制清除所有相关的localStorage
+    const keys = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key.startsWith('hidden_')) {
-            keys.push(key);
-        }
-        if (key.startsWith('report_')) {
+        // 清除几乎所有状态，除了极少数可能的系统配置
+        if (key.startsWith('hidden_') || key.startsWith('report_') || key === 'hmlSelections') {
             keys.push(key);
         }
     }
+    // 也能直接clear，确保彻底
+    localStorage.clear();
     
-    // 删除所有隐藏状态
-    keys.forEach(key => {
-        localStorage.removeItem(key);
-    });
+    if (isElectron) {
+        window.electronAPI.relaunchApp();
+        return; // 中止后续操作，等待重启
+    } else {
+        // 浏览器环境回退到刷新
+        location.reload();
+        return;
+    }
+
+    //以下为旧逻辑，仅作为非重启环境的兜底（实际上上面的return已经截断了）
     
-    // 显示所有目标容器
+    // 清除所有隐藏状态
+        // 确保清除导出状态的类，防止样式残留导致输入框不可见
+    document.body.classList.remove('is-exporting-pdf');
+        // 显示所有目标容器
     document.querySelectorAll('[id^="target"][id$="-container"]').forEach(container => {
         container.style.display = '';
     });
@@ -397,13 +407,103 @@ function resetAllContent() {
                                  element.closest('#table1-container');
         
         if (!isTable1SubTarget) {
-            element.innerHTML = '';
+            // 安全清空逻辑：
+            // 1. 如果有placeholder，清空innerHTML让CSS placeholder生效
+            // 2. 如果是表格内的单元格，尽量保持一定的结构以防塌陷
+            const hasPlaceholder = element.hasAttribute('data-placeholder');
+            const isInTable = element.closest('table') !== null;
+
+            if (hasPlaceholder) {
+                element.innerHTML = '';
+            } else if (isInTable) {
+                // 表格内的单元格，为了防止高度塌陷和聚焦问题，使用 <br> 或者 textContent=''
+                // 优先尝试 textContent = ''，结合 CSS min-height
+                element.textContent = ''; 
+                // 如果需要确保光标可点击，保留一个不占位的空文本节点可能更好，但最稳妥的是完全空+CSS支撑
+            } else {
+                element.innerHTML = '';
+            }
         }
     });
 
-    document.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(element => {
-        element.value = '';
+    // 显式重置所有输入框的可用状态，防止 pointer-events 或 disabled 残留
+    const allInputs = document.querySelectorAll('input, textarea, select, [contenteditable="true"]');
+    allInputs.forEach(el => {
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+            el.value = '';
+            el.disabled = false;
+            el.readOnly = false;
+        }
+        // 强制重置指针事件
+        el.style.pointerEvents = '';
+        el.style.userSelect = '';
+        
+        // 移除可能导致无法点击的内联样式
+        el.style.display = ''; 
+        el.style.visibility = '';
     });
+
+    // 清除 HML 选择器相关的 localStorage
+    if (localStorage.getItem('hmlSelections')) {
+        localStorage.removeItem('hmlSelections');
+    }
+
+    // 触发自定义重置事件
+    const resetEvent = new CustomEvent('reportReset');
+    document.dispatchEvent(resetEvent);
+
+    // 强制重置所有输入框状态
+    document.querySelectorAll('input, textarea, select, [contenteditable]').forEach(el => {
+        el.disabled = false;
+        el.readOnly = false;
+        el.style.pointerEvents = 'auto'; // 强制允许点击
+        el.style.userSelect = 'text';    // 强制允许选择
+        el.style.visibility = 'visible'; // 确保可见
+        el.style.opacity = '1';          // 确保不透明
+        
+        // 移除可能存在的内联样式干扰
+        if (el.style.removeProperty) {
+            el.style.removeProperty('display');
+        }
+    });
+
+    // 解决 Chromium/Electron 渲染层如果不最小化就无法响应点击的 Bug
+    // 强制容器重排和重绘
+    const reportContainer = document.getElementById('reportContent') || document.querySelector('.report-container') || document.body;
+    
+    // 技巧1: 切换 display
+    const currentDisplay = reportContainer.style.display;
+    reportContainer.style.display = 'none';
+    void reportContainer.offsetHeight; // 强制 Reflow
+    reportContainer.style.display = currentDisplay;
+
+    // 技巧2: 触发 resize 事件
+    window.dispatchEvent(new Event('resize'));
+
+    // 额外的检查：确保 loading-overlay 被隐藏
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+        loadingOverlay.style.zIndex = '-1'; // 确保在底部
+    }
+    
+    // 强制移除可能存在的全屏遮罩
+    document.querySelectorAll('[id*="mask"], [class*="mask"], [id*="overlay"], [class*="overlay"]').forEach(el => {
+        if (el.id !== 'reportContent' && !el.classList.contains('report-container')) {
+             if (window.getComputedStyle(el).position === 'fixed' && window.getComputedStyle(el).zIndex > 100) {
+                 el.style.display = 'none';
+             }
+        }
+    });
+
+    // 技巧3: 重置 Selection 对象
+    const selection = window.getSelection();
+    if (selection) {
+        selection.removeAllRanges();
+    }
+    
+    // 恢复滚动条位置到顶部，防止错位
+    window.scrollTo(0, 0);
 
     // 清空自动计算与同步显示区域
     const textSelectors = [
@@ -449,8 +549,38 @@ function resetAllContent() {
     if (window.calculationModule && typeof window.calculationModule.smartCalculate === 'function') {
         window.calculationModule.smartCalculate();
     }
+
+    // 尝试聚焦第一个可编辑元素，提升用户体验，并确保界面响应
+    const firstEditable = document.querySelector('[contenteditable="true"]');
+    if (firstEditable) {
+        // 使用多重机制确保渲染更新和焦点获取
+        
+        requestAnimationFrame(() => {
+            // 3. 延迟聚焦，给浏览器一点喘息时间
+            setTimeout(() => {
+                // 此时再次检查是否存在，因为可能有其他脚本在后台运行
+                if (document.contains(firstEditable)) {
+                    // 先 blur 再 focus 确保状态刷新
+                    firstEditable.blur();
+                    firstEditable.focus();
+                    
+                    // 确保选中内容（如果是输入框）
+                    if (window.getSelection && document.createRange) {
+                        const range = document.createRange();
+                        range.selectNodeContents(firstEditable);
+                        range.collapse(false); // 光标移到最后
+                        const sel = window.getSelection();
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                    // 再次强制滚动到顶部，因为 focus 可能会导致滚动
+                    window.scrollTo(0, 0);
+                }
+            }, 100);
+        });
+    }
     
-    // 不再显示额外的成功通知，因为已经有了确认对话框
+    console.log('恢复全部内容操作已完成，界面已重置');
 }
 
 // 表格行删除功能

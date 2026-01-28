@@ -27,7 +27,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
             }
             return { success: false, message: errorMsg };
         }
-    }
+    },
+    // 重启应用
+    relaunchApp: () => ipcRenderer.invoke('relaunch-app')
 });
 
 // 为窗口添加调试函数

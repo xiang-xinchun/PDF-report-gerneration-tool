@@ -20,6 +20,21 @@
     background-color: #45a049;
 }
 
+.table1-toggle-indicator-btn{
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+.table1-toggle-indicator-btn:hover{
+    background-color: #f44336;
+}
+
 /* 删除指标按钮 */
 .delete-indicator-btn {
     position: absolute;
@@ -115,4 +130,11 @@
     .table1-operation-container {
         display: none !important;
     }
+    #table1-container table tbody tr.non-basic-indicator{
+        display: none !important;
+    }
+}
+body.is-exporting-pdf .table1-add-indicator-btn,
+body.is-exporting-pdf .table1-operation-container { 
+    display: none !important;
 }

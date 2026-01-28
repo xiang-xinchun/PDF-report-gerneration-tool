@@ -11,6 +11,17 @@
     -webkit-user-select: text !important;
     background-color: rgba(255, 255, 255, 0.7) !important;
     border: 1px dashed #ccc !important;
+    min-height: 24px; /* 基础高度保障 */
+    display: block; /* 默认块级，防止内联元素塌缩 */
+    /* 强制某些浏览器进行层提升，解决渲染卡顿或不更新问题 */
+    transform: translateZ(0);
+    will-change: contents;
+}
+
+/* 针对特定类别的内联覆盖 */
+span[contenteditable="true"], 
+.editable-text {
+    display: inline-block !important; /* 内联块级，允许设置宽高 */
 }
 
 [contenteditable="true"]:focus {
@@ -18,6 +29,17 @@
     border-color: #2196F3 !important;
     background-color: #fff !important;
     box-shadow: 0 0 3px rgba(33, 150, 243, 0.3) !important;
+}
+
+/* 确保空的可编辑元素有最小尺寸和正确的显示模式 
+   注意：这非常关键，当内容被清空时，它是唯一支撑元素尺寸的规则
+*/
+[contenteditable="true"]:empty {
+    display: inline-block !important;
+    min-height: 24px !important;
+    min-width: 20px !important; /* 确保至少有一个光标的宽度 */
+    height: auto !important;
+    vertical-align: middle;
 }
 
 /* 确保输入框在正常模式下可以编辑 */

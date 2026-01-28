@@ -427,10 +427,9 @@ ipcMain.handle('export-pdf', async () => {
             landscape: false
         });
         
-        // 移除导出PDF的类并恢复界面状态
-        try {
-            await mainWindow.webContents.executeJavaScript(`
-                try {
+        // 移除导出样式表
+            try {
+                await mainWindow.webContents.executeJavaScript(`
                     // 移除导出样式表
                     const exportStylesheet = document.getElementById('export-styles');
                     if (exportStylesheet) {
@@ -439,6 +438,12 @@ ipcMain.handle('export-pdf', async () => {
                     
                     // 移除导出类
                     document.body.classList.remove('is-exporting-pdf');
+                    document.body.classList.remove('is-exporting'); // 确保移除可能存在的旧类
+                    
+                    // 强制所有输入框恢复可交互
+                    document.querySelectorAll('input, select, textarea, [contenteditable]').forEach(el => {
+                        el.style.pointerEvents = 'auto'; // 显式重置
+                    });
                     
                     // 恢复步骤显示状态
                     document.querySelectorAll('.step').forEach(step => {
@@ -526,4 +531,10 @@ ipcMain.handle('export-pdf', async () => {
             message: '导出PDF时发生错误: ' + error.message 
         };
     }
+});
+
+// 重启应用
+ipcMain.handle('relaunch-app', () => {
+    app.relaunch();
+    app.exit(0);
 });

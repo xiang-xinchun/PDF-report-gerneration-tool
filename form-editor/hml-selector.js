@@ -102,12 +102,14 @@ function loadHMLSelectionsFromStorage() {
 function updateExportDisplayMode() {
     document.querySelectorAll('.hml-selector').forEach(selector => {
         const selectedOption = selector.querySelector('.selected');
+        // 只有在确有选中的情况下才隐藏其他项，否则保持原样（避免全部消失）
         if (selectedOption) {
             // 在导出模式下只显示选中的值
             selector.querySelectorAll('.hml-option:not(.selected)').forEach(option => {
                 option.style.display = 'none';
             });
             
+            // 缓存被覆盖的样式以便日后恢复（可选优化，目前简化处理）
             selectedOption.style.border = 'none';
             selectedOption.style.backgroundColor = 'transparent';
             selectedOption.style.color = '#000';
@@ -125,13 +127,26 @@ function initHMLSelectors() {
     // 添加重置功能监听
     document.addEventListener('reportReset', function() {
         // 清除所有选择
-        document.querySelectorAll('.hml-selector .hml-option').forEach(option => {
-            option.classList.remove('selected');
+        document.querySelectorAll('.hml-selector').forEach(selector => {
+            // 确保选择器本身没有样式覆盖
+            selector.style.pointerEvents = 'auto';
+            
+            selector.querySelectorAll('.hml-option').forEach(option => {
+                option.classList.remove('selected');
+                // 确保在重置时恢复所有选项的可见性
+                option.style.display = ''; 
+                option.style.border = '';
+                option.style.backgroundColor = '';
+                option.style.color = '';
+                option.style.pointerEvents = 'auto'; // 确保子元素也可点击
+            });
         });
         
         // 清除存储的选择
         Object.keys(hmlSelections).forEach(key => delete hmlSelections[key]);
         localStorage.removeItem('hmlSelections');
+        
+        console.log('HML选择器已重置');
     });
     
     // 监听DOM变化，处理动态添加的选择器

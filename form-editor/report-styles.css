@@ -106,7 +106,7 @@ p {
 }
 
 .editable-text {
-    display: inline;
+    display: inline-block;
     min-width: 200px;
     outline: none;
 }
@@ -507,23 +507,78 @@ td.data-source [contenteditable="true"]:focus {
 
 /* 签名区域样式 */
 .signature-cell {
-    height: 150px;
+    height: auto;
+    min-height: 80px;
     position: relative;
 }
 
 .signature-group {
-    position: absolute;
-    bottom: 2px;
-    right: 10px;
     text-align: right;
+    width: 100%;
 }
 
 .signature-item {
     margin: 2px 0;
+    min-width: 350px;
+    display: inline-grid;
+    grid-template-columns: auto 150px;
+    align-items: center;
+    gap: 8px;
 }
 
 .signature-label {
-    margin-right: 100px;
+    display: inline-block;
+    margin-right: 0;
+    white-space: nowrap;
+    vertical-align: middle;
+    text-align: right;
+}
+
+.signature-input {
+    display: inline-block;
+    height: 24px !important;
+    min-height: 24px !important;
+    max-height: 24px !important;
+    border: 1px dashed var(--border-color);
+    padding: 2px 5px;
+    margin-left: 0;
+    vertical-align: middle;
+    line-height: 20px !important;
+    font-family: "SimSun", "宋体", serif;
+    font-size: 14px;
+    cursor: text;
+    background-color: var(--page-bg-color);
+    box-sizing: border-box;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.signature-input[data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    color: #999;
+    font-style: italic;
+}
+
+.signature-input:focus[data-placeholder]:empty:before {
+    content: "\200B";
+}
+
+.signature-input:focus {
+    outline: none;
+    border-color: var(--button-color);
+    background-color: #f5f9ff;
+}
+
+.signature-input.signature {
+    width: 100%;
+    flex: none;
+}
+
+.signature-input.date {
+    width: 100%;
+    flex: none;
 }
 
 /* 打印样式优化 */
@@ -716,6 +771,24 @@ td.data-source [contenteditable="true"]:focus {
     td:not([colspan="6"]) {
         width: auto !important;
         min-width: 80px !important;
+    }
+
+    .signature-input {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin-left: 0 !important;
+        display: inline !important;
+        min-height: 1em !important;
+        font-size: inherit !important;
+        line-height: inherit !important;
+        color: black !important;
+    }
+
+    .signature-input[data-placeholder]:empty:before {
+        content: attr(data-placeholder);
+        color: #999 !important;
+        font-style: italic;
     }
 }
 
@@ -961,4 +1034,16 @@ body.is-exporting-pdf [data-placeholder]:empty:before {
 body.is-exporting-pdf .limit-width {
     width: 600px !important;
     word-break: break-all;
+}
+
+body.is-exporting-pdf .signature-input {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin-left: 0 !important;
+    display: inline !important;
+    min-height: 1em !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    color: black !important;
 }
