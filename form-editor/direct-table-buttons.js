@@ -87,7 +87,11 @@
                     window.addRowFeature.addSubRow(row.id);
                 } else {
                     console.error('addSubRow函数不可用');
-                    alert('添加行功能未正确加载，请刷新页面重试');
+                    if (window.customAlert) { 
+                        window.customAlert('添加行功能未正确加载，请刷新页面重试');
+                    } else {
+                        alert('添加行功能未正确加载，请刷新页面重试');
+                    }
                 }
             };
             

@@ -230,7 +230,7 @@
     /**
      * 删除课程目标
      */
-    function removeGoal() {
+    async function removeGoal() {
         if (currentGoalCount <= 1) {
             showNotice('至少需要保留一个课程目标！', 'warning');
             return;
@@ -238,7 +238,15 @@
 
         const goalToRemove = currentGoalCount;
         
-        if (!confirm(`确定要删除课程目标${goalToRemove}吗？这将同时删除所有相关表格中的对应列/行。`)) {
+        // Use custom confirm if available, else standard confirm
+        let confirmed = false;
+        if (window.customConfirm) {
+            confirmed = await window.customConfirm(`确定要删除课程目标${goalToRemove}吗？这将同时删除所有相关表格中的对应列/行。`, '确认删除', true);
+        } else {
+            confirmed = confirm(`确定要删除课程目标${goalToRemove}吗？这将同时删除所有相关表格中的对应列/行。`);
+        }
+        
+        if (!confirmed) {
             return;
         }
         
@@ -901,7 +909,11 @@
                 type: type
             });
         } else {
-            alert(message);
+            if (window.customAlert) {
+                window.customAlert(message);
+            } else {
+                alert(message);
+            }
         }
     }
 

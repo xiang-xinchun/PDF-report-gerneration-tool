@@ -238,7 +238,7 @@ function countVisibleTargets() {
 }
 
 // 撤销上一次操作
-function undoLastOperation() {
+async function undoLastOperation() {
     if (operationHistory.length === 0) {
         // 没有可撤销的操作
         showNotification('提示', '没有可撤销的操作');
@@ -246,7 +246,14 @@ function undoLastOperation() {
     }
     
     // 添加确认对话框
-    if (!confirm("确认撤销吗？")) {
+    let confirmed = false;
+    if (window.customConfirm) {
+        confirmed = await window.customConfirm("确认撤销吗？", '确认撤销');
+    } else {
+        confirmed = confirm("确认撤销吗？");
+    }
+
+    if (!confirmed) {
         return; // 用户取消了撤销操作
     }
     
@@ -350,9 +357,16 @@ function restoreHiddenItems() {
 }
 
 // 重置所有内容到最初状态（恢复所有隐藏的项目）
-function resetAllContent() {
+async function resetAllContent() {
     // 添加确认对话框
-    if (!confirm("确认恢复全部内容吗？这将会清空所有数据。")) {
+    let confirmed = false;
+    if (window.customConfirm) {
+        confirmed = await window.customConfirm("确认恢复全部内容吗？这将会清空所有数据。", '确认重置', true);
+    } else {
+        confirmed = confirm("确认恢复全部内容吗？这将会清空所有数据。");
+    }
+
+    if (!confirmed) {
         return; // 用户取消了恢复操作
     }
     

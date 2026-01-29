@@ -112,7 +112,11 @@ function addExamRow() {
 function deleteLastRow() {
     const table = document.querySelector('#table2-container table tbody');
     if (table.rows.length <= 1) {
-        alert("至少需要保留一行考核方式");
+        if (window.customAlert) {
+            window.customAlert("至少需要保留一行考核方式");
+        } else {
+            alert("至少需要保留一行考核方式");
+        }
         return;
     }
     table.deleteRow(table.rows.length - 1);
@@ -537,7 +541,11 @@ function showNotification(options) {
             console.error('自定义通知调用失败:', e);
         }
     }
-    alert(`${title}（${type}）：${message}`);
+    if (window.customAlert) {
+        window.customAlert(`${title}（${type}）：${message}`);
+    } else {
+        alert(`${title}（${type}）：${message}`);
+    }
     console.log(`${title}（${type}）：${message}`);
 }
 

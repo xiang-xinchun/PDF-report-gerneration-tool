@@ -1867,6 +1867,7 @@
     <script src="excelUpload.js"></script>
     <script src="calculation-enhanced.js"></script>
     <!-- 课程目标动态管理模块 -->
+    <script src="custom-modal.js"></script>
     <script src="goal-manager.js"></script>
     <!-- 动态课程目标计算增强模块 -->
     <script src="calculation-dynamic.js"></script>
@@ -2056,7 +2057,11 @@
             if (!window.undoLastOperation || window.undoLastOperation === 'function' && !window.undoLastOperation.toString().includes('operationHistory')) {
                 window.undoLastOperation = function () {
                     if (!window.operationHistory || window.operationHistory.length === 0) {
-                        alert('没有可撤销的操作');
+                        if (window.customAlert) {
+                            window.customAlert('没有可撤销的操作');
+                        } else {
+                            alert('没有可撤销的操作');
+                        }
                         return;
                     }
 

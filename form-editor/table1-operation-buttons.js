@@ -444,11 +444,18 @@
      * 删除指标（及所有相关分行）
      * @param {HTMLElement} row 指标行元素
      */
-    function deleteIndicator(row) {
+    async function deleteIndicator(row) {
         if (!row) return;
         
         // 确认删除
-        if (!confirm('确定要删除该指标及其所有分行吗？')) {
+        let confirmed = false;
+        if (window.customConfirm) {
+            confirmed = await window.customConfirm('确定要删除该指标及其所有分行吗？', '确认删除', true);
+        } else {
+            confirmed = confirm('确定要删除该指标及其所有分行吗？');
+        }
+        
+        if (!confirmed) {
             return;
         }
         
@@ -478,11 +485,18 @@
      * 删除单行
      * @param {HTMLElement} row 行元素
      */
-    function deleteRow(row) {
+    async function deleteRow(row) {
         if (!row) return;
         
         // 确认删除
-        if (!confirm('确定要删除该行吗？')) {
+        let confirmed = false;
+        if (window.customConfirm) {
+            confirmed = await window.customConfirm('确定要删除该行吗？', '确认删除', true);
+        } else {
+            confirmed = confirm('确定要删除该行吗？');
+        }
+
+        if (!confirmed) {
             return;
         }
         
