@@ -526,6 +526,35 @@ ipcMain.handle('export-pdf', async () => {
         return { success: true, filePath };
     } catch (error) {
         console.error('PDF导出错误:', error);
+        
+        // 出错时也要尝试恢复页面状态
+        try {
+            if (mainWindow && !mainWindow.isDestroyed()) {
+                 await mainWindow.webContents.executeJavaScript(`
+                    document.body.classList.remove('is-exporting-pdf');
+                    document.body.classList.remove('is-exporting');
+                    
+                    const exportStyle = document.getElementById('export-styles');
+                    if (exportStyle) exportStyle.parentNode.removeChild(exportStyle);
+                    
+                    document.querySelectorAll('input, select, textarea, [contenteditable]').forEach(el => {
+                        el.style.pointerEvents = 'auto';
+                    });
+                    
+                    // 简单恢复所有步骤的显示状态，避免完全不可见
+                     document.querySelectorAll('.step').forEach(step => {
+                        if (step.dataset.prevDisplay) {
+                            step.style.display = step.dataset.prevDisplay;
+                        } else {
+                            step.style.removeProperty('display');
+                        }
+                    });
+                 `);
+            }
+        } catch (cleanupError) {
+            console.error('错误恢复清理失败:', cleanupError);
+        }
+
         return { 
             success: false, 
             message: '导出PDF时发生错误: ' + error.message 

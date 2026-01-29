@@ -875,6 +875,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         // 导出完成后，恢复页面状态
                         document.body.classList.remove('is-exporting');
                         
+                        // 清理主进程可能残留的样式和类 - 修复无法编辑的问题
+                        document.body.classList.remove('is-exporting-pdf');
+                        const exportStyle = document.getElementById('export-styles');
+                        if (exportStyle) {
+                            exportStyle.remove();
+                        }
+                        
+                        // 强制恢复交互性
+                         document.querySelectorAll('input, select, textarea, [contenteditable]').forEach(el => {
+                            el.style.pointerEvents = 'auto'; 
+                        });
+                        
                         // 删除临时添加的样式
                         const tempStyle = document.getElementById('pdf-export-styles');
                         if (tempStyle) {
@@ -932,6 +944,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .catch(err => {
                     document.body.classList.remove('is-exporting');
+                    
+                    // 清理主进程可能残留的样式和类
+                    document.body.classList.remove('is-exporting-pdf'); 
+                    const exportStyle = document.getElementById('export-styles');
+                    if (exportStyle) {
+                        exportStyle.remove();
+                    }
+                    // 强制恢复交互性
+                     document.querySelectorAll('input, select, textarea, [contenteditable]').forEach(el => {
+                        el.style.pointerEvents = 'auto'; 
+                    });
+
                     window.showDebug('PDF导出错误：' + err.message);
                     
                     // 确保恢复基本显示状态
