@@ -675,6 +675,28 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log('正在准备导出报告...');
             
+            // 强制关闭任何打开的模态框和通知
+            const modalOverlay = document.querySelector('.custom-modal-overlay');
+            if (modalOverlay && modalOverlay.classList.contains('active')) {
+                // 尝试触发取消按钮以正确清理状态
+                const cancelBtn = document.getElementById('custom-modal-cancel');
+                if (cancelBtn) {
+                     cancelBtn.click();
+                }
+                
+                // 强制立即隐藏，跳过过渡动画
+                modalOverlay.classList.remove('active');
+                modalOverlay.style.visibility = 'hidden';
+                modalOverlay.style.opacity = '0';
+                modalOverlay.style.display = 'none';
+            }
+            
+            // 隐藏通知
+            const notification = document.getElementById('notification-toast');
+            if (notification) {
+                notification.style.display = 'none';
+            }
+
             // 添加导出类以应用特殊标志
             document.body.classList.add('is-exporting');
             
@@ -889,6 +911,19 @@ document.addEventListener('DOMContentLoaded', function() {
                         // 导出完成后，恢复页面状态
                         document.body.classList.remove('is-exporting');
                         
+                        // 恢复模态框和通知的显示属性
+                         const modalOverlay = document.querySelector('.custom-modal-overlay');
+                         if (modalOverlay) {
+                             modalOverlay.style.visibility = '';
+                             modalOverlay.style.opacity = '';
+                             modalOverlay.style.display = '';
+                         }
+                         
+                         const notification = document.getElementById('notification-toast');
+                         if (notification) {
+                             notification.style.display = '';
+                         }
+
                         // 清理主进程可能残留的样式和类 - 修复无法编辑的问题
                         document.body.classList.remove('is-exporting-pdf');
                         const exportStyle = document.getElementById('export-styles');
