@@ -1,0 +1,1156 @@
+﻿// 操作历史记录栈，用于撤销功能
+const operationHistory = [];
+const MAX_HISTORY = 50; // 最大历史记录数量
+
+// 删除可编辑项的功能
+function hideEditableItem(containerId) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        // 记录操作到历史记录中，以便撤销
+        recordOperation({
+            type: 'hideEditableItem',
+            containerId: containerId,
+            previousDisplay: container.style.display,
+            previousContainerHTML: container.outerHTML
+        });
+        
+        // 隐藏元素而不是完全移除，以便于在需要时恢复
+        container.style.display = 'none';
+        
+        // 保存状态到 localStorage
+        localStorage.setItem('hidden_' + containerId, 'true');
+        
+        // 保留元素的内容
+        const inputElement = container.querySelector('[contenteditable="true"]');
+        if (inputElement && inputElement.id) {
+            // 仍然保存内容，以便在恢复时使用
+            localStorage.setItem('report_' + inputElement.id, inputElement.textContent);
+        }
+        
+        // 如果是目标项，则重排序后续的目标
+        if (containerId.startsWith('target') && containerId.endsWith('-container')) {
+            reorderTargets();
+        }
+    }
+}
+
+// 重新排序课程目标
+function reorderTargets() {
+    // 找出所有目标容器元素
+    const targetContainers = Array.from(document.querySelectorAll('[id^="target"][id$="-container"]'));
+    
+    // 找出所有目标的原始编号和顺序，包括隐藏的
+    const allTargetsInfo = targetContainers.map(container => {
+        const num = parseInt(container.id.match(/\d+/)[0]);
+        const isHidden = container.style.display === 'none' || 
+                         localStorage.getItem('hidden_' + container.id) === 'true';
+        return {
+            element: container,
+            number: num,
+            isHidden: isHidden
+        };
+    });
+    
+    // 过滤出可见的目标容器
+    const visibleTargets = allTargetsInfo.filter(info => !info.isHidden);
+    
+    // 排序可见容器，确保按照原始顺序
+    visibleTargets.sort((a, b) => a.number - b.number);
+    
+    // 记录目标重排映射（老编号 -> 新编号）
+    const targetMappings = {};
+    
+    // 更新目标文本和数据属性
+    visibleTargets.forEach((info, index) => {
+        const newTargetNumber = index + 1;
+        const oldTargetNumber = info.number;
+        
+        // 记录映射关系
+        targetMappings[oldTargetNumber] = newTargetNumber;
+        
+        const container = info.element;
+
+        // 更新目标标题文本
+        const labelElement = container.querySelector('.goal-label');
+        if (labelElement) {
+            labelElement.textContent = `目标${newTargetNumber}：`;
+            // 移除可能遗留的文本节点，防止重复显示
+            Array.from(container.childNodes).forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    node.nodeValue = '';
+                }
+            });
+        } else {
+            const textNode = Array.from(container.childNodes)
+                .find(node => node.nodeType === Node.TEXT_NODE);
+            if (textNode) {
+                textNode.nodeValue = `目标${newTargetNumber}：`;
+            }
+        }
+    });
+    
+    // 更新所有表格中的课程目标标题和数据
+    updateTableHeaders(targetMappings);
+    
+    // 更新其他相关元素中的目标编号
+    updateOtherTargetReferences(targetMappings);
+}
+
+// 更新表格中的标题和列数据
+function updateTableHeaders(targetMappings) {
+    // 处理所有表格
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+        // 获取所有表头行
+        const headerRows = table.querySelectorAll('thead tr');
+        
+        headerRows.forEach(row => {
+            // 跳过操作列和前置列（如"指标点"列）
+            const headerCells = Array.from(row.querySelectorAll('th')).filter((cell, index) => {
+                // 排除第一列和最后一列（通常是标签列和操作列）
+                return index > 0 && index < row.querySelectorAll('th').length - 1;
+            });
+            
+            // 只处理包含"课程目标X"的表头
+            headerCells.forEach(cell => {
+                const match = cell.textContent.match(/课程目标(\d+)/);
+                if (match) {
+                    const oldTargetNumber = parseInt(match[1]);
+                    if (targetMappings[oldTargetNumber]) {
+                        cell.textContent = `课程目标${targetMappings[oldTargetNumber]}`;
+                    } else {
+                        // 如果这个目标被删除了，隐藏这一列
+                        const columnIndex = Array.from(cell.parentNode.children).indexOf(cell);
+                        hideTableColumn(table, columnIndex);
+                    }
+                }
+            });
+        });
+    });
+}
+
+// 隐藏表格中的某一列
+function hideTableColumn(table, columnIndex) {
+    const rows = table.querySelectorAll('tr');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td, th');
+        if (cells.length > columnIndex) {
+            cells[columnIndex].style.display = 'none';
+        }
+    });
+}
+
+// 记录操作到历史记录栈中
+function recordOperation(operation) {
+    // 限制历史记录大小
+    if (operationHistory.length >= MAX_HISTORY) {
+        operationHistory.shift(); // 移除最旧的记录
+    }
+    
+    // 添加时间戳
+    operation.timestamp = new Date().getTime();
+    
+    // 添加到历史记录
+    operationHistory.push(operation);
+    
+    // 更新撤销按钮状态
+    updateUndoButtonState();
+}
+
+// 更新其他涉及课程目标的引用
+function updateOtherTargetReferences(targetMappings = {}) {
+    // 找出所有包含"课程目标X"或"目标X"文本的元素
+    const allElements = document.querySelectorAll('*');
+    
+    allElements.forEach(element => {
+        // 跳过我们已经处理过的目标容器和表格标题
+        if (element.id && (element.id.startsWith('target') || element.tagName === 'TH')) {
+            return;
+        }
+        
+        // 检查元素中是否有课程目标相关的文本
+        for (const node of element.childNodes) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.nodeValue;
+                
+                // 匹配"课程目标X"或"目标X"的格式
+                const courseTargetMatch = text.match(/课程目标(\d+)/g);
+                const targetMatch = text.match(/目标(\d+)/g);
+                
+                if (courseTargetMatch || targetMatch) {
+                    let newText = text;
+                    
+                    // 处理"课程目标X"格式
+                    if (courseTargetMatch) {
+                        courseTargetMatch.forEach(match => {
+                            const num = parseInt(match.match(/\d+/)[0]);
+                            if (targetMappings[num]) {
+                                newText = newText.replace(
+                                    new RegExp(`课程目标${num}`, 'g'), 
+                                    `课程目标${targetMappings[num]}`
+                                );
+                            }
+                        });
+                    }
+                    
+                    // 处理"目标X"格式（不是目标容器内部）
+                    if (targetMatch && !element.closest('[id^="target"][id$="-container"]')) {
+                        targetMatch.forEach(match => {
+                            const num = parseInt(match.match(/\d+/)[0]);
+                            if (targetMappings[num]) {
+                                newText = newText.replace(
+                                    new RegExp(`目标${num}(?!-)`, 'g'), 
+                                    `目标${targetMappings[num]}`
+                                );
+                            }
+                        });
+                    }
+                    
+                    // 如果有更改，更新文本
+                    if (newText !== text) {
+                        node.nodeValue = newText;
+                    }
+                }
+            }
+        }
+    });
+    
+    // 更新data-placeholder属性中的目标编号
+    document.querySelectorAll('[data-placeholder^="请填写目标"]').forEach(element => {
+        const placeholder = element.getAttribute('data-placeholder');
+        const match = placeholder.match(/请填写目标(\d+)/);
+        if (match) {
+            const num = parseInt(match[1]);
+            if (targetMappings[num]) {
+                element.setAttribute('data-placeholder', `请填写目标${targetMappings[num]}`);
+            }
+        }
+    });
+}
+
+// 计算当前可见的目标数量
+function countVisibleTargets() {
+    const targetContainers = Array.from(document.querySelectorAll('[id^="target"][id$="-container"]'));
+    return targetContainers.filter(container => {
+        return container.style.display !== 'none' && 
+               localStorage.getItem('hidden_' + container.id) !== 'true';
+    }).length;
+}
+
+// 撤销上一次操作
+async function undoLastOperation() {
+    if (operationHistory.length === 0) {
+        // 没有可撤销的操作
+        showNotification('提示', '没有可撤销的操作');
+        return;
+    }
+    
+    // 添加确认对话框
+    const confirmUndo = await customConfirm(
+        "确认撤销吗？",
+        "确认撤销",
+        { confirmText: "撤销", cancelText: "取消" }
+    );
+    
+    if (!confirmUndo) {
+        return;
+    }
+    
+    const lastOperation = operationHistory.pop();
+    
+    // 根据操作类型执行相应的撤销
+    switch (lastOperation.type) {
+        case 'hideEditableItem':
+            // 恢复被隐藏的可编辑项
+            const container = document.getElementById(lastOperation.containerId);
+            if (container) {
+                container.style.display = lastOperation.previousDisplay || '';
+                localStorage.removeItem('hidden_' + lastOperation.containerId);
+                
+                // 如果是目标项，需要重排序
+                if (lastOperation.containerId.startsWith('target') && lastOperation.containerId.endsWith('-container')) {
+                    reorderTargets();
+                }
+            }
+            break;
+            
+        case 'hideTableRow':
+            // 恢复被隐藏的表格行
+            const row = document.getElementById(lastOperation.rowId);
+            if (row) {
+                row.style.display = lastOperation.previousDisplay || '';
+                localStorage.removeItem('hidden_row_' + lastOperation.rowId);
+            }
+            break;
+            
+        default:
+            console.warn('未知的操作类型:', lastOperation.type);
+    }
+    
+    // 更新撤销按钮状态
+    updateUndoButtonState();
+    
+    // 不再显示额外的成功通知，因为已经有了确认对话框
+}
+
+// 更新撤销按钮状态
+function updateUndoButtonState() {
+    const undoButton = document.getElementById('undo-button');
+    if (undoButton) {
+        undoButton.disabled = operationHistory.length === 0;
+    }
+}
+
+// 显示通知
+function showNotification(title, message) {
+    // 如果页面中有Toast组件，使用它
+    const toastTitle = document.getElementById('toast-title');
+    const toastMessage = document.getElementById('toast-message');
+    const toast = document.getElementById('notification-toast');
+    
+    if (toastTitle && toastMessage && toast) {
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+        
+        // 显示自定义Toast通知
+        toast.style.display = 'block';
+        
+        // 3秒后自动隐藏
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    } else {
+        // 否则使用简单的alert
+        console.log(`${title}: ${message}`);
+    }
+}
+
+// 恢复之前隐藏的可编辑项和表格行
+function restoreHiddenItems() {
+    // 查找所有具有ID并以-container结尾的元素
+    const containerElements = document.querySelectorAll('[id$="-container"]');
+    
+    containerElements.forEach(container => {
+        const containerId = container.id;
+        // 检查该元素是否已被隐藏
+        const isHidden = localStorage.getItem('hidden_' + containerId) === 'true';
+        
+        if (isHidden) {
+            // 如果元素之前被隐藏，则隐藏它
+            container.style.display = 'none';
+        }
+    });
+    
+    // 恢复所有已隐藏的表格行
+    const allTableRows = document.querySelectorAll('tr[id]');
+    allTableRows.forEach(row => {
+        const rowId = row.id;
+        if (rowId) {
+            const isHidden = localStorage.getItem('hidden_row_' + rowId) === 'true';
+            
+            if (isHidden) {
+                row.style.display = 'none';
+            }
+        }
+    });
+}
+
+// 重置所有内容到最初状态（恢复所有隐藏的项目）
+async function resetAllContent() {
+    // 添加确认对话框
+    const confirmReset = await customConfirm(
+        "确认恢复全部内容吗？这将会清空所有数据。",
+        "确认恢复",
+        { danger: true, confirmText: "恢复", cancelText: "取消" }
+    );
+    
+    if (!confirmReset) {
+        return;
+    }
+    
+    // 如果是Electron环境，使用更激进的重启策略来解决DOM残留问题
+    const isElectron = window.electronAPI && typeof window.electronAPI.relaunchApp === 'function';
+    
+    // 强制清除所有相关的localStorage
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        // 清除几乎所有状态，除了极少数可能的系统配置
+        if (key.startsWith('hidden_') || key.startsWith('report_') || key === 'hmlSelections') {
+            keys.push(key);
+        }
+    }
+    // 也能直接clear，确保彻底
+    localStorage.clear();
+    
+    if (isElectron) {
+        window.electronAPI.relaunchApp();
+        return; // 中止后续操作，等待重启
+    } else {
+        // 浏览器环境回退到刷新
+        location.reload();
+        return;
+    }
+
+    //以下为旧逻辑，仅作为非重启环境的兜底（实际上上面的return已经截断了）
+    
+    // 清除所有隐藏状态
+        // 确保清除导出状态的类，防止样式残留导致输入框不可见
+    document.body.classList.remove('is-exporting-pdf');
+        // 显示所有目标容器
+    document.querySelectorAll('[id^="target"][id$="-container"]').forEach(container => {
+        container.style.display = '';
+    });
+    
+    // 显示所有表格行
+    document.querySelectorAll('tr[id]').forEach(row => {
+        row.style.display = '';
+    });
+    
+    // 显示所有表格列
+    document.querySelectorAll('th, td').forEach(cell => {
+        cell.style.display = '';
+    });
+
+    // 清空所有可编辑文本和输入框（但保留表1中的分目标内容）
+    document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+        // 检查是否是表1中的分目标输入框
+        const isTable1SubTarget = element.classList.contains('indicator-input') && 
+                                 element.closest('#table1-container');
+        
+        if (!isTable1SubTarget) {
+            // 安全清空逻辑：
+            // 1. 如果有placeholder，清空innerHTML让CSS placeholder生效
+            // 2. 如果是表格内的单元格，尽量保持一定的结构以防塌陷
+            const hasPlaceholder = element.hasAttribute('data-placeholder');
+            const isInTable = element.closest('table') !== null;
+
+            if (hasPlaceholder) {
+                element.innerHTML = '';
+            } else if (isInTable) {
+                // 表格内的单元格，为了防止高度塌陷和聚焦问题，使用 <br> 或者 textContent=''
+                // 优先尝试 textContent = ''，结合 CSS min-height
+                element.textContent = ''; 
+                // 如果需要确保光标可点击，保留一个不占位的空文本节点可能更好，但最稳妥的是完全空+CSS支撑
+            } else {
+                element.innerHTML = '';
+            }
+        }
+    });
+
+    // 显式重置所有输入框的可用状态，防止 pointer-events 或 disabled 残留
+    const allInputs = document.querySelectorAll('input, textarea, select, [contenteditable="true"]');
+    allInputs.forEach(el => {
+        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+            el.value = '';
+            el.disabled = false;
+            el.readOnly = false;
+        }
+        // 强制重置指针事件
+        el.style.pointerEvents = '';
+        el.style.userSelect = '';
+        
+        // 移除可能导致无法点击的内联样式
+        el.style.display = ''; 
+        el.style.visibility = '';
+    });
+
+    // 清除 HML 选择器相关的 localStorage
+    if (localStorage.getItem('hmlSelections')) {
+        localStorage.removeItem('hmlSelections');
+    }
+
+    // 触发自定义重置事件
+    const resetEvent = new CustomEvent('reportReset');
+    document.dispatchEvent(resetEvent);
+
+    // 强制重置所有输入框状态
+    document.querySelectorAll('input, textarea, select, [contenteditable]').forEach(el => {
+        el.disabled = false;
+        el.readOnly = false;
+        el.style.pointerEvents = 'auto'; // 强制允许点击
+        el.style.userSelect = 'text';    // 强制允许选择
+        el.style.visibility = 'visible'; // 确保可见
+        el.style.opacity = '1';          // 确保不透明
+        
+        // 移除可能存在的内联样式干扰
+        if (el.style.removeProperty) {
+            el.style.removeProperty('display');
+        }
+    });
+
+    // 解决 Chromium/Electron 渲染层如果不最小化就无法响应点击的 Bug
+    // 强制容器重排和重绘
+    const reportContainer = document.getElementById('reportContent') || document.querySelector('.report-container') || document.body;
+    
+    // 技巧1: 切换 display
+    const currentDisplay = reportContainer.style.display;
+    reportContainer.style.display = 'none';
+    void reportContainer.offsetHeight; // 强制 Reflow
+    reportContainer.style.display = currentDisplay;
+
+    // 技巧2: 触发 resize 事件
+    window.dispatchEvent(new Event('resize'));
+
+    // 额外的检查：确保 loading-overlay 被隐藏
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+        loadingOverlay.style.zIndex = '-1'; // 确保在底部
+    }
+    
+    // 强制移除可能存在的全屏遮罩
+    document.querySelectorAll('[id*="mask"], [class*="mask"], [id*="overlay"], [class*="overlay"]').forEach(el => {
+        if (el.id !== 'reportContent' && !el.classList.contains('report-container')) {
+             if (window.getComputedStyle(el).position === 'fixed' && window.getComputedStyle(el).zIndex > 100) {
+                 el.style.display = 'none';
+             }
+        }
+    });
+
+    // 技巧3: 重置 Selection 对象
+    const selection = window.getSelection();
+    if (selection) {
+        selection.removeAllRanges();
+    }
+    
+    // 恢复滚动条位置到顶部，防止错位
+    window.scrollTo(0, 0);
+
+    // 清空自动计算与同步显示区域
+    const textSelectors = [
+        '[id^="courseNameShow"]',
+        '#supportMaterial',
+        '#totalWeight',
+        '#totalAchieve',
+        '#studentCount',
+        '#maxScoreShow',
+        '#minScoreShow',
+        '#avgTotalScoreShow',
+        '[id^="count"]',
+        '[id^="rate"]',
+        '[id^="targetWeight"]',
+        '[id^="targetAchieve"]',
+        '[id^="showWeight"]',
+        '[id^="showAchieve"]',
+        '[id^="evaluationShow"]',
+        '[id^="totalScore"]',
+        '[id^="avgScore"]'
+    ];
+
+    textSelectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach(element => {
+            element.textContent = '';
+        });
+    });
+
+    // 清空预览 iframe
+    const pdfPreview = document.getElementById('pdf-preview');
+    if (pdfPreview) {
+        pdfPreview.src = '';
+    }
+    
+    // 清空操作历史
+    while(operationHistory.length > 0) {
+        operationHistory.pop();
+    }
+    
+    // 更新撤销按钮状态
+    updateUndoButtonState();
+
+    if (window.calculationModule && typeof window.calculationModule.smartCalculate === 'function') {
+        window.calculationModule.smartCalculate();
+    }
+
+    // 尝试聚焦第一个可编辑元素，提升用户体验，并确保界面响应
+    const firstEditable = document.querySelector('[contenteditable="true"]');
+    if (firstEditable) {
+        // 使用多重机制确保渲染更新和焦点获取
+        
+        requestAnimationFrame(() => {
+            // 3. 延迟聚焦，给浏览器一点喘息时间
+            setTimeout(() => {
+                // 此时再次检查是否存在，因为可能有其他脚本在后台运行
+                if (document.contains(firstEditable)) {
+                    // 先 blur 再 focus 确保状态刷新
+                    firstEditable.blur();
+                    firstEditable.focus();
+                    
+                    // 确保选中内容（如果是输入框）
+                    if (window.getSelection && document.createRange) {
+                        const range = document.createRange();
+                        range.selectNodeContents(firstEditable);
+                        range.collapse(false); // 光标移到最后
+                        const sel = window.getSelection();
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                    // 再次强制滚动到顶部，因为 focus 可能会导致滚动
+                    window.scrollTo(0, 0);
+                }
+            }, 100);
+        });
+    }
+    
+    console.log('恢复全部内容操作已完成，界面已重置');
+}
+
+// 表格行删除功能
+function hideTableRow(rowId) {
+    const row = document.getElementById(rowId);
+    if (row) {
+        // 记录操作到历史记录中，以便撤销
+        recordOperation({
+            type: 'hideTableRow',
+            rowId: rowId,
+            previousDisplay: row.style.display
+        });
+        
+        // 隐藏表格行
+        row.style.display = 'none';
+        
+        // 保存状态到 localStorage
+        localStorage.setItem('hidden_row_' + rowId, 'true');
+        
+        // 保留表格行的内容
+        const editableElements = row.querySelectorAll('[contenteditable="true"]');
+        editableElements.forEach(element => {
+            if (element.id) {
+                localStorage.setItem('report_' + element.id, element.textContent);
+            }
+        });
+    }
+}
+
+// 页面加载后的初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取DOM元素
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const steps = document.querySelectorAll('.step');
+    
+    // 初始化撤销按钮状态
+    updateUndoButtonState();
+
+    // 全局变量
+    let currentStep = 0;
+    
+    // 加载MathJax脚本
+    loadMathJax();
+    
+    // 步骤导航
+    prevBtn.addEventListener('click', function() {
+        if (currentStep > 0) {
+            showStep(currentStep - 1);
+        }
+    });
+
+    nextBtn.addEventListener('click', function() {
+        if (currentStep < steps.length - 1) {
+            showStep(currentStep + 1);
+        }
+    });
+
+    // 初始化内容同步
+    setupContentSync();
+    
+    // 恢复之前隐藏的元素
+    restoreHiddenItems();
+    
+    // 重排序课程目标
+    reorderTargets();
+    
+    // 导出PDF按钮点击事件
+    exportBtn.addEventListener('click', function() {
+        // 在导出前准备报告内容
+        prepareForExport();
+        exportPDF();
+    });
+    
+    // 准备导出，处理所有可编辑区域，确保内容正确显示
+    function prepareForExport() {
+        try {
+            console.log('正在准备导出报告...');
+            
+            // 添加导出类以应用特殊标志
+            document.body.classList.add('is-exporting');
+            
+            // 隐藏所有删除按钮
+            document.querySelectorAll('.delete-button, .row-delete-button, .delete-cell').forEach(button => {
+                button.style.display = 'none';
+            });
+            
+            // 处理隐藏的元素，在PDF中完全移除
+            document.querySelectorAll('[id$="-container"]').forEach(container => {
+                if (container.style.display === 'none') {
+                    // 临时添加类以便在PDF中完全移除
+                    container.classList.add('pdf-hidden');
+                }
+            });
+            
+            // 处理隐藏的表格行
+            document.querySelectorAll('tr[id]').forEach(row => {
+                if (row.style.display === 'none') {
+                    // 临时添加类以便在PDF中完全移除
+                    row.classList.add('pdf-hidden');
+                }
+            });
+            
+            // 添加样式规则以隐藏这些元素
+            let style = document.createElement('style');
+            style.id = 'pdf-export-styles';
+            style.textContent = '.pdf-hidden { display: none !important; }';
+            document.head.appendChild(style);
+            
+            // 填充可编辑内容的基本操作
+            // 处理所有可编辑区域，确保内容被保留
+            document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                // 保存原始内容以便导出后恢复
+                element.dataset.exportOriginalContent = element.innerHTML;
+
+                // 如果元素为空，使用占位符内容或添加空格
+                if (element.textContent.trim() === '') {
+                    const placeholder = element.getAttribute('data-placeholder');
+                    if (placeholder) {
+                        element.textContent = placeholder;
+                        element.dataset.exportInsertedPlaceholder = 'true';
+                    } else {
+                        element.innerHTML = '&nbsp;';
+                        element.dataset.exportInsertedPlaceholder = 'true';
+                    }
+                }
+            });
+            
+            // 处理所有输入框
+            document.querySelectorAll('input.input-field').forEach(element => {
+                element.dataset.exportOriginalValue = element.value;
+
+                if (element.value.trim() === '') {
+                    const placeholder = element.getAttribute('placeholder');
+                    if (placeholder) {
+                        element.value = placeholder;
+                        element.dataset.exportInsertedPlaceholder = 'true';
+                    } else {
+                        element.value = ' ';
+                        element.dataset.exportInsertedPlaceholder = 'true';
+                    }
+                }
+            });
+            
+            console.log('报告准备完成，准备导出PDF');
+        } catch (error) {
+            console.error('准备导出报告时出错:', error);
+        }
+    }
+
+    // 显示特定步骤
+    function showStep(stepIndex) {
+        // 隐藏所有步骤
+        steps.forEach(step => step.classList.remove('active'));
+        
+        // 显示当前步骤
+        steps[stepIndex].classList.add('active');
+        
+        // 更新当前步骤索引
+        currentStep = stepIndex;
+        
+        // 更新按钮状态（CSS会自动处理禁用样式）
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep === steps.length - 1;
+    }
+    
+    // 设置内容同步
+    function setupContentSync() {
+        // 课程名称同步
+        const courseName = document.getElementById('courseName');
+        const courseNameShows = [
+            document.getElementById('courseNameShow1'),
+            document.getElementById('courseNameShow2'),
+            document.getElementById('courseNameShow3'),
+            document.getElementById('courseNameShow4'),
+            document.getElementById('courseNameShow5')
+        ];
+        if (courseName) {
+            courseName.addEventListener('input', function() {
+                const value = this.textContent;
+                courseNameShows.forEach(element => {
+                    if(element) element.textContent = value;
+                });
+            });
+        }
+        // 获取表2中的数据到表4
+        const evaluations = ['evaluation1','evaluation2','evaluation3','evaluation4'];
+        const evaluationShows = ['evaluationShow1', 'evaluationShow2', 'evaluationShow3', 'evaluationShow4'];
+        evaluations.forEach((id, index) => { 
+            const evaluationName = document.getElementById(id);
+            const evaluationNameShow = document.getElementById(evaluationShows[index]);
+            if (evaluationName && evaluationNameShow) {
+                evaluationName.addEventListener('input', function() {
+                    evaluationNameShow.textContent = this.textContent;
+                });
+                evaluationNameShow.textContent = evaluationName.textContent;
+            }
+        });
+    
+        // const supportMaterialElem = document.getElementById('supportMaterial');
+        // // 定义更新支撑材料的函数
+        // function updateSupportMaterial() {
+        //     if (!supportMaterialElem) return;
+            
+        //     const validEvaluations = evaluations
+        //         .map(id => document.getElementById(id)?.textContent?.trim())
+        //         .filter(content => content);
+            
+        //     const supportText = validEvaluations.join('、');
+        //     supportMaterialElem.textContent = supportText;
+        // }
+        
+        // // 为每个考核方式添加输入监听
+        // evaluations.forEach(id => {
+        //     const input = document.getElementById(id);
+        //     if (input) {
+        //         input.addEventListener('input', updateSupportMaterial);
+        //     }
+        // });
+        // updateSupportMaterial();
+
+
+        
+        const scores=['score1','score2','score3','score4'];
+        const scoreShows = ['totalScore1', 'totalScore2', 'totalScore3', 'totalScore4'];
+        scores.forEach((id, index) => { 
+            const score = document.getElementById(id);
+            const scoreShow = document.getElementById(scoreShows[index]);
+            if (score && scoreShow) {
+                score.addEventListener('input', function() {
+                    scoreShow.textContent = this.textContent;
+                });
+                scoreShow.textContent = score.textContent;
+            }
+        });
+        
+        // 确保所有可编辑元素都可以进行编辑
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.style.pointerEvents = 'auto';
+            el.style.userSelect = 'text';
+            el.style.cursor = 'text';
+            
+            // 修复空的contenteditable元素
+            if (!el.textContent.trim() && !el.innerHTML.trim()) {
+                el.innerHTML = ''; // 确保内容为空，而不是只包含空格或换行符
+            }
+        });
+        
+        // 其他输入元素的自动保存到localStorage
+        const inputElements = document.querySelectorAll('[contenteditable="true"], input');
+        inputElements.forEach(element => {
+            const id = element.id;
+            if (id) {
+                // 从localStorage加载数据
+                const savedValue = localStorage.getItem('report_' + id);
+                if (savedValue) {
+                    if (element.hasAttribute('contenteditable')) {
+                        element.textContent = savedValue;
+                    } else {
+                        element.value = savedValue;
+                    }
+                }
+                
+                // 保存输入数据到localStorage
+                element.addEventListener('input', function() {
+                    const value = element.hasAttribute('contenteditable') ? 
+                                 element.textContent : element.value;
+                    localStorage.setItem('report_' + id, value);
+                });
+            }
+        });
+    }
+    
+    // 加载MathJax脚本
+    function loadMathJax() {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
+        script.async = true;
+        document.head.appendChild(script);
+    }
+    
+    // 导出PDF功能
+    function exportPDF() {
+        try {
+            window.showDebug('准备导出PDF...');
+            
+            // 通知主进程开始生成PDF
+            window.electronAPI.exportPDF()
+                .then(result => {
+                    try {
+                        // 导出完成后，恢复页面状态
+                        document.body.classList.remove('is-exporting');
+                        
+                        // 清理主进程可能残留的样式和类 - 修复无法编辑的问题
+                        document.body.classList.remove('is-exporting-pdf');
+                        const exportStyle = document.getElementById('export-styles');
+                        if (exportStyle) {
+                            exportStyle.remove();
+                        }
+                        
+                        // 强制恢复交互性
+                         document.querySelectorAll('input, select, textarea, [contenteditable]').forEach(el => {
+                            el.style.pointerEvents = 'auto'; 
+                        });
+                        
+                        // 删除临时添加的样式
+                        const tempStyle = document.getElementById('pdf-export-styles');
+                        if (tempStyle) {
+                            tempStyle.remove();
+                        }
+                        
+                        // 恢复删除按钮的显示
+                        document.querySelectorAll('.delete-button, .row-delete-button, .delete-cell').forEach(button => {
+                            button.style.display = '';
+                        });
+
+                        // 恢复导出时插入的占位内容
+                        document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                            if (element.dataset.exportInsertedPlaceholder === 'true') {
+                                element.innerHTML = '';
+                            }
+                            if (element.dataset.exportOriginalContent !== undefined) {
+                                element.innerHTML = element.dataset.exportOriginalContent;
+                                delete element.dataset.exportOriginalContent;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
+                        });
+
+                        document.querySelectorAll('input.input-field').forEach(element => {
+                            if (element.dataset.exportOriginalValue !== undefined) {
+                                element.value = element.dataset.exportOriginalValue;
+                                delete element.dataset.exportOriginalValue;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
+                        });
+
+                        // 移除临时标记类
+                        document.querySelectorAll('.pdf-hidden').forEach(element => {
+                            element.classList.remove('pdf-hidden');
+                        });
+
+                        // 恢复步骤显示状态 - 移除内联display并调用showStep确保状态一致
+                        steps.forEach(step => {
+                            step.style.removeProperty('display');
+                            if (step.dataset && step.dataset.prevDisplay !== undefined) {
+                                delete step.dataset.prevDisplay;
+                            }
+                        });
+                        showStep(currentStep);
+                        
+                        if (result.success) {
+                            window.showDebug('PDF导出成功：' + result.filePath);
+                        } else {
+                            window.showDebug('PDF导出失败：' + (result.message || '未知错误'));
+                        }
+                    } catch (cleanupErr) {
+                        console.error('导出后清理错误:', cleanupErr);
+                        window.showDebug('PDF导出后清理出现问题，但PDF可能已成功生成');
+                    }
+                })
+                .catch(err => {
+                    document.body.classList.remove('is-exporting');
+                    
+                    // 清理主进程可能残留的样式和类
+                    document.body.classList.remove('is-exporting-pdf'); 
+                    const exportStyle = document.getElementById('export-styles');
+                    if (exportStyle) {
+                        exportStyle.remove();
+                    }
+                    // 强制恢复交互性
+                     document.querySelectorAll('input, select, textarea, [contenteditable]').forEach(el => {
+                        el.style.pointerEvents = 'auto'; 
+                    });
+
+                    window.showDebug('PDF导出错误：' + err.message);
+                    
+                    // 确保恢复基本显示状态
+                    try {
+                        // 恢复导出时插入的占位内容
+                        document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                            if (element.dataset.exportInsertedPlaceholder === 'true') {
+                                element.innerHTML = '';
+                            }
+                            if (element.dataset.exportOriginalContent !== undefined) {
+                                element.innerHTML = element.dataset.exportOriginalContent;
+                                delete element.dataset.exportOriginalContent;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
+                        });
+
+                        document.querySelectorAll('input.input-field').forEach(element => {
+                            if (element.dataset.exportOriginalValue !== undefined) {
+                                element.value = element.dataset.exportOriginalValue;
+                                delete element.dataset.exportOriginalValue;
+                            }
+                            delete element.dataset.exportInsertedPlaceholder;
+                        });
+
+                        steps.forEach(step => {
+                            step.style.removeProperty('display');
+                        });
+                        showStep(currentStep);
+                    } catch (displayErr) {
+                        console.error('恢复显示状态出错:', displayErr);
+                    }
+                });
+        } catch (error) {
+            console.error('exportPDF函数执行出错:', error);
+            window.showDebug('PDF导出初始化错误：' + error.message);
+        }
+    }
+    
+    // 初始化显示第一步
+    showStep(0);
+    
+    // 静默修复表1分目标内容
+    fixTable1SubTargetsQuietly();
+});
+
+// 表1分目标内容数据
+const subTargetData = {
+    'table-row-1-1': '思想信念',
+    'table-row-1-2': '立德树人', 
+    'table-row-1-3': '职业道德',
+    'table-row-2-1': '爱岗从教',
+    'table-row-2-2': '关爱学生',
+    'table-row-2-3': '自身修养',
+    'table-row-3-1': '整合能力',
+    'table-row-3-2': '学科知识',
+    'table-row-3-3': '实验技能',
+    'table-row-4-1': '教学理解',
+    'table-row-4-2': '教学技能',
+    'table-row-4-3': '教学评价',
+    'table-row-5-1': '信息技术',
+    'table-row-5-2': '化学工具',
+    'table-row-5-3': '数字素养',
+    'table-row-6-1': '德育素养',
+    'table-row-6-2': '组织管理',
+    'table-row-6-3': '心理辅导',
+    'table-row-7-1': '课程育人',
+    'table-row-7-2': '活动育人',
+    'table-row-7-3': '文化育人',
+    'table-row-8-1': '终身学习',
+    'table-row-8-2': '职业规划',
+    'table-row-9-1': '全球视野',
+    'table-row-9-2': '改革创新',
+    'table-row-10-1': '批判思维',
+    'table-row-10-2': '反思改进',
+    'table-row-11-1': '沟通技能',
+    'table-row-11-2': '协作发展'
+};
+
+// 静默修复表1分目标内容的函数
+function fixTable1SubTargetsQuietly() {
+    let fixedCount = 0;
+    
+    // 遍历所有行ID，恢复对应的分目标内容
+    Object.keys(subTargetData).forEach(rowId => {
+        const row = document.getElementById(rowId);
+        if (row) {
+            // 查找该行中的indicator-input元素
+            const indicatorInput = row.querySelector('.indicator-input');
+            if (indicatorInput) {
+                const currentContent = indicatorInput.textContent.trim();
+                const expectedContent = subTargetData[rowId];
+                
+                // 如果内容为空或不正确，则恢复正确的内容
+                if (!currentContent || currentContent !== expectedContent) {
+                    indicatorInput.textContent = expectedContent;
+                    fixedCount++;
+                }
+            }
+        }
+    });
+    
+    if (fixedCount > 0) {
+        console.log(`已静默修复表1中的 ${fixedCount} 个分目标内容`);
+    }
+}
+
+// 全局修复：在任何弹窗（confirm/alert）后恢复输入框的交互能力
+// 重写原生confirm和alert函数
+(function() {
+    const originalConfirm = window.confirm;
+    const originalAlert = window.alert;
+    
+    // 强制恢复所有输入框交互能力的函数 - 增强版
+    function forceRestoreInputInteraction() {
+        const elements = document.querySelectorAll('input, textarea, select, [contenteditable="true"], [contenteditable]');
+        elements.forEach(el => {
+            try {
+                // 强制设置样式，使用important确保优先级
+                el.style.setProperty('pointer-events', 'auto', 'important');
+                el.style.setProperty('user-select', 'text', 'important');
+                el.style.setProperty('-webkit-user-select', 'text', 'important');
+                el.style.setProperty('-moz-user-select', 'text', 'important');
+                el.style.setProperty('-ms-user-select', 'text', 'important');
+                
+                // 确保元素可见和可点击
+                if (el.style.display !== 'none' && !el.closest('[style*="display: none"]')) {
+                    el.style.setProperty('visibility', 'visible', 'important');
+                    el.style.setProperty('opacity', '1', 'important');
+                }
+                
+                // 恢复contenteditable属性
+                if (el.hasAttribute('contenteditable')) {
+                    el.setAttribute('contenteditable', 'true');
+                }
+                
+                // 移除disabled和readonly
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+                    el.disabled = false;
+                    el.readOnly = false;
+                }
+            } catch (e) {
+                console.error('恢复元素失败:', el, e);
+            }
+        });
+    }
+    
+    window.confirm = function(...args) {
+        const result = originalConfirm.apply(this, args);
+        // 弹窗关闭后多次恢复
+        forceRestoreInputInteraction();
+        forceRestoreInputInteraction(); // 立即执行两次
+        setTimeout(forceRestoreInputInteraction, 10);
+        setTimeout(forceRestoreInputInteraction, 50);
+        setTimeout(forceRestoreInputInteraction, 100);
+        setTimeout(forceRestoreInputInteraction, 200);
+        setTimeout(forceRestoreInputInteraction, 500);
+        return result;
+    };
+    
+    window.alert = function(...args) {
+        const result = originalAlert.apply(this, args);
+        // 弹窗关闭后多次恢复
+        forceRestoreInputInteraction();
+        forceRestoreInputInteraction(); // 立即执行两次
+        setTimeout(forceRestoreInputInteraction, 10);
+        setTimeout(forceRestoreInputInteraction, 50);
+        setTimeout(forceRestoreInputInteraction, 100);
+        setTimeout(forceRestoreInputInteraction, 200);
+        setTimeout(forceRestoreInputInteraction, 500);
+        return result;
+    };
+    
+    // 将恢复函数暴露到全局，以便其他代码也可以调用
+    window.forceRestoreInputInteraction = forceRestoreInputInteraction;
+    
+    // 在页面加载完成后立即恢复一次
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', forceRestoreInputInteraction);
+    } else {
+        forceRestoreInputInteraction();
+    }
+    
+    // 监听任何可能影响输入框的事件
+    document.addEventListener('click', forceRestoreInputInteraction);
+    document.addEventListener('focus', forceRestoreInputInteraction, true);
+})();

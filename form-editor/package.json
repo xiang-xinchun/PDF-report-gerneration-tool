@@ -2,7 +2,7 @@
   "name": "course-report-generator",
   "version": "1.0.0",
   "description": "课程目标达成情况评价报告生成工具",
-  "main": "index.js",
+  "main": "src/main/index.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
@@ -19,8 +19,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^38.3.0",
-    "electron-builder": "^26.0.12",
+    "electron": "^21.4.4",
+    "electron-builder": "^24.13.3",
     "rimraf": "^6.0.1"
   },
   "dependencies": {
@@ -33,16 +33,21 @@
     "appId": "com.electron.course-report-generator",
     "productName": "课程目标达成情况评价报告生成工具",
     "directories": {
-      "output": "dist"
+      "output": "dist",
+      "buildResources": "build"
     },
     "files": [
-      "**/*",
-      "node_modules/",
+      "src/**/*",
+      "assets/**/*",
+      "node_modules/**/*",
       "package.json",
       "icudtl.dat"
     ],
     "extraResources": [
-      "node_modules/xlsx/**/*",
+      {
+        "from": "node_modules/xlsx",
+        "to": "node_modules/xlsx"
+      },
       "icudtl.dat"
     ],
     "asar": {

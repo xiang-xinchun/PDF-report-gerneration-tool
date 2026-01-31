@@ -2,14 +2,36 @@
 
 ## 简介
 
-这是一个用于创建完整课程目标达成情况评价报告的工具，基于 Electron 开发，支持公式、表格等复杂内容编辑，并能够导出高质量PDF报告。
+这是一个基于 Electron 开发的课程目标达成情况评价报告生成工具。应用支持公式、表格等复杂内容编辑，能够导出高质量的PDF报告。
 
-应用支持按顺序填写表单，只有完成当前步骤才能进入下一步，同时允许用户返回修改之前填写的内容。
+## 项目结构
+
+```
+course-report-generator/
+├── src/
+│   ├── main/              # 主进程代码
+│   │   ├── index.js       # 主进程入口（ICU初始化）
+│   │   ├── main.js        # 主进程逻辑
+│   │   ├── icu-helper.js  # ICU辅助工具
+│   │   └── ...            # 其他主进程模块
+│   ├── renderer/          # 渲染进程代码
+│   │   ├── course-report.html  # 主界面
+│   │   ├── scripts/       # JS脚本
+│   │   └── styles/        # CSS样式
+│   └── preload/           # 预加载脚本
+│       └── preload.js
+├── assets/                # 静态资源
+│   └── images/           # 图片资源
+├── build/                # 构建资源
+├── dist/                 # 打包输出（自动生成）
+├── package.json
+└── README.md
+```
 
 ## 功能特点
 
 ### 报告生成器
-- **完整的报告编辑界面**：提供所有课程目标达成情况评价报告的编辑功能
+- **完整的报告编辑界面**：提供课程目标达成情况评价报告的完整编辑功能
 - **数学公式支持**：使用 MathJax 支持复杂数学公式的编辑和显示
 - **表格编辑**：支持复杂表格的填写和编辑
 - **分步骤填写**：将报告填写分为多个步骤，便于操作
@@ -19,8 +41,8 @@
 
 ### 前提条件
 
-- 安装 [Node.js](https://nodejs.org/) (推荐版本 14.x 或更高)
-- 安装 [npm](https://www.npmjs.com/) 或 [yarn](https://yarnpkg.com/)
+- 安装 [Node.js](https://nodejs.org/) (推荐版本 16.x 或更高)
+- 安装 npm 或 pnpm
 
 ### 安装步骤
 
@@ -31,22 +53,26 @@
 ```bash
 npm install
 # 或
-yarn install
+pnpm install
 ```
 
-4. 运行应用
+### 运行应用
 
 ```bash
 npm start
-# 或
-yarn start
-# 或
-yarn selector
+# 或直接运行
+.\启动应用.bat
 ```
 
-或直接运行特定工具：
+## 打包应用
+
+### Windows 打包
 
 ```bash
+npm run build:win
+# 或运行
+.\windows打包.bat
+```
 ```
 
 ## 使用说明

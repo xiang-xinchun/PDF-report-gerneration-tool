@@ -1,29 +1,55 @@
 x64:
   firstOrDefaultFilePatterns:
-    - '**/*'
+    - '!**/node_modules'
     - '!build{,/**/*}'
     - '!dist{,/**/*}'
-    - '!**/node_modules/**'
-    - node_modules/
+    - src/**/*
+    - assets/**/*
+    - node_modules/**/*
     - package.json
     - icudtl.dat
-    - '!**/*.{iml,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,suo,xproj,cc,d.ts,mk,a,o,obj,forge-meta,pdb}'
+    - '!**/*.{iml,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,suo,xproj,cc,d.ts,mk,a,o,forge-meta,pdb}'
     - '!**/._*'
     - '!**/electron-builder.{yaml,yml,json,json5,toml,ts}'
-    - '!**/{.git,.hg,.svn,CVS,RCS,SCCS,__pycache__,.DS_Store,thumbs.db,.gitignore,.gitkeep,.gitattributes,.npmignore,.idea,.vs,.flowconfig,.jshintrc,.eslintrc,.circleci,.yarn-integrity,.yarn-metadata.json,yarn-error.log,yarn.lock,package-lock.json,npm-debug.log,pnpm-lock.yaml,appveyor.yml,.travis.yml,circle.yml,.nyc_output,.husky,.github,electron-builder.env}'
+    - '!**/{.git,.hg,.svn,CVS,RCS,SCCS,__pycache__,.DS_Store,thumbs.db,.gitignore,.gitkeep,.gitattributes,.npmignore,.idea,.vs,.flowconfig,.jshintrc,.eslintrc,.circleci,.yarn-integrity,.yarn-metadata.json,yarn-error.log,yarn.lock,package-lock.json,npm-debug.log,appveyor.yml,.travis.yml,circle.yml,.nyc_output,.husky,.github,electron-builder.env}'
     - '!.yarn{,/**/*}'
     - '!.editorconfig'
     - '!.yarnrc.yml'
   nodeModuleFilePatterns:
     - '**/*'
+    - src/**/*
+    - assets/**/*
+    - node_modules/**/*
+    - package.json
+    - icudtl.dat
+ia32:
+  firstOrDefaultFilePatterns:
+    - '!**/node_modules'
+    - '!build{,/**/*}'
+    - '!dist{,/**/*}'
+    - src/**/*
+    - assets/**/*
+    - node_modules/**/*
+    - package.json
+    - icudtl.dat
+    - '!**/*.{iml,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,suo,xproj,cc,d.ts,mk,a,o,forge-meta,pdb}'
+    - '!**/._*'
+    - '!**/electron-builder.{yaml,yml,json,json5,toml,ts}'
+    - '!**/{.git,.hg,.svn,CVS,RCS,SCCS,__pycache__,.DS_Store,thumbs.db,.gitignore,.gitkeep,.gitattributes,.npmignore,.idea,.vs,.flowconfig,.jshintrc,.eslintrc,.circleci,.yarn-integrity,.yarn-metadata.json,yarn-error.log,yarn.lock,package-lock.json,npm-debug.log,appveyor.yml,.travis.yml,circle.yml,.nyc_output,.husky,.github,electron-builder.env}'
+    - '!.yarn{,/**/*}'
+    - '!.editorconfig'
+    - '!.yarnrc.yml'
+  nodeModuleFilePatterns:
     - '**/*'
-    - node_modules/
+    - src/**/*
+    - assets/**/*
+    - node_modules/**/*
     - package.json
     - icudtl.dat
 nsis:
   script: |-
-    !include "C:\Users\24454\Desktop\html\化院项目\form-editor\node_modules\.store\app-builder-lib@26.0.12\node_modules\app-builder-lib\templates\nsis\include\StdUtils.nsh"
-    !addincludedir "C:\Users\24454\Desktop\html\化院项目\form-editor\node_modules\.store\app-builder-lib@26.0.12\node_modules\app-builder-lib\templates\nsis\include"
+    !include "D:\桌面\from-editor\node_modules\.pnpm\app-builder-lib@24.13.3_dmg_50e5e469a2b4af2ece15da687f1a1d18\node_modules\app-builder-lib\templates\nsis\include\StdUtils.nsh"
+    !addincludedir "D:\桌面\from-editor\node_modules\.pnpm\app-builder-lib@24.13.3_dmg_50e5e469a2b4af2ece15da687f1a1d18\node_modules\app-builder-lib\templates\nsis\include"
     !macro _isUpdated _a _b _t _f
       ${StdUtils.TestParameter} $R9 "updated"
       StrCmp "$R9" "true" `${_t}` `${_f}`
@@ -95,9 +121,11 @@ nsis:
       !insertmacro MUI_LANGUAGE "Vietnamese"
     !macroend
 
-    !include "C:\Users\24454\AppData\Local\Temp\t-WtCYHq\2-messages.nsh"
-    !include "C:\Users\24454\AppData\Local\Temp\t-WtCYHq\3-messages.nsh"
-    !addplugindir /x86-unicode "C:\Users\24454\AppData\Local\electron-builder\Cache\nsis\nsis-resources-3.4.1\plugins\x86-unicode"
+    !addincludedir "D:\桌面\from-editor\build"
+    !include "D:\桌面\from-editor\build\installer.nsh"
+    !include "C:\Users\Lenovo\AppData\Local\Temp\t-YyLYF6\1-messages.nsh"
+    !include "C:\Users\Lenovo\AppData\Local\Temp\t-YyLYF6\0-messages.nsh"
+    !addplugindir /x86-unicode "C:\Users\Lenovo\AppData\Local\electron-builder\Cache\nsis\nsis-resources-3.4.1\plugins\x86-unicode"
 
     Var newStartMenuLink
     Var oldStartMenuLink

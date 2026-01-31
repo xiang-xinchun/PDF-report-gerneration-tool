@@ -2,16 +2,21 @@
   "appId": "com.electron.course-report-generator",
   "productName": "课程目标达成情况评价报告生成工具",
   "directories": {
-    "output": "dist"
+    "output": "dist",
+    "buildResources": "build"
   },
   "files": [
-    "**/*",
-    "node_modules/",
+    "src/**/*",
+    "assets/**/*",
+    "node_modules/**/*",
     "package.json",
     "icudtl.dat"
   ],
   "extraResources": [
-    "node_modules/xlsx/**/*",
+    {
+      "from": "node_modules/xlsx",
+      "to": "node_modules/xlsx"
+    },
     "icudtl.dat"
   ],
   "asar": {
@@ -19,17 +24,27 @@
   },
   "win": {
     "target": [
-      "nsis"
+      "nsis",
+      "portable",
+      "zip"
     ],
-    "artifactName": "${productName}-${version}-Setup.${ext}",
-    "publisherName": "课程目标达成情况评价报告生成工具"
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "publisherName": "课程目标达成情况评价报告生成工具",
+    "requestedExecutionLevel": "asInvoker",
+    "verifyUpdateCodeSignature": false
   },
   "nsis": {
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
-    "perMachine": true,
+    "allowElevation": true,
+    "perMachine": false,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "课程目标达成情况评价报告生成工具"
+    "shortcutName": "课程目标达成情况评价报告生成工具",
+    "include": "build/installer.nsh",
+    "deleteAppDataOnUninstall": false
+  },
+  "portable": {
+    "artifactName": "${productName}-${version}-${arch}-Portable.${ext}"
   }
 }

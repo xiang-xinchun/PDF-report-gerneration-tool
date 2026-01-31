@@ -5,13 +5,15 @@ appId: com.electron.course-report-generator
 productName: 课程目标达成情况评价报告生成工具
 files:
   - filter:
-      - '**/*'
-      - node_modules/
+      - src/**/*
+      - assets/**/*
+      - node_modules/**/*
       - package.json
       - icudtl.dat
 extraResources:
+  - from: node_modules/xlsx
+    to: node_modules/xlsx
   - filter:
-      - node_modules/xlsx/**/*
       - icudtl.dat
 asar:
   smartUnpack: true
@@ -26,4 +28,4 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: 课程目标达成情况评价报告生成工具
-electronVersion: 38.3.0
+electronVersion: 21.4.4

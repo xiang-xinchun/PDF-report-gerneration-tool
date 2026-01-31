@@ -1,0 +1,2359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>课程目标达成情况评价报告生成工具</title>
+    <!-- 关键CSS预加载 -->
+    <link rel="preload" href="styles/report-styles.css" as="style">
+    <link rel="preload" href="styles/edit-fix.css" as="style">
+    <link rel="preload" href="styles/table-styles.css" as="style">
+
+    <!-- 核心CSS立即加载 -->
+    <link rel="stylesheet" href="styles/report-styles.css">
+    <link rel="stylesheet" href="styles/edit-fix.css"><!-- 添加编辑功能修复CSS -->
+    <link rel="stylesheet" href="styles/table-styles.css"><!-- 添加表格样式CSS -->
+
+    <!-- 非关键CSS延迟加载 -->
+    <link rel="stylesheet" href="styles/export-hide.css" media="print"><!-- 添加导出隐藏样式 -->
+    <!-- <link rel="stylesheet" href="styles/add-row-styles.css">//添加行按钮样式 -->
+    <link rel="stylesheet" href="styles/formula-styles.css"><!-- 添加公式样式 -->
+    <link rel="stylesheet" href="styles/goal-manager-styles.css"><!-- 课程目标管理器样式 -->
+    <link rel="stylesheet" href="styles/table1-operation-styles.css"><!-- 表1操作按钮样式 -->
+    <link rel="stylesheet" href="styles/table1-divider-bold.css"><!-- 表1指标分隔线加粗样式 -->
+
+    <!-- 资源加载优化脚本 -->
+    <script>
+        // 加载进度追踪
+        var loadedResources = 0;
+        var totalResources = 5; // CSS, JS, Bootstrap Icons, MathJax, XLSX
+
+        function updateLoadingProgress(message) {
+            loadedResources++;
+            var progressElement = document.getElementById('loading-progress');
+            if (progressElement) {
+                var percent = Math.round((loadedResources / totalResources) * 100);
+                progressElement.textContent = message + ' (' + percent + '%)';
+            }
+
+            // 当所有资源都加载完成时，隐藏加载指示器
+            if (loadedResources >= totalResources) {
+                setTimeout(function () {
+                    var overlay = document.getElementById('loading-overlay');
+                    if (overlay) {
+                        overlay.style.opacity = '0';
+                        overlay.style.transition = 'opacity 0.5s';
+                        setTimeout(function () {
+                            overlay.style.display = 'none';
+                        }, 500);
+                    }
+                }, 500); // 给一点额外时间确保界面渲染完成
+            }
+        }
+
+        // 延迟加载非关键资源
+        window.addEventListener('DOMContentLoaded', function () {
+            // 加载Bootstrap图标
+            var bootstrapIconsLink = document.createElement('link');
+            bootstrapIconsLink.rel = 'stylesheet';
+            bootstrapIconsLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css';
+            bootstrapIconsLink.onload = function () {
+                updateLoadingProgress('图标加载完成');
+            };
+            document.head.appendChild(bootstrapIconsLink);
+
+            // 加载XLSX库
+            var xlsxScript = document.createElement('script');
+            xlsxScript.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+            xlsxScript.async = true;
+            xlsxScript.onload = function () {
+                updateLoadingProgress('Excel处理库加载完成');
+            };
+            document.head.appendChild(xlsxScript);
+        });
+    </script>
+
+    <!-- 添加MathJax配置 - 延迟加载 -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            },
+            startup: {
+                ready: function () {
+                    MathJax.startup.defaultReady();
+                    console.log('MathJax初始化完成');
+                    updateLoadingProgress('MathJax加载完成');
+                }
+            }
+        };
+
+        // 延迟加载MathJax
+        setTimeout(function () {
+            var mathJaxScript = document.createElement('script');
+            mathJaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+            mathJaxScript.async = true;
+            document.head.appendChild(mathJaxScript);
+        }, 1000); // 延迟1秒加载MathJax，优先加载核心UI
+    </script>
+    
+    <!-- 自定义对话框 - 替代原生confirm/alert，避免失焦 -->
+    <script src="scripts/custom-dialogs.js"></script>
+    
+    <!--
+    旧方案：监听恢复（已弃用，改用自定义对话框）
+    <!-- 紧急修复：防止弹窗后输入框失效 -->
+    <script>
+    (function() {
+        // 调试标志
+        const DEBUG_INPUT_FIX = false;
+        
+        // 创建一个全局的输入框恢复函数 - 最强力版本
+        window._forceInputsInteractive = function() {
+            const elements = document.querySelectorAll('input, textarea, select, [contenteditable], [contenteditable="true"]');
+            
+            if (DEBUG_INPUT_FIX) {
+                console.log(`[输入框修复] ========== 开始恢复 ${elements.length} 个输入元素 ==========`);
+            }
+            
+            elements.forEach(el => {
+                try {
+                    // 先移除所有可能阻止交互的样式
+                    const problematicStyles = [
+                        'pointer-events', 'user-select', '-webkit-user-select', 
+                        '-moz-user-select', '-ms-user-select',
+                        'user-modify', '-webkit-user-modify', 
+                        'touch-action'
+                    ];
+                    
+                    problematicStyles.forEach(prop => {
+                        el.style.removeProperty(prop);
+                    });
+                    
+                    // 强制设置为可交互状态 - 必须用important
+                    el.style.setProperty('pointer-events', 'auto', 'important');
+                    el.style.setProperty('user-select', 'text', 'important');
+                    el.style.setProperty('-webkit-user-select', 'text', 'important');
+                    el.style.setProperty('cursor', 'text', 'important');
+                    
+                    // 对contenteditable元素特殊处理 - Chromium特有的问题
+                    if (el.hasAttribute('contenteditable')) {
+                        el.setAttribute('contenteditable', 'true');
+                        // 这个属性对Chromium内核很重要
+                        el.style.setProperty('-webkit-user-modify', 'read-write', 'important');
+                    }
+                    
+                    // 移除disabled和readonly
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+                        el.disabled = false;
+                        el.readOnly = false;
+                    }
+                    
+                    // 移除tabindex负值（会阻止焦点）
+                    if (el.tabIndex < 0) {
+                        el.tabIndex = 0;
+                    }
+                    
+                    if (DEBUG_INPUT_FIX) {
+                        const computed = window.getComputedStyle(el);
+                        console.log(`[输入框修复] ${el.tagName}#${el.id || '(无id)'}.${el.className}:`, {
+                            pointerEvents: computed.pointerEvents,
+                            userSelect: computed.userSelect,
+                            webkitUserModify: computed.webkitUserModify
+                        });
+                    }
+                } catch (e) {
+                    console.error('[输入框修复] 恢复失败:', e, el);
+                }
+            });
+            
+            // 清除可能的模态框遮罩
+            document.querySelectorAll('.modal-backdrop, .overlay').forEach(el => {
+                if (DEBUG_INPUT_FIX) {
+                    console.log('[输入框修复] 移除遮罩:', el.className);
+                }
+                el.remove();
+            });
+            
+            // 恢复body的样式
+            if (document.body.classList.contains('modal-open')) {
+                document.body.classList.remove('modal-open');
+                if (DEBUG_INPUT_FIX) {
+                    console.log('[输入框修复] 移除body.modal-open');
+                }
+            }
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+            
+            if (DEBUG_INPUT_FIX) {
+                console.log('[输入框修复] ========== 恢复完成 ==========');
+            }
+        };
+        
+        // 劫持confirm和alert
+        const _confirm = window.confirm;
+        const _alert = window.alert;
+        
+        window.confirm = function() {
+            console.log('[输入框修复] ========== CONFIRM 对话框出现 ==========');
+            console.log('[输入框修复] confirm参数:', arguments[0]);
+            const result = _confirm.apply(this, arguments);
+            console.log('[输入框修复] confirm返回:', result);
+            
+            // 在confirm关闭的瞬间立即恢复（最关键）
+            window._forceInputsInteractive();
+            window._forceInputsInteractive(); // 执行两次确保生效
+            
+            // 多个延迟时间点恢复，覆盖不同浏览器的渲染时机
+            [0, 1, 5, 10, 20, 50, 100, 150, 200, 300, 500, 1000].forEach(delay => {
+                setTimeout(() => {
+                    if (DEBUG_INPUT_FIX) {
+                        console.log(`[输入框修复] confirm后 ${delay}ms 执行恢复`);
+                    }
+                    window._forceInputsInteractive();
+                }, delay);
+            });
+            
+            return result;
+        };
+        
+        window.alert = function() {
+            console.log('[输入框修复] ========== ALERT 对话框出现 ==========');
+            console.log('[输入框修复] alert内容:', arguments[0]);
+            const result = _alert.apply(this, arguments);
+            console.log('[输入框修复] alert关闭');
+            
+            // 在alert关闭的瞬间立即恢复
+            window._forceInputsInteractive();
+            window._forceInputsInteractive();
+            
+            // 多个延迟时间点恢复
+            [0, 1, 5, 10, 20, 50, 100, 150, 200, 300, 500, 1000].forEach(delay => {
+                setTimeout(() => {
+                    if (DEBUG_INPUT_FIX) {
+                        console.log(`[输入框修复] alert后 ${delay}ms 执行恢复`);
+                    }
+                    window._forceInputsInteractive();
+                }, delay);
+            });
+            
+            return result;
+        };
+        
+        // 页面加载后立即恢复
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', window._forceInputsInteractive);
+        } else {
+            window._forceInputsInteractive();
+        }
+        
+        // 监听多种交互事件 - 用户尝试点击时强制恢复
+        ['click', 'mousedown', 'mouseup', 'touchstart'].forEach(eventType => {
+            document.addEventListener(eventType, () => {
+                setTimeout(window._forceInputsInteractive, 0);
+                setTimeout(window._forceInputsInteractive, 5);
+            }, true);
+        });
+        
+        // 监听焦点事件
+        document.addEventListener('focus', () => {
+            setTimeout(window._forceInputsInteractive, 0);
+            setTimeout(window._forceInputsInteractive, 10);
+        }, true);
+        
+        // 定期强制恢复（每秒一次）- 用于调试阶段
+        setInterval(() => {
+            if (DEBUG_INPUT_FIX) {
+                console.log('[输入框修复] ===== 定期检查和恢复 =====');
+            }
+            window._forceInputsInteractive();
+        }, 1000);
+        
+        console.log('[输入框修复] ========== 初始化完成 ==========');
+    })();
+    </script>
+    -->
+</head>
+
+<body>
+    <!-- 加载指示器 -->
+    <div id="loading-overlay"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10001;">
+        <div
+            style="width: 60px; height: 60px; border: 8px solid #f3f3f3; border-top: 8px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;">
+        </div>
+        <p style="margin-top: 15px; font-size: 18px; color: #333;">正在加载应用...</p>
+        <p id="loading-progress" style="margin-top: 10px; font-size: 14px; color: #666;">准备资源中...</p>
+        <style>
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </div>
+
+    <div id="debug-info"
+        style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 5px 10px; font-size: 12px; z-index: 9999; max-width: 400px; display: none;">
+    </div>
+
+    <!-- 通知容器 -->
+    <div id="notification-toast"
+        style="position: fixed; top: 60px; right: 10px; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.2); border-radius: 4px; padding: 12px 15px; z-index: 10000; max-width: 300px; display: none;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <strong id="toast-title" style="color: #333;">通知</strong>
+            <span style="cursor: pointer; font-size: 18px;"
+                onclick="document.getElementById('notification-toast').style.display='none';">&times;</span>
+        </div>
+        <p id="toast-message" style="margin: 8px 0 0 0; color: #555;">通知内容</p>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="edit-controls" style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
+        <button id="excel-upload-btn" class="reset-button" title="上传Excel成绩表">
+            <i class="bi bi-file-earmark-spreadsheet"></i> 上传成绩表
+        </button>
+        <button id="reset-button" class="reset-button" title="恢复所有内容到初始状态" onclick="resetAllContent()">
+            <i class="bi bi-arrow-repeat"></i> 恢复全部
+        </button>
+        <button id="scan-table-button" class="reset-button" title="扫描表格内容并重新计算" onclick="scanTableAndCalculate()">
+            <i class="bi bi-calculator"></i> 刷新计算
+        </button>
+    </div>
+    <!-- 添加导航样式 -->
+    <link rel="stylesheet" href="styles/navigation-styles.css">
+    <!-- 编辑修复样式必须最后加载，确保覆盖其他所有CSS -->
+    <link rel="stylesheet" href="styles/edit-fix-final.css">
+    <div class="report-container" id="reportContent">
+        <div class="step active" id="step1">
+            <header>
+                <img src="../../assets/images/school_badge.png" alt="江西师范大学" class="school-logo">
+                <h1><span class="title-wrapper">《<span contenteditable="true" class="input-def" id="courseName"
+                            data-placeholder="请填写课程名称"></span>》</span>课程目标达成情况评价报告</h1>
+            </header>
+
+            <h2>一、课程简介</h2>
+            <div class="input-field" id="courseSubject" contenteditable="true" rows="1"></div>
+            <h2>二、课程目标</h2>
+            <p class="paragraph">通过本课程的教学，学生应该具备如下知识和能力：</p>
+            <div class="paragraph target-item" id="target1-container">
+                <span class="goal-label">目标1：</span>
+                <div contenteditable="true" class="editable-text goal-text" id="target1" data-placeholder="请填写目标1">
+                </div>
+            </div>
+            <div class="paragraph target-item" id="target2-container">
+                <span class="goal-label">目标2：</span>
+                <div contenteditable="true" class="editable-text goal-text" id="target2" data-placeholder="请填写目标2">
+                </div>
+            </div>
+            <div class="paragraph target-item" id="target3-container">
+                <span class="goal-label">目标3：</span>
+                <div contenteditable="true" class="editable-text goal-text" id="target3" data-placeholder="请填写目标3">
+                </div>
+            </div>
+            <div class="paragraph target-item" id="target4-container">
+                <span class="goal-label">目标4：</span>
+                <div contenteditable="true" class="editable-text goal-text" id="target4" data-placeholder="请填写目标4">
+                </div>
+            </div>
+
+            <h2>三、课程目标对毕业要求指标点的支撑关系</h2>
+            <p class="paragraph">表1是依据江西师范大学材料化学专业人才培养方案和《<span
+                    id="courseNameShow1"></span>》课程大纲得到的课程目标对毕业要求各指标点的对应支撑关系矩阵。</p>
+            <div style="font-size: 12px;" class="table-name">表1.课程目标对毕业要求指标点的支撑矩阵</div>
+            <div class="table-container" id="table1-container">
+                <table>
+                    <thead class="table-header">
+                        <tr>
+                            <th class="table-th" colspan="2"></th>
+                            <th class="table-th goal-header"><span class="goal-header-text">课程目标1</span></th>
+                            <th class="table-th goal-header"><span class="goal-header-text">课程目标2</span></th>
+                            <th class="table-th goal-header"><span class="goal-header-text">课程目标3</span></th>
+                            <th class="table-th goal-header"><span class="goal-header-text">课程目标4</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="table-row-1-1">
+                            <td class="table-td category" rowspan="3"
+                                style="position:relative; vertical-align: middle;">
+                                师德规范
+                            </td>
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">思想信念</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-1-2">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">立德树人</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-1-3">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">职业道德</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        <tr id="table-row-2-1">
+                            <td class="table-td category" rowspan="3"
+                                style="position:relative; vertical-align: middle;">
+                                教育情怀
+                            </td>
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">爱岗从教</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-2-2">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">关爱学生</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+
+                        </tr>
+                        <tr id="table-row-2-3">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">自身修养</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-3-1">
+                            <td class="table-td category" rowspan="3"
+                                style="position:relative; vertical-align: middle;">
+                                知识整合
+                            </td>
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">整合能力</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-3-2">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">学科知识</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-3-3">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">实验技能</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-4-1">
+                            <td class="table-td category" rowspan="3"
+                                style="position:relative; vertical-align: middle;">
+                                教学能力
+                            </td>
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">教学理解</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-4-2">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">教学技能</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-4-3">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">教学评价</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-5-1">
+                            <td class="table-td category" rowspan="3"
+                                style="position:relative; vertical-align: middle;">
+                                技术融合
+                            </td>
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">信息技术</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-5-2">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">化学工具</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-5-3">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">数字素养</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-6-1">
+                            <td class="table-td category" rowspan="3"
+                                style="position:relative; vertical-align: middle;">
+                                班级指导
+                            </td>
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">德育素养</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-6-2">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">组织管理</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-6-3">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">心理辅导</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-7-1">
+                            <td class="table-td category" rowspan="3"
+                                style="position:relative; vertical-align: middle;">
+                                综合育人
+                            </td>
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">课程育人</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-7-2">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">活动育人</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        <tr id="table-row-7-3">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">文化育人</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-8-1">
+                            <td class="table-td category" rowspan="2"
+                                style="position:relative; vertical-align: middle;">
+                                自主学习
+                            </td>
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">终身学习</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-8-2">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">职业规划</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-9-1">
+                            <td class="table-td category" rowspan="2"
+                                style="position:relative; vertical-align: middle;">
+                                国际视野
+                            </td>
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">全球视野</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-9-2">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">改革创新</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-10-1">
+                            <td class="table-td category" rowspan="2"
+                                style="position:relative; vertical-align: middle;">
+                                反思研究
+                            </td>
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">批判思维</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-10-2">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">反思改进</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-11-1">
+                            <td class="table-td category" rowspan="2"
+                                style="position:relative; vertical-align: middle;">
+                                交流合作
+                            </td>
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">沟通技能</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="table-row-11-2">
+                            <td class="table-td">
+                                <div contenteditable="true" class="input-box indicator-input">协作发展</div>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标1支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标2支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标3支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                            <td class="table-td goal-cell">
+                                <select class="input-box hml-select" aria-label="课程目标4支撑强度">
+                                    <option value=""></option>
+                                    <option value="H">H</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="font-size: 12px;">注："H"表示高关联度，"M"表示中等关联度，"L"表示低关联度。</p>
+        </div>
+
+        <div class="step" id="step2">
+            <h2>四、课程目标与考核方式的对应权重关系</h2>
+            <div class="paragraph">本课程目标达成度评价采用直接评价方式进行。直接评价采用"考试成绩分析法"，数据源自抽取样本学生的课程考核成绩，对应的支撑材料为<span
+                    id="supportMaterial"></span>等成绩，其对应的各个课程目标考核方式与权重关系见下表2。</div>
+            <p style="font-size: 12px;" class="table-name">表2.课程考核方式对课程目标的权重关系矩阵</p>
+            <div class="table-container" id="table2-container">
+                <div class="button-group">
+                    <button type="button" class="add-evaluation-button" onclick="addExamRow()">+ 添加考核方式</button>
+                    <button type="button" class="remove-evaluation-button" onclick="deleteLastRow()">- 删除最后一行</button>
+                    <span class="count-label" id="evaluation-count-label">当前考核方式数量: 1</span>
+                </div>
+                <table>
+                    <thead class="table-header">
+                        <tr>
+                            <th rowspan="2">考核方式</th>
+                            <th rowspan="2">满分</th>
+                            <th colspan="4">权重</th>
+                        </tr>
+                        <tr>
+                            <th>课程目标1</th>
+                            <th>课程目标2</th>
+                            <th>课程目标3</th>
+                            <th>课程目标4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="exam-row-1">
+                            <td>
+                                <div contenteditable="true" class="input-box" id="evaluation1"></div>
+                            </td>
+                            <td>
+                                <div contenteditable="true" class="input-box" id="score1"></div>
+                            </td>
+                            <td>
+                                <div contenteditable="true" class="input-box" id="weight1-1"></div>
+                            </td>
+                            <td>
+                                <div contenteditable="true" class="input-box" id="weight1-2"></div>
+                            </td>
+                            <td>
+                                <div contenteditable="true" class="input-box" id="weight1-3"></div>
+                            </td>
+                            <td>
+                                <div contenteditable="true" class="input-box" id="weight1-4"></div>
+                            </td>
+                        </tr>
+                        <!-- <tr id="exam-row-2">
+                            <td><div contenteditable="true" class="input-box" id="evaluation2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="score2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight2-1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight2-2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight2-3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight2-4"></div></td>
+                        </tr>
+                        <tr id="exam-row-3">
+                            <td><div contenteditable="true" class="input-box" id="evaluation3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="score3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight3-1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight3-2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight3-3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight3-4"></div></td>
+                        </tr>
+                        <tr id="exam-row-4">
+                            <td><div contenteditable="true" class="input-box" id="evaluation4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="score4"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight4-1"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight4-2"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight4-3"></div></td>
+                            <td><div contenteditable="true" class="input-box" id="weight4-4"></div></td>
+                        </tr> -->
+                    </tbody>
+                </table>
+            </div>
+            <h2>五、课程目标达成度评价</h2>
+            <h3>（一）课程分目标的权重值</h3>
+            <p class="paragraph">《<span
+                    id="courseNameShow2"></span>》课程中有4个课程目标，设本课程有n个课程分目标，第i个课程分目标对应11个毕业要求分解指标点的支撑强度值为Vi（第i个课程分目标对11个毕业要求分解指标点的支撑强度分别有x个H、y个M、z个L，按照赋值H=3、M=2、L=1计算，则第i个课程分目标的支撑强度值Vi=3x+2y+1z），则第i个课程目标的权重值(wi)计算公式为：
+            </p>
+            <!-- 使用图片显示公式1 -->
+            <div class="formula-container formula-compact">
+                <div class="formula-wrapper">
+                    <div class="formula-content-container">
+                        <div class="formula-img-container">
+                            <img src="../../assets/images/公式1.jpg" alt="课程目标权重值计算公式" class="formula-img formula-img-normal" />
+                        </div>
+                    </div>
+                    <div class="formula-number">公式（1）</div>
+                </div>
+            </div>
+            <div class="paragraph">通过累加可以计算出单个课程目标对应的权值，以及总权值为<span id="totalWeight"></span>。《<span
+                    id="courseNameShow3"></span>》课程4个分目标对应的权重值计算如下：</div>
+            <p class="table-name">表3.课程目标的权重值</p>
+            <div class="table-container" id="table3-container">
+                <table>
+                    <thead class="table-header">
+                        <tr>
+                            <th></th>
+                            <th>课程目标1</th>
+                            <th>课程目标2</th>
+                            <th>课程目标3</th>
+                            <th>课程目标4</th>
+                            <th class="delete-cell">操作</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="weight-value-row">
+                            <td>权重值</td>
+                            <td>
+                                <div id="targetWeight1"></div>
+                            </td>
+                            <td>
+                                <div id="targetWeight2"></div>
+                            </td>
+                            <td>
+                                <div id="targetWeight3"></div>
+                            </td>
+                            <td>
+                                <div id="targetWeight4"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('weight-value-row')">×</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="step" id="step3">
+            <h3>（二）课程分目标的达成度</h3>
+            <p class="paragraph">
+                根据表2中各个课程分目标与考核方式权重的对应关系，设各种考核方式的权重、考核总分和考核平均分的数值分别为Kij、Zij、Qij（i=1,2,3,...n；j为考核方式的项数），则本课程分目标i的评价达成度Pi为：
+            </p>
+            <!-- 使用图片显示公式2 -->
+            <div class="formula-container">
+                <div class="formula-wrapper">
+                    <div class="formula-content-container">
+                        <div class="formula-img-container">
+                            <img src="../../assets/images/公式2.png" alt="课程分目标评价达成度计算公式" class="formula-img formula-img-larger" />
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <p class="table-name">表4.课程考核方式对应的考核成绩情况</p>
+            <div class="table-container" id="table4-container">
+                <table>
+                    <thead class="table-header">
+                        <tr id="table4-header">
+                            <th>考核方式</th>
+                            <th>
+                                <div id="evaluationShow1" class="evaluation-name"></div>
+                            </th>
+                            <th>
+                                <div id="evaluationShow2" class="evaluation-name"></div>
+                            </th>
+                            <th>
+                                <div id="evaluationShow3" class="evaluation-name"></div>
+                            </th>
+                            <th>
+                                <div id="evaluationShow4" class="evaluation-name"></div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="score-row-1">
+                            <td>总分 (Zij)</td>
+                            <td>
+                                <div id="totalScore1" class="score-cell"></div>
+                            </td>
+                            <td>
+                                <div id="totalScore2" class="score-cell"></div>
+                            </td>
+                            <td>
+                                <div id="totalScore3" class="score-cell"></div>
+                            </td>
+                            <td>
+                                <div id="totalScore4" class="score-cell"></div>
+                            </td>
+                        </tr>
+                        <tr id="score-row-2">
+                            <td>平均分 (Qij)</td>
+                            <td>
+                                <div id="avgScore1" class="score-cell"></div>
+                            </td>
+                            <td>
+                                <div id="avgScore2" class="score-cell"></div>
+                            </td>
+                            <td>
+                                <div id="avgScore3" class="score-cell"></div>
+                            </td>
+                            <td>
+                                <div id="avgScore4" class="score-cell"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="table-name">表5：课程分目标达成度</p>
+            <div class="table-container" id="table5-container">
+                <table>
+                    <thead class="table-header">
+                        <tr>
+                            <th></th>
+                            <th>课程目标1</th>
+                            <th>课程目标2</th>
+                            <th>课程目标3</th>
+                            <th>课程目标4</th>
+                            <th class="delete-cell">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="achievement-row">
+                            <td>课程分目标的达成度</td>
+                            <td>
+                                <div id="targetAchieve1"></div>
+                            </td>
+                            <td>
+                                <div id="targetAchieve2"></div>
+                            </td>
+                            <td>
+                                <div id="targetAchieve3"></div>
+                            </td>
+                            <td>
+                                <div id="targetAchieve4"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('achievement-row')">×</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>（三）课程目标的总达成度</h3>
+            <p class="paragraph">
+                课程的整体目标达成度由该课程所有的课程分目标达成度的加权平均值确定。设本课程有n个课程目标，利用公式(1)计算得到的第i课程目标的权重值为wi，利用公式(2)计算得到的第i个课程分目标的达成度为Pi，则该门课程的整体目标达成度P为：
+            </p>
+            <!-- 使用图片显示公式3 -->
+            <div class="formula-container">
+                <div class="formula-wrapper">
+                    <div class="formula-content-container">
+                        <div class="formula-img-container">
+                            <img src="../../assets/images/公式3.png" alt="课程整体目标达成度计算公式" class="formula-img formula-img-larger" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="paragraph">根据公式（3），计算可得《<span id="courseNameShow4"></span>》课程目标总达成度为：</p>
+            <div class="table-container" id="table6-container">
+                <table>
+                    <thead class="table-header">
+                        <tr>
+                            <th></th>
+                            <th>权重值</th>
+                            <th>课程分目标达成度</th>
+                            <th>课程目标总达成度</th>
+                            <th class="delete-cell">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>课程目标1</td>
+                            <td>
+                                <div id="showWeight1"></div>
+                            </td>
+                            <td>
+                                <div id="showAchieve1"></div>
+                            </td>
+                            <td rowspan="4">
+                                <div id="totalAchieve"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('goal-row-1')">×</button></td>
+                        </tr>
+                        <tr>
+                            <td>课程目标2</td>
+                            <td>
+                                <div id="showWeight2"></div>
+                            </td>
+                            <td>
+                                <div id="showAchieve2"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('goal-row-1')">×</button></td>
+                        </tr>
+                        <tr>
+                            <td>课程目标3</td>
+                            <td>
+                                <div id="showWeight3"></div>
+                            </td>
+                            <td>
+                                <div id="showAchieve3"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('goal-row-1')">×</button></td>
+                        </tr>
+                        <tr>
+                            <td>课程目标4</td>
+                            <td>
+                                <div id="showWeight4"></div>
+                            </td>
+                            <td>
+                                <div id="showAchieve4"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('goal-row-1')">×</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h2>六、课程目标达成情况评价分析与持续改进</h2>
+
+            <div class="table-container">
+                <table>
+                    <tbody>
+                        <tr id="course-info-row-1">
+                            <td><strong>课程名称</strong></td>
+                            <td><span id="courseNameShow5"></span></td>
+                            <td><strong>课程类别</strong></td>
+                            <td>
+                                <div contenteditable="true" class="input-box"></div>
+                            </td>
+                            <td><strong>学时</strong></td>
+                            <td>
+                                <div contenteditable="true" class="input-box"></div>
+                            </td>
+                            <td><strong>学分</strong></td>
+                            <td>
+                                <div contenteditable="true" class="input-box"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('course-info-row-1')">×</button></td>
+                        </tr>
+                        <tr id="course-info-row-2">
+                            <td><strong>任课教师</strong></td>
+                            <td>
+                                <div contenteditable="true" class="input-box" id="teacherName"></div>
+                            </td>
+                            <td><strong>教师职称</strong></td>
+                            <td>
+                                <div contenteditable="true" class="input-box" id="teacherTitle"></div>
+                            </td>
+                            <td colspan="2"><strong>授课时间</strong></td>
+                            <td colspan="2">
+                                <div contenteditable="true" class="input-box" id="teachTime"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('course-info-row-2')">×</button></td>
+                        </tr>
+                        <tr id="course-info-row-3">
+                            <td><strong>授课班级</strong></td>
+                            <td>
+                                <div contenteditable="true" class="input-box" id="className"></div>
+                            </td>
+                            <td><strong>学生人数</strong></td>
+                            <td>
+                                <div id="studentCount"></div>
+                            </td>
+                            <td colspan="2"><strong>期末考核方式</strong></td>
+                            <td colspan="2">
+                                <div contenteditable="true" class="input-box" id="examMethod"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('course-info-row-3')">×</button></td>
+                        </tr>
+                        <tr id="grade-analysis-row-1">
+                            <td colspan="2" rowspan="4"><strong>成绩分析</strong></td>
+                            <td><strong>最高分</strong></td>
+                            <td>
+                                <div id="maxScoreShow"></div>
+                            </td>
+                            <td><strong>最低分</strong></td>
+                            <td>
+                                <div id="minScoreShow"></div>
+                            </td>
+                            <td><strong>平均分</strong></td>
+                            <td>
+                                <div id="avgTotalScoreShow"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('grade-analysis-row-1')">×</button></td>
+                        </tr>
+                        <tr id="grade-analysis-row-2">
+                            <td><strong>分数</strong></td>
+                            <td>100-90</td>
+                            <td>89-80</td>
+                            <td>79-70</td>
+                            <td>69-60</td>
+                            <td>60分以下</td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('grade-analysis-row-2')">×</button></td>
+                        </tr>
+                        <tr id="grade-analysis-row-3">
+                            <td><strong>人数</strong></td>
+                            <td>
+                                <div id="count1Show"></div>
+                            </td>
+                            <td>
+                                <div id="count2Show"></div>
+                            </td>
+                            <td>
+                                <div id="count3Show"></div>
+                            </td>
+                            <td>
+                                <div id="count4Show"></div>
+                            </td>
+                            <td>
+                                <div id="count5Show"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('grade-analysis-row-3')">×</button></td>
+                        </tr>
+                        <tr id="grade-analysis-row-4">
+                            <td><strong>百分比</strong></td>
+                            <td><span id="rate1Show">0</span>%</td>
+                            <td><span id="rate2Show">0</span>%</td>
+                            <td><span id="rate3Show">0</span>%</td>
+                            <td><span id="rate4Show">0</span>%</td>
+                            <td><span id="rate5Show">0</span>%</td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('grade-analysis-row-4')">×</button></td>
+                        </tr>
+                        <tr id="course-goal-row">
+                            <td colspan="2"><strong>课程目标达成情况分析</strong><br></td>
+                            <td colspan="6">
+                                <div contenteditable="true" class="input-field limit-width" id="rate6"
+                                style="width: 600px; word-break: break-all;"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('course-goal-row')">×</button></td>
+                        </tr>
+                        <tr id="continuous-improvement-row">
+                            <td colspan="2"><strong>持续改进措施</strong><br></td>
+                            <td colspan="6">
+                                <div contenteditable="true" class="input-field limit-width" id="rate7"
+                                style="width: 600px; word-break: break-all;"></div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('continuous-improvement-row')">×</button></td>
+                        </tr>
+                        <tr id="department-leader-row">
+                            <td colspan="2"><strong>教研室主任或系主任意见</strong></td>
+                            <td colspan="6" class="signature-cell">
+                                <div class="opinioncontent">
+                                    <div contenteditable="true" class="input-field limit-width" id="rate8" style="width: 600px; word-break: break-all;">
+                                    </div>
+                                </div>
+                                <div class="signature-group">
+                                    <div class="signature-item">
+                                        <span class="signature-label">教研室主任或系主任签名：</span>
+                                        <div contenteditable="true" class="signature-input signature" data-placeholder="请填写签名1">
+                                        </div>
+                                    </div>
+                                    <div class="signature-item">
+                                        <span class="signature-label">日期：</span>
+                                        <div contenteditable="true" class="signature-input date" data-placeholder="请填写日期1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('department-leader-row')">×</button></td>
+                        </tr>
+                        <tr id="college-approval-row">
+                            <td colspan="2"><strong>学院审核意见</strong></td>
+                            <td colspan="6" class="signature-cell">
+                                <div class="opinioncontent">
+                                    <div contenteditable="true" class="input-field limit-width" id="rate9" style="width: 600px; word-break: break-all;">
+                                    </div>
+                                </div>
+                                <div class="signature-group">
+                                    <div class="signature-item">
+                                        <span class="signature-label">学院负责人签名：</span>
+                                        <div contenteditable="true" class="signature-input signature" data-placeholder="请填写签名2">
+                                        </div>
+                                    </div>
+                                    <div class="signature-item">
+                                        <span class="signature-label">日期：</span>
+                                        <div contenteditable="true" class="signature-input date" data-placeholder="请填写日期2">
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="delete-cell"><button class="row-delete-button" title="删除此行"
+                                    onclick="hideTableRow('college-approval-row')">×</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 步骤导航和导出按钮 - 集中放置 -->
+    <div class="navigation-bar no-print">
+        <button id="prevBtn" disabled>上一步</button>
+        <button id="exportBtn">导出PDF报告</button>
+        <button id="nextBtn">下一步</button>
+    </div>
+    </div>
+
+    <!-- 调试信息区域 -->
+    <div id="debug-info"
+        style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: white; padding: 5px; font-size: 12px;">
+        <div>调试信息：<span id="debug-message">无消息</span></div>
+        <button onclick="document.getElementById('debug-info').style.display = 'none'">关闭</button>
+    </div>
+
+    <script>
+        // 全局调试函数
+        window.showDebug = function (msg) {
+            const debugInfo = document.getElementById('debug-info');
+            const debugMsg = document.getElementById('debug-message');
+            if (debugInfo && debugMsg) {
+                debugMsg.textContent = msg;
+                debugInfo.style.display = 'block';
+            }
+            console.log('[DEBUG]', msg);
+        };
+
+        // 全局通知函数 - 只使用控制台输出，不显示UI通知
+        window.showNotification = function (options) {
+            const title = options.title || '通知';
+            const message = options.message || '';
+            const type = options.type || 'info';
+
+            // 只在控制台输出消息
+            console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
+
+            // 如果是错误，显示在调试区域
+            if (type === 'error') {
+                window.showDebug(`${title}: ${message}`);
+            }
+        };
+    </script>
+
+    <!-- 页面脚本在外部JS文件中加载 -->
+    <script src="scripts/report-editor.js"></script>
+    <script src="scripts/excelUpload.js"></script>
+    <script src="scripts/calculation-enhanced.js"></script>
+    <!-- 课程目标动态管理模块 -->
+    <script src="scripts/goal-manager.js"></script>
+    <!-- 动态课程目标计算增强模块 -->
+    <script src="scripts/calculation-dynamic.js"></script>
+    <!-- 表1操作按钮模块 -->
+    <script src="scripts/table1-operation-buttons.js"></script>
+    <!-- 表3说明文本动态更新模块 -->
+    <script src="scripts/table3-description-updater.js"></script>
+    <script>
+        // 辅助函数：重新计算所有数据
+        function recalculateAllData() {
+            console.log('重新计算所有数据...');
+            // 直接调用计算模块的函数
+            if (window.calculationModule) {
+                window.calculationModule.calculateWeights();
+                window.calculationModule.calculateAchievements();
+                window.calculationModule.calculateTotal();
+            }
+        }
+
+        // 扫描表格并重新计算函数
+        function scanTableAndCalculate() {
+            console.log('开始扫描表格并重新计算...');
+
+            // 强制重新计算所有内容
+            if (window.calculationModule) {
+                window.calculationModule.calculateWeights();
+                window.calculationModule.calculateAchievements();
+                window.calculationModule.calculateTotal();
+
+                // 显示通知
+                showNotification({
+                    title: '计算已刷新',
+                    message: '已根据表格内容重新计算所有数据',
+                    type: 'success'
+                });
+            }
+        }
+
+        // 同步两个表格的考核方式名称
+        function setupExamTypeSync() {
+            // 设置考核方式名称同步
+            for (let i = 1; i <= 4; i++) {
+                const examTypeElement = document.getElementById(`examType${i}`);
+                const examTypeHeaderElement = document.getElementById(`examTypeHeader${i}`);
+
+                if (examTypeElement && examTypeHeaderElement) {
+                    // 从表2同步到表4
+                    examTypeElement.addEventListener('input', function () {
+                        examTypeHeaderElement.textContent = this.textContent;
+                    });
+
+                    // 从表4同步到表2
+                    examTypeHeaderElement.addEventListener('input', function () {
+                        examTypeElement.textContent = this.textContent;
+                    });
+                }
+            }
+        }
+
+        // 页面加载完成后初始化计算模块
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.calculationModule && typeof window.calculationModule.init === 'function') {
+                window.calculationModule.init();
+                console.log('计算模块已加载');
+
+                // 设置考核方式名称同步
+                setupExamTypeSync();
+
+                // 页面加载完成后延迟执行扫描和计算
+                setTimeout(function () {
+                    scanTableAndCalculate();
+                }, 1500);
+
+                showNotification({
+                    title: '计算功能已启用',
+                    message: '当填写表格数据后，会自动计算结果，也可点击"刷新计算"按钮手动触发',
+                    type: 'info'
+                });
+            }
+        });
+    </script>
+
+    <!-- 引入添加行功能JS -->
+    <!-- <script src="add-row-feature.js"></script> -->
+
+    <!-- 直接添加表格按钮的脚本 -->
+    <!-- <script src="direct-table-buttons.js"></script> -->
+
+    <!-- 初始化撤销按钮状态 -->
+    <script>
+        // 优化加载状态更新
+        function updateLoadingStatus(stage) {
+            var progressElement = document.getElementById('loading-progress');
+            if (progressElement) {
+                progressElement.textContent = stage;
+            }
+        }
+
+        // 记录应用加载开始时间
+        var appStartTime = Date.now();
+
+        // 全局通知函数
+        window.showNotification = function (options) {
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            const toast = document.getElementById('notification-toast');
+
+            if (toastTitle && toastMessage && toast) {
+                // 如果options是对象，使用其属性
+                if (typeof options === 'object') {
+                    toastTitle.textContent = options.title || '通知';
+                    toastMessage.textContent = options.message || '';
+
+                    // 根据类型设置标题颜色
+                    switch (options.type) {
+                        case 'success':
+                            toastTitle.style.color = '#4CAF50';
+                            break;
+                        case 'error':
+                            toastTitle.style.color = '#f44336';
+                            break;
+                        case 'info':
+                            toastTitle.style.color = '#2196F3';
+                            break;
+                        case 'warning':
+                            toastTitle.style.color = '#ff9800';
+                            break;
+                        default:
+                            toastTitle.style.color = '#333';
+                    }
+                } else {
+                    // 如果是旧版参数格式
+                    toastTitle.textContent = arguments[0] || '通知';
+                    toastMessage.textContent = arguments[1] || '';
+                    toastTitle.style.color = '#333';
+                }
+
+                // 显示通知
+                toast.style.display = 'block';
+
+                // 3秒后自动关闭
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            }
+        };
+
+        // 初始化完成后更新加载状态
+        document.addEventListener('DOMContentLoaded', function () {
+            updateLoadingStatus('DOM内容加载完成');
+            updateLoadingProgress('界面初始化中');
+        });
+
+        // 确保撤销按钮状态在页面加载时正确初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            // 确保操作历史记录在全局可用
+            if (!window.operationHistory) {
+                window.operationHistory = [];
+            }
+
+            // 确保记录操作的函数在全局可用
+            if (!window.recordOperation) {
+                window.recordOperation = function (operation) {
+                    // 限制历史记录大小
+                    const MAX_HISTORY = 50;
+                    if (window.operationHistory.length >= MAX_HISTORY) {
+                        window.operationHistory.shift(); // 移除最旧的记录
+                    }
+
+                    // 添加时间戳
+                    operation.timestamp = new Date().getTime();
+
+                    // 添加到历史记录
+                    window.operationHistory.push(operation);
+
+                    // 更新撤销按钮状态
+                    window.updateUndoButtonState();
+                };
+            }
+
+            // 确保撤销函数在全局可用
+            if (!window.undoLastOperation || window.undoLastOperation === 'function' && !window.undoLastOperation.toString().includes('operationHistory')) {
+                window.undoLastOperation = function () {
+                    if (!window.operationHistory || window.operationHistory.length === 0) {
+                        alert('没有可撤销的操作');
+                        // alert后恢复输入框交互能力
+                        if (window._forceInputsInteractive) {
+                            setTimeout(window._forceInputsInteractive, 100);
+                        }
+                        return;
+                    }
+
+                    const lastOperation = window.operationHistory.pop();
+
+                    // 根据操作类型执行相应的撤销
+                    if (lastOperation.type === 'addSubRow') {
+                        // 找到添加的行
+                        const addedRow = document.getElementById(lastOperation.newRowId);
+                        if (addedRow) {
+                            // 找到类别行
+                            const categoryRow = document.getElementById(lastOperation.categoryRowId);
+                            if (categoryRow) {
+                                // 找到类别单元格
+                                const categoryCell = categoryRow.querySelector('.category');
+                                if (categoryCell) {
+                                    // 恢复原来的rowspan值
+                                    categoryCell.setAttribute('rowspan', lastOperation.rowspan - 1);
+                                }
+                            }
+                            // 移除添加的行
+                            if (addedRow.parentNode) {
+                                addedRow.parentNode.removeChild(addedRow);
+                            }
+                        }
+                    } else if (lastOperation.type === 'removeSubRow') {
+                        console.log('暂不支持撤销删除行操作');
+                    } else {
+                        console.log('未知的操作类型:', lastOperation.type);
+                    }
+
+                    // 更新撤销按钮状态
+                    window.updateUndoButtonState();
+
+                    // 显示通知
+                    if (window.showNotification) {
+                        window.showNotification({
+                            title: '撤销成功',
+                            message: '已撤销上一步操作',
+                            type: 'info'
+                        });
+                    }
+                };
+            }
+
+            // 确保更新撤销按钮状态的函数在全局可用
+            if (!window.updateUndoButtonState) {
+                window.updateUndoButtonState = function () {
+                    const undoButton = document.getElementById('undo-button');
+                    if (undoButton) {
+                        undoButton.disabled = !window.operationHistory || window.operationHistory.length === 0;
+                    }
+                };
+            }
+
+            setTimeout(function () {
+                window.updateUndoButtonState();
+                console.log('撤销按钮状态已初始化');
+                updateLoadingProgress('界面控件初始化完成');
+            }, 300);
+        });
+    </script>
+
+    <!-- 优化资源加载 -->
+    <script>
+        // 异步加载脚本资源
+        function loadScript(url, callback) {
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.async = true;
+
+            if (callback) {
+                script.onload = function () {
+                    callback();
+                };
+            }
+
+            script.src = url;
+            document.head.appendChild(script);
+        }
+
+        // 在DOM内容加载后优化初始化流程
+        document.addEventListener('DOMContentLoaded', function () {
+            // 优先加载关键JS
+            loadScript('scripts/add-row-feature.js', function () {
+                console.log('添加行功能已加载');
+                updateLoadingProgress('行操作功能已加载');
+
+                // 加载次要JS - 注释掉以删除表1的添加按钮
+                // loadScript('scripts/direct-table-buttons.js', function() {
+                //     console.log('表格按钮功能已加载');
+                //     updateLoadingProgress('UI组件初始化完成');
+                // });
+            });
+
+            // 记录加载耗时
+            window.addEventListener('load', function () {
+                var totalLoadTime = Date.now() - appStartTime;
+                console.log('应用完全加载时间: ' + totalLoadTime + 'ms');
+
+                // 完全加载后的操作
+                setTimeout(function () {
+                    // 确保加载指示器消失
+                    var overlay = document.getElementById('loading-overlay');
+                    if (overlay && overlay.style.display !== 'none') {
+                        overlay.style.opacity = '0';
+                        overlay.style.transition = 'opacity 0.5s';
+                        setTimeout(function () {
+                            overlay.style.display = 'none';
+                        }, 500);
+                    }
+                }, 500);
+            });
+        });
+    </script>
+    <!-- 添加表格操作控制脚本 -->
+    <script src="scripts/table-operation-control.js"></script>
+    <!-- 输入框调试工具 - 开发时使用 -->
+    <script src="scripts/input-debug.js"></script>
+</body>
+
+</html>

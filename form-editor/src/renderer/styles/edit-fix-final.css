@@ -1,0 +1,82 @@
+/*
+ * 终极修复CSS - 必须最后加载
+ * 此文件专门用于修复confirm/alert对话框后输入框失效的问题
+ * 使用最高优先级的!important规则确保覆盖所有其他样式
+ */
+
+/* 全局强制所有输入元素可交互 */
+input:not([type="hidden"]),
+textarea,
+select,
+[contenteditable],
+[contenteditable="true"] {
+    pointer-events: auto !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    cursor: text !important;
+}
+
+/* contenteditable元素特殊处理 - Chromium/Electron必需 */
+[contenteditable="true"] {
+    -webkit-user-modify: read-write !important;
+    -moz-user-modify: read-write !important;
+}
+
+/* 确保按钮可点击 */
+button:not([disabled]) {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* 移除可能阻止交互的全局样式 */
+* {
+    -webkit-touch-callout: inherit !important;
+}
+
+/* 确保body没有阻止 */
+body,
+html {
+    pointer-events: auto !important;
+    user-select: text !important;
+}
+
+/* 强制移除任何遮罩层 */
+.modal-backdrop,
+.overlay,
+.modal-open-backdrop {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+/* 移除body的modal-open类的副作用 */
+body.modal-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
+}
+
+/* 额外保险：确保没有元素有display:none阻止点击 */
+[contenteditable="true"]:not([style*="display: none"]),
+input:not([type="hidden"]):not([style*="display: none"]),
+textarea:not([style*="display: none"]) {
+    display: block !important;
+}
+
+/* 内联contenteditable元素保持内联 */
+span[contenteditable="true"],
+a[contenteditable="true"],
+strong[contenteditable="true"],
+em[contenteditable="true"] {
+    display: inline !important;
+}
+
+/* 确保焦点状态正常 */
+[contenteditable="true"]:focus,
+input:focus,
+textarea:focus {
+    outline: 2px solid #2196F3 !important;
+    outline-offset: 1px !important;
+}

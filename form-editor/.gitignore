@@ -1,0 +1,26 @@
+# 依赖
+node_modules/
+
+# 构建输出
+dist/
+build/
+*.log
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 临时文件
+*.tmp
+~$*
+
+# 锁文件（保留pnpm-lock.yaml，删除其他）
+package-lock.json
+yarn.lock
