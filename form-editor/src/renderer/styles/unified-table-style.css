@@ -65,12 +65,16 @@ tr.standard-subrow td {
 
     tr,
     td,
-    th,
-    table {
+    th {
         border-color: #000 !important;
         border-width: 1px !important;
         border-style: solid !important;
         border-collapse: collapse !important;
+    }
+
+    table {
+        border-collapse: collapse !important;
+        border: none !important;
     }
 
     tr.subrow,
@@ -89,6 +93,12 @@ body.is-exporting-pdf th,
 body.is-exporting-pdf table {
     border-color: #000 !important;
     border-width: 1px !important;
-    border-style: solid !important;
+    border-style: solid !important; 
     border-collapse: collapse !important;
+}
+
+/* 修正表格本身的边框，避免分页异常 */
+body.is-exporting table,
+body.is-exporting-pdf table {
+    border: none !important;
 }

@@ -64,8 +64,11 @@ async function exportToPdf(htmlPath, pdfPath) {
         // 注入打印专用样式，确保表格边框统一
         await win.webContents.insertCSS(`
           @media print {
-            table { border-collapse: collapse !important; }
-            table, th, td {
+            table { 
+              border-collapse: collapse !important; 
+              border: none !important;
+            }
+            th, td {
               border: 1px solid #000 !important;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;

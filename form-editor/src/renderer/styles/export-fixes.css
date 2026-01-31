@@ -3,7 +3,7 @@
 /* 所有表格设置为边框折叠模式，确保边框无间隙 */
 body.is-exporting table, body.is-exporting-pdf table {
     border-collapse: collapse !important;
-    border: 2px solid black !important;
+    border: none !important;
     width: 100% !important;
 }
 
@@ -32,6 +32,8 @@ body.is-exporting-pdf #table1-container .row-delete-button {
 }
 
 /* 移除任何可能导致边框问题的样式 */
+body.is-exporting table,
+body.is-exporting-pdf table,
 body.is-exporting table *,
 body.is-exporting-pdf table * {
     box-shadow: none !important;

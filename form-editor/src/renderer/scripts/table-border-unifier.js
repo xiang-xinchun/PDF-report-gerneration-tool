@@ -17,7 +17,8 @@ const tableBorderUnifier = {
         // 应用到所有表格
         document.querySelectorAll('table').forEach(table => {
             table.style.borderCollapse = 'collapse';
-            table.style.border = '1px solid #000';
+            // 移除表格元素本身的边框，解决PDF分页闭合问题
+            table.style.border = 'none';
             
             // 处理表格中的所有行
             table.querySelectorAll('tr').forEach(row => {

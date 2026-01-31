@@ -657,6 +657,7 @@ td.data-source [contenteditable="true"]:focus {
         width: 100% !important;
         border-collapse: collapse !important;
         display: table !important;
+        border: none !important;
     }
 
     thead {
@@ -976,6 +977,7 @@ body.is-exporting-pdf table {
     border-collapse: collapse !important;
     visibility: visible !important;
     opacity: 1 !important;
+    border: none !important;
 }
 
 body.is-exporting-pdf thead {

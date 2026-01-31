@@ -26,9 +26,9 @@ const tableBorderFixer = {
                 table.style.borderCollapse = 'collapse';
             }
             
-            if (!table.style.border || table.style.border !== '1px solid #000') {
-                table.style.border = '1px solid #000';
-            }
+            // 移除表格元素本身的边框，解决PDF导出分页问题
+            // 单元格已有边框，不需要表格外框
+            table.style.border = 'none';
         });
         
         // 应用到所有单元格
